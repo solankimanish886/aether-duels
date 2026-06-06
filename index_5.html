@@ -1,0 +1,3243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#06080f" />
+<title>Aether Duels — Real-Time Drawing Battles</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg-0:#06080f; --bg-1:#0d1126; --bg-2:#1c1538;
+  --accent:#8ab4ff; --accent-2:#ff7ab6; --accent-3:#7af0c1;
+  --gold:#ffd166; --warn:#ff6b6b;
+  --p1:#8ab4ff; --p2:#ff7ab6;
+  --glass-bg:rgba(255,255,255,0.055);
+  --glass-bg-strong:rgba(255,255,255,0.085);
+  --glass-border:rgba(255,255,255,0.14);
+  --glass-shadow:0 10px 40px rgba(0,0,0,0.45),0 2px 8px rgba(0,0,0,0.3);
+  --text:rgba(255,255,255,0.96);
+  --text-dim:rgba(255,255,255,0.6);
+  --text-mute:rgba(255,255,255,0.35);
+  --ease:cubic-bezier(0.2,0.9,0.3,1);
+  --ease-out-quart:cubic-bezier(0.25,1,0.5,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Manrope',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);user-select:none;-webkit-user-select:none;overscroll-behavior:none;touch-action:none;background:var(--bg-0)}
+body{background:radial-gradient(ellipse 80% 60% at 15% 20%,rgba(123,97,255,.32) 0%,transparent 50%),radial-gradient(ellipse 70% 50% at 85% 80%,rgba(255,90,160,.20) 0%,transparent 55%),radial-gradient(ellipse 60% 40% at 50% 50%,rgba(80,180,255,.10) 0%,transparent 60%),linear-gradient(180deg,var(--bg-1) 0%,var(--bg-0) 100%);position:relative}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");opacity:.4;mix-blend-mode:overlay;z-index:1}
+
+.glass{background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:var(--glass-shadow);border-radius:16px}
+.glass-strong{background:var(--glass-bg-strong);border:1px solid var(--glass-border);backdrop-filter:blur(28px) saturate(1.5);-webkit-backdrop-filter:blur(28px) saturate(1.5);box-shadow:var(--glass-shadow);border-radius:16px}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+
+.btn{appearance:none;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text);font-family:inherit;font-weight:600;font-size:14px;letter-spacing:0.02em;padding:12px 22px;border-radius:12px;cursor:pointer;transition:all .25s var(--ease);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;overflow:hidden}
+.btn:hover:not(:disabled){background:var(--glass-bg-strong);border-color:rgba(255,255,255,.25);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.btn:active:not(:disabled){transform:translateY(0)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,rgba(138,180,255,.22),rgba(255,122,182,.18));border-color:rgba(138,180,255,.4);box-shadow:0 10px 30px rgba(138,180,255,.18),inset 0 1px 0 rgba(255,255,255,.12)}
+.btn-primary:hover:not(:disabled){background:linear-gradient(135deg,rgba(138,180,255,.32),rgba(255,122,182,.26));box-shadow:0 14px 36px rgba(138,180,255,.3),inset 0 1px 0 rgba(255,255,255,.18)}
+.btn-primary::after{content:'';position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.12) 50%,transparent 70%);transform:translateX(-100%);transition:transform .6s var(--ease);pointer-events:none}
+.btn-primary:hover::after{transform:translateX(100%)}
+.btn-large{padding:16px 28px;font-size:15px}
+.btn-danger{border-color:rgba(255,107,107,.4);color:#ffb3b3}
+.btn-danger:hover:not(:disabled){background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.6)}
+.btn-ghost{background:transparent;border:1px solid transparent;color:var(--text-dim);font-size:13px;padding:8px 14px}
+.btn-ghost:hover:not(:disabled){color:var(--text);background:var(--glass-bg);border-color:var(--glass-border)}
+
+.input{width:100%;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text);font-family:inherit;font-size:16px;padding:14px 18px;border-radius:12px;outline:none;transition:border-color .2s var(--ease),background .2s var(--ease)}
+.input:focus{border-color:var(--accent);background:var(--glass-bg-strong);box-shadow:0 0 0 4px rgba(138,180,255,.12)}
+.input.mono{letter-spacing:0.15em;font-size:22px;text-align:center;font-weight:600}
+
+.screen{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .45s var(--ease-out-quart),visibility .45s}
+.screen.active{opacity:1;visibility:visible;pointer-events:auto}
+.screen-content{flex:1;overflow-y:auto;overflow-x:hidden;padding:28px;display:flex;flex-direction:column}
+
+#screen-splash{background:radial-gradient(ellipse at center,rgba(138,180,255,.18) 0%,transparent 60%),radial-gradient(ellipse 80% 60% at 15% 20%,rgba(123,97,255,.42) 0%,transparent 50%),var(--bg-0);align-items:center;justify-content:center}
+.splash-logo{font-family:'Instrument Serif',serif;font-size:clamp(64px,12vw,132px);line-height:1;text-align:center;letter-spacing:-0.02em;opacity:0;animation:splashFade 1.6s var(--ease-out-quart) .1s forwards}
+.splash-logo em{font-style:italic;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 60%,var(--accent-3) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.splash-sub{font-size:11px;letter-spacing:0.4em;color:var(--text-mute);margin-top:18px;text-align:center;text-transform:uppercase;opacity:0;animation:splashFade 1.4s var(--ease-out-quart) .7s forwards}
+@keyframes splashFade{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+#screen-onboard .screen-content{align-items:center;justify-content:center;gap:32px}
+.onboard-card{width:min(560px,92%);padding:40px 36px;text-align:center}
+.onboard-icon{font-size:64px;margin-bottom:22px;filter:drop-shadow(0 4px 16px rgba(138,180,255,.4))}
+.onboard-title{font-family:'Instrument Serif',serif;font-size:38px;line-height:1.1;margin-bottom:14px}
+.onboard-title em{color:var(--accent)}
+.onboard-text{color:var(--text-dim);font-size:15px;line-height:1.6;margin-bottom:32px}
+.onboard-progress{display:flex;gap:8px;justify-content:center;margin-bottom:24px}
+.onboard-dot{width:28px;height:4px;border-radius:2px;background:var(--glass-border);transition:all .3s var(--ease)}
+.onboard-dot.active{background:var(--accent);width:40px}
+.onboard-actions{display:flex;gap:12px;justify-content:center}
+
+#screen-menu .screen-content{gap:24px}
+.top-bar{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;letter-spacing:0.32em;color:var(--text-dim);text-transform:uppercase}
+.brand-mark{width:26px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:8px;box-shadow:0 4px 12px rgba(138,180,255,.4);position:relative}
+.brand-mark::after{content:'';position:absolute;inset:6px;background:var(--bg-0);border-radius:3px}
+.profile-card{display:flex;align-items:center;gap:14px;padding:10px 16px 10px 10px;border-radius:100px;cursor:pointer;transition:all .25s var(--ease)}
+.profile-card:hover{background:var(--glass-bg-strong);transform:translateY(-1px)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:var(--bg-0);flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+.profile-info{display:flex;flex-direction:column;gap:4px;min-width:110px}
+.profile-name{font-size:13px;font-weight:600;line-height:1}
+.profile-level{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-mute)}
+.profile-level b{color:var(--accent);font-weight:700}
+.xp-bar{width:70px;height:4px;background:var(--glass-border);border-radius:2px;overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-3));border-radius:2px;transition:width .6s var(--ease-out-quart)}
+
+.hero{margin:auto 0;text-align:center;padding:24px 0}
+.hero-title{font-family:'Instrument Serif',serif;font-size:clamp(56px,11vw,132px);line-height:0.95;letter-spacing:-0.02em;margin-bottom:18px}
+.hero-title em{font-style:italic;background:linear-gradient(135deg,var(--accent) 0%,var(--accent-2) 60%,var(--accent-3) 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{color:var(--text-dim);font-size:15px;letter-spacing:0.06em;max-width:480px;margin:0 auto;line-height:1.5}
+
+.menu-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;max-width:720px;width:100%;margin:0 auto}
+.menu-btn{display:flex;align-items:center;gap:18px;padding:18px 22px;text-align:left;appearance:none;color:var(--text);font-family:inherit;cursor:pointer;transition:all .25s var(--ease);border-radius:16px;position:relative}
+.menu-btn:hover:not(:disabled){background:var(--glass-bg-strong);transform:translateY(-2px);box-shadow:0 14px 36px rgba(0,0,0,.35)}
+.menu-btn:disabled{opacity:.5;cursor:not-allowed}
+.menu-btn.primary{background:linear-gradient(135deg,rgba(138,180,255,.2),rgba(255,122,182,.14));border-color:rgba(138,180,255,.32)}
+.menu-btn-icon{width:52px;height:52px;border-radius:14px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+.menu-btn-text{display:flex;flex-direction:column;gap:4px;flex:1}
+.menu-btn-title{font-weight:700;font-size:17px}
+.menu-btn-sub{font-size:12px;color:var(--text-dim)}
+.menu-btn-pill{position:absolute;top:10px;right:14px;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;padding:3px 8px;border-radius:100px;background:rgba(255,209,102,.15);border:1px solid rgba(255,209,102,.3);color:var(--gold);font-weight:700}
+
+.menu-footer{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.menu-footer .btn-ghost{display:inline-flex;align-items:center;gap:8px}
+.badge{display:inline-flex;align-items:center;justify-content:center;background:var(--glass-bg-strong);border:1px solid var(--glass-border);color:var(--accent);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+
+#screen-match{background:var(--bg-0)}
+#screen-match .screen-content{padding:0;overflow:hidden}
+.match-hud-top{position:fixed;top:0;left:0;right:0;z-index:14;display:flex;align-items:center;justify-content:space-between;padding:18px 22px;pointer-events:none}
+.match-hud-top>*{pointer-events:auto}
+.match-round{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--text-mute);padding:10px 16px;border-radius:100px}
+.match-round b{color:var(--text);font-weight:700;margin:0 6px}
+.match-timer{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;letter-spacing:0.08em;padding:10px 20px;border-radius:100px;color:var(--text);min-width:96px;text-align:center;transition:color .3s var(--ease),background .3s var(--ease)}
+.match-timer.urgent{color:var(--warn);background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.4);animation:heartbeat .9s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.match-mode-pill{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent);padding:10px 16px;border-radius:100px;background:rgba(138,180,255,.1);border:1px solid rgba(138,180,255,.3)}
+
+.match-prompt-banner{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:13;padding:14px 28px;border-radius:100px;text-align:center;max-width:90%;pointer-events:none}
+.match-prompt-eyebrow{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-mute);margin-bottom:4px}
+.match-prompt-text{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);line-height:1.2}
+
+.canvas-stage{position:absolute;inset:0}
+.canvas-stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.canvas-stage #canvas-cursor{pointer-events:none}
+
+.match-toolbar{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:12;padding:14px 12px;display:flex;flex-direction:column;gap:14px;border-radius:18px}
+.tool-group{display:flex;flex-direction:column;gap:8px;align-items:center}
+.tool-group-label{font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-mute);margin-bottom:2px}
+.tool-swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.tool-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s var(--ease);background-clip:padding-box}
+.tool-swatch:hover{transform:scale(1.15)}
+.tool-swatch.active{border-color:var(--text);box-shadow:0 0 0 2px rgba(0,0,0,.4);transform:scale(1.15)}
+.tool-sizes{display:flex;flex-direction:column;gap:8px;align-items:center}
+.tool-size{border:1px solid var(--glass-border);background:var(--glass-bg);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease)}
+.tool-size:hover{background:var(--glass-bg-strong)}
+.tool-size.active{border-color:var(--accent);background:var(--glass-bg-strong)}
+.tool-size .dot{background:var(--text);border-radius:50%}
+.tool-btn-icon{width:38px;height:38px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease)}
+.tool-btn-icon:hover{background:var(--glass-bg-strong);color:var(--text)}
+.tool-btn-icon.active{background:rgba(138,180,255,.18);border-color:rgba(138,180,255,.5);color:var(--accent)}
+.tool-btn-icon svg{width:18px;height:18px}
+
+.countdown-overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(6,8,15,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;visibility:hidden;transition:opacity .35s var(--ease),visibility .35s}
+.countdown-overlay.show{opacity:1;visibility:visible}
+.countdown-num{font-family:'Instrument Serif',serif;font-size:clamp(140px,22vw,280px);line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-style:italic;animation:countPop .95s var(--ease-out-quart)}
+@keyframes countPop{0%{opacity:0;transform:scale(2);filter:blur(20px)}35%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.7);filter:blur(8px)}}
+.countdown-prompt{position:absolute;bottom:18vh;left:50%;transform:translateX(-50%);text-align:center;animation:splashFade .6s var(--ease-out-quart) .3s both}
+.countdown-prompt-eyebrow{font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-mute);margin-bottom:8px}
+.countdown-prompt-text{font-family:'Instrument Serif',serif;font-size:28px;color:var(--text)}
+
+#screen-reveal .screen-content{padding:24px;gap:18px;align-items:center;justify-content:center}
+.reveal-header{text-align:center}
+.reveal-eyebrow{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-mute);margin-bottom:6px}
+.reveal-prompt{font-family:'Instrument Serif',serif;font-size:32px;line-height:1.1}
+.reveal-single{width:min(640px,92%);aspect-ratio:1;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#fff;box-shadow:0 16px 48px rgba(0,0,0,.4)}
+.reveal-single canvas{width:100%;height:100%;object-fit:contain;display:block}
+
+#screen-result .screen-content{align-items:center;justify-content:center;gap:20px}
+.result-card{width:min(560px,94%);padding:42px 36px;text-align:center;position:relative;overflow:hidden}
+.result-eyebrow{font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-mute);margin-bottom:8px}
+.result-headline{font-family:'Instrument Serif',serif;font-size:56px;line-height:1;margin-bottom:12px}
+.result-headline.victory{background:linear-gradient(135deg,var(--gold),#fff3b0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.result-headline.defeat{color:var(--text-dim)}
+.result-headline.draw{color:var(--accent-3)}
+.result-headline.practice{background:linear-gradient(135deg,var(--accent),var(--accent-3));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.result-sub{color:var(--text-dim);font-size:14px;margin-bottom:24px;line-height:1.5;max-width:420px;margin-left:auto;margin-right:auto}
+.result-rewards{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:28px}
+.reward-chip{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:12px;background:var(--glass-bg);border:1px solid var(--glass-border)}
+.reward-chip-icon{font-size:18px}
+.reward-chip-text{display:flex;flex-direction:column}
+.reward-chip-label{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-mute)}
+.reward-chip-value{font-weight:700;font-size:16px;color:var(--accent)}
+.result-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+.modal-overlay{position:fixed;inset:0;z-index:50;background:rgba(6,8,15,.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;padding:22px;opacity:0;visibility:hidden;transition:opacity .3s var(--ease),visibility .3s}
+.modal-overlay.show{opacity:1;visibility:visible}
+.modal{width:min(680px,100%);max-height:90vh;overflow:hidden;display:flex;flex-direction:column;transform:translateY(20px) scale(.96);transition:transform .4s var(--ease-out-quart)}
+.modal-overlay.show .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:22px 26px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--glass-border)}
+.modal-title{font-family:'Instrument Serif',serif;font-size:26px}
+.modal-close{width:36px;height:36px;border-radius:50%;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-dim);cursor:pointer;transition:all .2s var(--ease);display:flex;align-items:center;justify-content:center;font-size:18px}
+.modal-close:hover{color:var(--text);background:var(--glass-bg-strong)}
+.modal-body{padding:22px 26px;overflow-y:auto}
+.modal-body::-webkit-scrollbar{width:6px}
+.modal-body::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:3px}
+
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ach-item{padding:14px;border-radius:14px;border:1px solid var(--glass-border);background:var(--glass-bg);display:flex;gap:12px;align-items:flex-start;transition:all .25s var(--ease)}
+.ach-item.unlocked{background:linear-gradient(135deg,rgba(122,240,193,.12),rgba(138,180,255,.08));border-color:rgba(122,240,193,.3)}
+.ach-icon{font-size:28px;filter:grayscale(1);opacity:.4;transition:all .3s var(--ease)}
+.ach-item.unlocked .ach-icon{filter:grayscale(0);opacity:1}
+.ach-info{flex:1;min-width:0}
+.ach-name{font-weight:700;font-size:14px;margin-bottom:2px}
+.ach-desc{font-size:11px;color:var(--text-dim);line-height:1.4}
+
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.stat-cell{padding:18px;border-radius:14px;border:1px solid var(--glass-border);background:var(--glass-bg);text-align:center}
+.stat-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-mute);margin-bottom:8px}
+.stat-value{font-family:'Instrument Serif',serif;font-size:36px;line-height:1;color:var(--text)}
+.stat-value.accent{color:var(--accent)}
+.stat-value.gold{color:var(--gold)}
+
+.ach-toast-stack{position:fixed;top:22px;right:22px;z-index:60;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.ach-toast{width:320px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,rgba(122,240,193,.18),rgba(138,180,255,.12));border:1px solid rgba(122,240,193,.4);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 10px 40px rgba(0,0,0,.5);display:flex;gap:12px;align-items:center;animation:achIn .5s var(--ease-out-quart),achShine 1.2s var(--ease-out-quart);position:relative;overflow:hidden}
+@keyframes achIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes achShine{from{box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 0 0 rgba(122,240,193,.6)}50%{box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 30px 4px rgba(122,240,193,.4)}to{box-shadow:0 10px 40px rgba(0,0,0,.5),0 0 0 0 rgba(122,240,193,0)}}
+.ach-toast-icon{font-size:30px}
+.ach-toast-text{flex:1;min-width:0}
+.ach-toast-eyebrow{font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:var(--accent-3);margin-bottom:2px;font-weight:700}
+.ach-toast-name{font-weight:700;font-size:14px;line-height:1.2}
+
+.toast-stack{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:70;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{padding:12px 22px;border-radius:100px;font-size:13px;color:var(--text);background:var(--glass-bg-strong);border:1px solid var(--glass-border);backdrop-filter:blur(20px);animation:toastIn .3s var(--ease-out-quart)}
+.toast.error{border-color:rgba(255,107,107,.4);color:#ffb3b3}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.levelup-burst{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;visibility:hidden}
+.levelup-burst.show{opacity:1;visibility:visible;transition:opacity .4s var(--ease)}
+.levelup-center{text-align:center;animation:levelup 2.2s var(--ease-out-quart)}
+.levelup-eyebrow{font-size:14px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-shadow:0 0 24px rgba(255,209,102,.6)}
+.levelup-num{font-family:'Instrument Serif',serif;font-size:clamp(120px,18vw,220px);line-height:1;color:var(--gold);text-shadow:0 0 60px rgba(255,209,102,.8);font-style:italic}
+@keyframes levelup{0%{transform:scale(.4);opacity:0;filter:blur(20px)}25%{transform:scale(1.1);opacity:1;filter:blur(0)}75%{transform:scale(1);opacity:1}100%{transform:scale(.95);opacity:0}}
+
+/* ============================================================
+ * Phase 2 — multiplayer additions
+ * Host / Join / Lobby screens, dual-canvas reveal, vote system,
+ * chat, quick reactions, opponent ghost canvas
+ * ============================================================ */
+
+/* Lobby / Host / Join shared layout */
+.lobby-content{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.lobby-card{width:min(500px,94%);padding:36px 32px;text-align:center}
+.lobby-eyebrow{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--text-mute);margin-bottom:12px}
+.lobby-title{font-family:'Instrument Serif',serif;font-size:36px;line-height:1.1;margin-bottom:8px}
+.lobby-sub{color:var(--text-dim);font-size:14px;margin-bottom:28px;line-height:1.5}
+
+.room-code-display{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.room-code{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;letter-spacing:0.18em;padding:14px 22px;background:var(--glass-bg-strong);border:1px solid var(--glass-border);border-radius:12px;color:var(--accent);min-width:200px;max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-copy{background:var(--glass-bg);border:1px solid var(--glass-border);width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);transition:all .2s var(--ease);flex-shrink:0}
+.room-copy:hover{color:var(--text);background:var(--glass-bg-strong)}
+.room-copy svg{width:20px;height:20px}
+
+.spinner{width:32px;height:32px;border:3px solid var(--glass-border);border-top-color:var(--accent);border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent-3);margin-right:8px;box-shadow:0 0 0 0 rgba(122,240,193,.6);animation:pulseDot 1.6s ease-out infinite;vertical-align:middle}
+@keyframes pulseDot{0%{box-shadow:0 0 0 0 rgba(122,240,193,.6)}70%{box-shadow:0 0 0 12px rgba(122,240,193,0)}100%{box-shadow:0 0 0 0 rgba(122,240,193,0)}}
+.waiting-status{color:var(--text-dim);font-size:13px;display:flex;align-items:center;justify-content:center}
+
+/* VS block (lobby card showing both players) */
+.vs-block{display:flex;align-items:center;justify-content:center;gap:32px;margin:8px 0 28px}
+.vs-player{flex:1;max-width:200px;text-align:center}
+.vs-avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:28px;color:var(--bg-0);box-shadow:0 8px 24px rgba(0,0,0,.4),inset 0 2px 0 rgba(255,255,255,.25)}
+.vs-avatar.p1{background:linear-gradient(135deg,var(--p1),#b8d2ff)}
+.vs-avatar.p2{background:linear-gradient(135deg,var(--p2),#ffc1de)}
+.vs-name{font-weight:600;font-size:15px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.vs-level{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-mute)}
+.vs-ready{margin-top:10px;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-mute);transition:color .3s var(--ease)}
+.vs-ready.ready{color:var(--accent-3)}
+.vs-divider{font-family:'Instrument Serif',serif;font-style:italic;font-size:36px;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;flex-shrink:0}
+
+/* Match HUD additions: score pills + mode label override */
+.match-score{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:100px;font-size:12px;font-family:'JetBrains Mono',monospace}
+.match-score-pill{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--bg-0)}
+.match-score-pill.p1{background:var(--p1)}
+.match-score-pill.p2{background:var(--p2)}
+.match-score-sep{color:var(--text-mute)}
+.match-mode-pill.mp{background:rgba(255,122,182,.1);border-color:rgba(255,122,182,.3);color:var(--accent-2)}
+
+/* Opponent live ghost canvas (small picture-in-picture during match) */
+.opp-ghost{position:fixed;right:18px;bottom:18px;width:220px;height:220px;border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--glass-border);box-shadow:0 12px 36px rgba(0,0,0,.4);z-index:12;opacity:0;visibility:hidden;transform:translateY(10px) scale(.96);transition:opacity .35s var(--ease),visibility .35s,transform .35s var(--ease-out-quart)}
+.opp-ghost.show{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+.opp-ghost canvas{width:100%;height:100%;display:block;touch-action:none}
+.opp-ghost-label{position:absolute;top:8px;left:8px;font-size:9px;letter-spacing:0.24em;text-transform:uppercase;color:#fff;padding:4px 8px;border-radius:100px;background:rgba(6,8,15,.6);backdrop-filter:blur(8px);font-weight:700;display:flex;align-items:center;gap:6px;pointer-events:none}
+.opp-ghost-label .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--p2)}
+
+/* In-match chat */
+.match-chat{position:fixed;left:18px;bottom:18px;z-index:13;width:280px;border-radius:16px;overflow:hidden;transition:max-height .35s var(--ease-out-quart);max-height:300px;display:flex;flex-direction:column}
+.match-chat.collapsed{max-height:44px}
+.chat-header{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid var(--glass-border)}
+.chat-header-title{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.chat-unread-pill{background:var(--accent);color:var(--bg-0);font-size:9px;font-weight:700;padding:2px 7px;border-radius:100px;letter-spacing:0;display:none}
+.chat-unread-pill.show{display:inline-block}
+.chat-toggle{color:var(--text-mute);font-size:14px;transition:transform .3s var(--ease)}
+.match-chat:not(.collapsed) .chat-toggle{transform:rotate(180deg)}
+.chat-messages{flex:1;overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;font-size:13px;line-height:1.4;max-height:200px}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+.chat-msg{padding:6px 10px;border-radius:10px;max-width:92%;animation:chatIn .3s var(--ease-out-quart);word-wrap:break-word}
+@keyframes chatIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg .author{font-size:10px;font-weight:700;letter-spacing:0.06em;margin-bottom:2px}
+.chat-msg.me{align-self:flex-end;background:rgba(138,180,255,.15)}
+.chat-msg.me .author{color:var(--p1)}
+.chat-msg.them{align-self:flex-start;background:var(--glass-bg)}
+.chat-msg.them .author{color:var(--p2)}
+.chat-msg.system{align-self:center;background:transparent;color:var(--text-mute);font-size:11px;font-style:italic;text-align:center;padding:4px 8px}
+.chat-input-row{display:flex;gap:6px;padding:8px;border-top:1px solid var(--glass-border)}
+.chat-input{flex:1;background:var(--glass-bg);border:1px solid var(--glass-border);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:100px;outline:none;min-width:0}
+.chat-input:focus{border-color:var(--accent)}
+.chat-send{background:var(--accent);color:var(--bg-0);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--ease);flex-shrink:0}
+.chat-send:hover{transform:scale(1.08)}
+
+/* Quick emoji reactions (vertical column on the right) */
+.quick-reactions{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:12;display:flex;gap:6px;padding:8px;border-radius:100px;flex-direction:column}
+.quick-reaction{width:32px;height:32px;border-radius:50%;background:var(--glass-bg);border:1px solid var(--glass-border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--ease);font-size:15px}
+.quick-reaction:hover{transform:scale(1.18);background:var(--glass-bg-strong)}
+
+/* Floating reaction emoji that animates upward */
+.float-reaction{position:fixed;z-index:20;font-size:40px;pointer-events:none;animation:floatUp 2.2s var(--ease-out-quart) forwards;text-shadow:0 4px 18px rgba(0,0,0,.6)}
+@keyframes floatUp{
+  0%{opacity:0;transform:translateY(20px) scale(.5) rotate(-5deg)}
+  15%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}
+  100%{opacity:0;transform:translateY(-180px) scale(.8) rotate(8deg)}
+}
+
+/* Reveal screen — dual canvas vote layout */
+.reveal-canvases{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:22px;max-height:calc(100vh - 280px);min-height:0;width:min(1100px,96%);margin:0 auto}
+.reveal-art{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#fff;transition:all .45s var(--ease-out-quart);cursor:pointer;display:flex;flex-direction:column;min-height:0}
+.reveal-art:not(.locked):hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.reveal-art.chosen{box-shadow:0 0 0 3px var(--accent),0 12px 40px rgba(138,180,255,.3);transform:translateY(-4px)}
+.reveal-art.winner{box-shadow:0 0 0 3px var(--gold),0 16px 48px rgba(255,209,102,.3)}
+.reveal-art.winner::before{content:'';position:absolute;inset:-30%;background:conic-gradient(from 0deg,transparent 70%,rgba(255,209,102,.35) 80%,transparent 90%);animation:winnerSpin 4s linear infinite;pointer-events:none}
+@keyframes winnerSpin{to{transform:rotate(360deg)}}
+.reveal-art.locked{cursor:default}
+.reveal-art-img{flex:1;background:#fff;position:relative;overflow:hidden;min-height:0}
+.reveal-art-img canvas{width:100%;height:100%;object-fit:contain;display:block}
+.reveal-art-label{padding:12px 16px;display:flex;align-items:center;gap:10px;background:rgba(6,8,15,.7);border-top:1px solid var(--glass-border);position:relative;z-index:1}
+.reveal-art-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.reveal-art-color-dot.p1{background:var(--p1)}
+.reveal-art-color-dot.p2{background:var(--p2)}
+.reveal-art-author{flex:1;font-weight:700;font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.reveal-art-vote-badge{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;padding:4px 10px;border-radius:100px;border:1px solid var(--glass-border);color:var(--text-mute);transition:all .3s var(--ease);flex-shrink:0}
+.reveal-art-vote-badge.you-voted{border-color:var(--accent);color:var(--accent);background:rgba(138,180,255,.1)}
+.reveal-art-vote-badge.they-voted{border-color:var(--p2);color:var(--p2);background:rgba(255,122,182,.1)}
+.reveal-art-vote-badge.both-voted{border-color:var(--gold);color:var(--gold);background:rgba(255,209,102,.12)}
+.reveal-bottom{display:flex;align-items:center;justify-content:center;gap:18px;padding-top:8px;flex-wrap:wrap}
+.reveal-status{font-size:13px;color:var(--text-dim);text-align:center}
+.reveal-vote-prompt{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--text)}
+
+/* Round outcome banner (between rounds) */
+.round-banner{font-family:'Instrument Serif',serif;font-size:clamp(48px,9vw,108px);line-height:1;text-align:center}
+.round-banner.win{background:linear-gradient(135deg,var(--gold),#fff3b0);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.round-banner.lose{color:var(--text-dim)}
+.round-banner.tie{color:var(--accent-3)}
+
+/* Disabled overlay (e.g. opp left, generic error in middle of match) */
+.disconnect-overlay{position:fixed;inset:0;z-index:55;display:flex;align-items:center;justify-content:center;background:rgba(6,8,15,.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:22px;opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.disconnect-overlay.show{opacity:1;visibility:visible}
+.disconnect-card{width:min(440px,100%);padding:36px 28px;text-align:center}
+.disconnect-icon{font-size:48px;margin-bottom:12px}
+.disconnect-title{font-family:'Instrument Serif',serif;font-size:32px;margin-bottom:8px}
+.disconnect-sub{color:var(--text-dim);font-size:14px;margin-bottom:22px;line-height:1.5}
+
+/* ============================================================
+ * Phase 3 — hand tracking, audio, perfect-freehand polish
+ * ============================================================ */
+
+/* Camera video feed for hand mode (ghosted behind the canvas) */
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:0;transition:opacity .55s var(--ease);filter:blur(2px) saturate(1.4) contrast(1.1);pointer-events:none;z-index:0;background:#06080f}
+#video.visible{opacity:0.16}
+
+/* Tool button — hand mode toggle */
+.tool-btn-icon.tool-hand{position:relative}
+.tool-btn-icon.tool-hand.active{color:var(--accent-2);background:linear-gradient(135deg,rgba(255,122,182,.16),rgba(138,180,255,.1));border:1px solid rgba(255,122,182,.4)}
+.tool-btn-icon.tool-hand.loading{opacity:.6;cursor:wait}
+.tool-btn-icon.tool-hand.active::after{content:'';position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--accent-3);box-shadow:0 0 8px var(--accent-3)}
+
+/* Hand-mode status panel (top-center, below prompt banner) */
+.hand-info{position:fixed;top:120px;left:50%;transform:translateX(-50%) translateY(-6px);padding:10px 16px;border-radius:100px;display:flex;align-items:center;gap:14px;font-size:12px;z-index:11;opacity:0;visibility:hidden;transition:all .35s var(--ease-out-quart);pointer-events:none}
+.hand-info.visible{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+.hand-info-eyebrow{font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:var(--text-mute)}
+.hand-info-state{font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+.hand-info-state.drawing{color:var(--accent-3)}
+.hand-info-state.searching{color:var(--text-mute)}
+.hand-info-state.lifted{color:var(--text-dim)}
+
+/* Hand cursor on the canvas stage — circle that follows the index fingertip */
+.hand-cursor{position:fixed;width:36px;height:36px;border-radius:50%;border:2px solid var(--accent-2);background:rgba(255,122,182,.12);pointer-events:none;z-index:11;transform:translate(-50%,-50%);opacity:0;transition:opacity .15s,background .15s,border-color .15s,width .15s,height .15s}
+.hand-cursor.visible{opacity:1}
+.hand-cursor.drawing{background:rgba(122,240,193,.18);border-color:var(--accent-3);width:44px;height:44px}
+
+/* Audio toggle row in profile modal */
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--glass-border)}
+.settings-row:first-of-type{border-top:none}
+.settings-label{font-size:13px;color:var(--text-dim)}
+.settings-control{display:flex;gap:8px}
+.toggle-pill{padding:6px 14px;border-radius:100px;border:1px solid var(--glass-border);background:var(--glass-bg);color:var(--text-mute);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all .2s var(--ease);font-weight:600}
+.toggle-pill.on{background:var(--accent);border-color:var(--accent);color:var(--bg-0)}
+.toggle-pill:hover:not(.on){color:var(--text);border-color:rgba(138,180,255,.4)}
+
+@media (max-width:900px){
+  .match-toolbar{left:10px;padding:10px 8px;gap:10px}
+  .tool-swatch{width:18px;height:18px}
+  .tool-btn-icon{width:32px;height:32px}
+  .opp-ghost{width:160px;height:160px;right:14px;bottom:14px}
+  .match-chat{width:240px}
+  .reveal-canvases{grid-template-columns:1fr;gap:14px;max-height:none}
+  .quick-reactions{right:14px;padding:6px}
+  .quick-reaction{width:28px;height:28px;font-size:13px}
+}
+@media (max-width:640px){
+  .match-prompt-text{font-size:16px}
+  .match-prompt-banner{top:70px;padding:10px 18px}
+  .menu-actions{grid-template-columns:1fr}
+  .result-headline{font-size:42px}
+  .countdown-prompt-text{font-size:20px}
+  .opp-ghost{width:120px;height:120px;right:10px;bottom:10px;border-radius:14px}
+  .match-chat{width:200px;max-height:240px;left:10px;bottom:10px}
+  .match-chat.collapsed{max-height:40px}
+  .quick-reactions{top:auto;bottom:240px;right:10px;transform:none;flex-direction:row;border-radius:100px}
+  .vs-block{gap:14px}
+  .vs-player{max-width:none}
+  .vs-avatar{width:56px;height:56px;font-size:20px}
+  .vs-divider{font-size:28px}
+  .room-code{font-size:18px;padding:12px 18px;min-width:160px}
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="screen active" id="screen-splash">
+  <div class="splash-logo">Aether<br><em>Duels</em></div>
+  <div class="splash-sub">Real-time drawing battles</div>
+</div>
+
+<!-- ONBOARDING -->
+<div class="screen" id="screen-onboard">
+  <div class="screen-content">
+    <div class="onboard-card glass-strong">
+      <div class="onboard-icon" id="onboard-icon">⚔️</div>
+      <h2 class="onboard-title" id="onboard-title">Welcome to <em>Aether Duels</em></h2>
+      <p class="onboard-text" id="onboard-text">A real-time drawing battle. You and an opponent get the same prompt, sixty seconds, and a blank canvas. Best of three wins.</p>
+      <div class="onboard-progress" id="onboard-dots">
+        <div class="onboard-dot active"></div><div class="onboard-dot"></div><div class="onboard-dot"></div>
+      </div>
+      <div class="onboard-actions">
+        <button class="btn btn-ghost" id="onboard-skip">Skip</button>
+        <button class="btn btn-primary" id="onboard-next">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN MENU -->
+<div class="screen" id="screen-menu">
+  <div class="screen-content">
+    <div class="top-bar">
+      <div class="brand"><div class="brand-mark"></div><span>AETHER DUELS</span></div>
+      <div class="profile-card glass" id="profile-card-btn">
+        <div class="avatar" id="profile-avatar">P</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profile-name">Player</div>
+          <div class="profile-level">
+            <span>LVL <b id="profile-level">1</b></span>
+            <div class="xp-bar"><div class="xp-fill" id="profile-xp-fill" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero">
+      <h1 class="hero-title">Aether<br><em>Duels</em></h1>
+      <p class="hero-sub">Real-time drawing battles. Sixty seconds. One winner. No mercy.</p>
+    </div>
+    <div class="menu-actions">
+      <button class="menu-btn primary glass" data-action="practice">
+        <div class="menu-btn-icon">🎨</div>
+        <div class="menu-btn-text"><div class="menu-btn-title">Practice Round</div><div class="menu-btn-sub">Warm up against the blank canvas</div></div>
+      </button>
+      <button class="menu-btn glass" data-action="multiplayer-host">
+        <div class="menu-btn-icon">⚔️</div>
+        <div class="menu-btn-text"><div class="menu-btn-title">Forge a Duel</div><div class="menu-btn-sub">Host a real-time multiplayer match</div></div>
+      </button>
+      <button class="menu-btn glass" data-action="multiplayer-join">
+        <div class="menu-btn-icon">🎯</div>
+        <div class="menu-btn-text"><div class="menu-btn-title">Enter the Arena</div><div class="menu-btn-sub">Join a friend's code</div></div>
+      </button>
+    </div>
+    <div class="menu-footer">
+      <button class="btn btn-ghost" data-action="achievements"><span>🏆</span> Achievements <span class="badge" id="achievement-count">0/8</span></button>
+      <button class="btn btn-ghost" data-action="stats"><span>📊</span> Stats</button>
+      <button class="btn btn-ghost" data-action="howto"><span>📖</span> How to Play</button>
+      <button class="btn btn-ghost" data-action="profile"><span>👤</span> Edit Name</button>
+    </div>
+  </div>
+</div>
+
+<!-- HOST (waiting for opponent) -->
+<div class="screen" id="screen-host">
+  <div class="screen-content lobby-content">
+    <div class="lobby-card glass-strong">
+      <div class="lobby-eyebrow">Duel Forge</div>
+      <h2 class="lobby-title">Awaiting a Challenger</h2>
+      <p class="lobby-sub">Share this code with your opponent. The moment they join, the duel begins.</p>
+      <div class="room-code-display">
+        <div class="room-code mono" id="room-code">connecting…</div>
+        <button class="room-copy" id="room-copy-btn" title="Copy code">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="waiting-status"><span class="pulse-dot"></span><span id="host-status-text">Waiting for opponent…</span></div>
+      <div style="margin-top:28px;display:flex;gap:10px;justify-content:center">
+        <button class="btn" data-action="back-to-menu-from-net">← Back to Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JOIN -->
+<div class="screen" id="screen-join">
+  <div class="screen-content lobby-content">
+    <div class="lobby-card glass-strong">
+      <div class="lobby-eyebrow">Enter the Arena</div>
+      <h2 class="lobby-title">Have a Code?</h2>
+      <p class="lobby-sub">Paste the room code your opponent sent.</p>
+      <input type="text" class="input mono" id="join-code-input" placeholder="ENTER CODE" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <div id="join-error" style="color:var(--warn);font-size:12px;margin-top:10px;min-height:16px"></div>
+      <div style="margin-top:22px;display:flex;gap:10px;justify-content:center">
+        <button class="btn" data-action="back-to-menu-from-net">← Back</button>
+        <button class="btn btn-primary" id="join-go">Enter Duel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOBBY (both connected, ready up) -->
+<div class="screen" id="screen-lobby">
+  <div class="screen-content lobby-content">
+    <div class="lobby-card glass-strong">
+      <div class="lobby-eyebrow">The Match</div>
+      <h2 class="lobby-title">Both fighters present</h2>
+      <p class="lobby-sub">Best of three rounds. Sixty seconds each. May the better brush win.</p>
+      <div class="vs-block">
+        <div class="vs-player">
+          <div class="vs-avatar p1" id="lobby-p1-avatar">Y</div>
+          <div class="vs-name" id="lobby-p1-name">You</div>
+          <div class="vs-level" id="lobby-p1-level">LVL 1</div>
+          <div class="vs-ready" id="lobby-p1-ready">Not Ready</div>
+        </div>
+        <div class="vs-divider">vs</div>
+        <div class="vs-player">
+          <div class="vs-avatar p2" id="lobby-p2-avatar">?</div>
+          <div class="vs-name" id="lobby-p2-name">Opponent</div>
+          <div class="vs-level" id="lobby-p2-level">LVL ?</div>
+          <div class="vs-ready" id="lobby-p2-ready">Not Ready</div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-large" id="lobby-ready-btn">I'm Ready</button>
+      <div style="margin-top:14px">
+        <button class="btn btn-ghost btn-danger" data-action="leave-match">Leave Match</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MATCH (gameplay screen) -->
+<div class="screen" id="screen-match">
+  <div class="canvas-stage">
+    <video id="video" playsinline autoplay muted></video>
+    <canvas id="canvas-main"></canvas>
+    <canvas id="canvas-active"></canvas>
+    <canvas id="canvas-cursor"></canvas>
+  </div>
+
+  <!-- Hand-mode floating cursor (positioned via JS) -->
+  <div class="hand-cursor" id="hand-cursor"></div>
+
+  <!-- Hand-mode status panel (above the prompt banner) -->
+  <div class="hand-info glass" id="hand-info">
+    <div>
+      <div class="hand-info-eyebrow">Hand Mode</div>
+      <div class="hand-info-state searching" id="hand-info-state">Show your hand</div>
+    </div>
+    <div style="color:var(--text-mute);font-size:11px;line-height:1.3;border-left:1px solid var(--glass-border);padding-left:14px">
+      <div>☝️ Index point = draw</div>
+      <div>✋ Open hand = lift</div>
+    </div>
+  </div>
+
+  <!-- Opponent live ghost canvas (multiplayer only) -->
+  <div class="opp-ghost" id="opp-ghost">
+    <div class="opp-ghost-label"><span class="dot"></span><span id="opp-ghost-name">OPPONENT</span></div>
+    <canvas id="canvas-opp-ghost"></canvas>
+  </div>
+
+  <div class="match-hud-top">
+    <div class="match-round glass"><span>Round</span><b id="match-round-num">1</b><span>of <span id="match-total-rounds">1</span></span></div>
+    <div class="match-timer glass" id="match-timer">60</div>
+    <div class="match-score glass" id="match-score" style="display:none">
+      <span class="match-score-pill p1" id="score-p1">0</span>
+      <span class="match-score-sep">·</span>
+      <span class="match-score-pill p2" id="score-p2">0</span>
+    </div>
+    <div class="match-mode-pill glass" id="match-mode-pill">PRACTICE</div>
+  </div>
+  <div class="match-prompt-banner glass">
+    <div class="match-prompt-eyebrow">Draw</div>
+    <div class="match-prompt-text" id="match-prompt">—</div>
+  </div>
+  <div class="match-toolbar glass">
+    <div class="tool-group">
+      <div class="tool-group-label">Color</div>
+      <div class="tool-swatches" id="tool-swatches"></div>
+    </div>
+    <div class="tool-group">
+      <div class="tool-group-label">Size</div>
+      <div class="tool-sizes" id="tool-sizes"></div>
+    </div>
+    <div class="tool-group">
+      <button class="tool-btn-icon tool-hand" id="tool-hand" title="Hand tracking mode (camera)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+      </button>
+      <button class="tool-btn-icon" id="tool-undo" title="Undo (Z)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+      </button>
+      <button class="tool-btn-icon" id="tool-clear" title="Clear">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+      <button class="tool-btn-icon" id="tool-quit" title="Quit match">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick emoji reactions (multiplayer only) -->
+  <div class="quick-reactions glass" id="quick-reactions" style="display:none">
+    <div class="quick-reaction" data-emoji="🔥" title="Fire">🔥</div>
+    <div class="quick-reaction" data-emoji="😂" title="LOL">😂</div>
+    <div class="quick-reaction" data-emoji="🎨" title="Art">🎨</div>
+    <div class="quick-reaction" data-emoji="👏" title="Applause">👏</div>
+    <div class="quick-reaction" data-emoji="🤔" title="Hmm">🤔</div>
+  </div>
+
+  <!-- Chat (multiplayer only) -->
+  <div class="match-chat glass collapsed" id="match-chat" style="display:none">
+    <div class="chat-header" id="chat-header">
+      <div class="chat-header-title">
+        <span>💬</span> Chat
+        <span class="chat-unread-pill" id="chat-unread">0</span>
+      </div>
+      <div class="chat-toggle">▲</div>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" class="chat-input" id="chat-input" placeholder="Say something…" maxlength="120" />
+      <button class="chat-send" id="chat-send" title="Send">→</button>
+    </div>
+  </div>
+</div>
+
+<!-- REVEAL (both drawings + voting) -->
+<div class="screen" id="screen-reveal">
+  <div class="screen-content">
+    <div class="reveal-header">
+      <div class="reveal-eyebrow">The Prompt Was</div>
+      <h2 class="reveal-prompt" id="reveal-prompt">—</h2>
+    </div>
+    <div class="reveal-canvases" id="reveal-canvases-grid">
+      <div class="reveal-art" id="reveal-art-p1" data-vote-target="me">
+        <div class="reveal-art-img"><canvas id="reveal-canvas-you"></canvas></div>
+        <div class="reveal-art-label">
+          <div class="reveal-art-color-dot p1"></div>
+          <div class="reveal-art-author" id="reveal-p1-name">You</div>
+          <div class="reveal-art-vote-badge" id="reveal-p1-badge">Vote</div>
+        </div>
+      </div>
+      <div class="reveal-art" id="reveal-art-p2" data-vote-target="them">
+        <div class="reveal-art-img"><canvas id="reveal-canvas-opp"></canvas></div>
+        <div class="reveal-art-label">
+          <div class="reveal-art-color-dot p2"></div>
+          <div class="reveal-art-author" id="reveal-p2-name">Opponent</div>
+          <div class="reveal-art-vote-badge" id="reveal-p2-badge">Vote</div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal-bottom">
+      <div class="reveal-status" id="reveal-status">Pick the better artwork. You can vote for yourself — but be honest…</div>
+      <div class="match-timer glass" id="reveal-timer" style="margin:0">15</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
+      <button class="btn btn-primary" id="reveal-continue" style="display:none">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="screen-content">
+    <div class="result-card glass-strong">
+      <div class="result-eyebrow" id="result-eyebrow">Practice Round Complete</div>
+      <h2 class="result-headline practice" id="result-headline">Nice work.</h2>
+      <p class="result-sub" id="result-sub">A warmup against an empty canvas. Real duels — and real XP — arrive in the next phase.</p>
+      <div class="result-rewards">
+        <div class="reward-chip">
+          <div class="reward-chip-icon">✨</div>
+          <div class="reward-chip-text">
+            <div class="reward-chip-label">Earned</div>
+            <div class="reward-chip-value"><span id="result-xp">+10</span> XP</div>
+          </div>
+        </div>
+        <div class="reward-chip">
+          <div class="reward-chip-icon">📈</div>
+          <div class="reward-chip-text">
+            <div class="reward-chip-label">Level</div>
+            <div class="reward-chip-value" id="result-level">1</div>
+          </div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="btn" data-action="back-to-menu">Menu</button>
+        <button class="btn btn-primary" id="result-again">Another Round</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENTS MODAL -->
+<div class="modal-overlay" id="modal-achievements">
+  <div class="modal glass-strong">
+    <div class="modal-header">
+      <div class="modal-title">Achievements</div>
+      <button class="modal-close" data-action="close-modal">✕</button>
+    </div>
+    <div class="modal-body"><div class="ach-grid" id="ach-grid"></div></div>
+  </div>
+</div>
+
+<!-- STATS MODAL -->
+<div class="modal-overlay" id="modal-stats">
+  <div class="modal glass-strong">
+    <div class="modal-header">
+      <div class="modal-title">Your Stats</div>
+      <button class="modal-close" data-action="close-modal">✕</button>
+    </div>
+    <div class="modal-body" id="stats-body"></div>
+  </div>
+</div>
+
+<!-- HOW TO PLAY MODAL -->
+<div class="modal-overlay" id="modal-howto">
+  <div class="modal glass-strong">
+    <div class="modal-header">
+      <div class="modal-title">How to Play</div>
+      <button class="modal-close" data-action="close-modal">✕</button>
+    </div>
+    <div class="modal-body" style="line-height:1.7;color:var(--text-dim);font-size:14px">
+      <p style="margin-bottom:14px"><b style="color:var(--text)">⚔️ Forge a Duel.</b> Host a match — a room code appears. Send it to anyone, anywhere. The moment they join, the duel begins.</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">🎯 Enter the Arena.</b> Your opponent pastes the code and you're both in the lobby. Ready up and play.</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">🎨 Three rounds.</b> Each round, both players get the same prompt and 60 seconds. Draw simultaneously — you can see their strokes appear live in the corner.</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">🗳️ Mutual judgment.</b> When time's up, both players vote on the better artwork. Votes reveal at once. Agreement crowns a winner — disagreement is a "Judge's Tie."</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">🏆 Best of three.</b> First to two round wins takes the match, the XP, and any achievements unlocked along the way.</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">✋ Hand mode.</b> Tap the hand icon in the toolbar to draw mid-air with your finger via the camera. Point your index finger to draw, open your palm to lift the brush. Win a match this way for an extra achievement.</p>
+      <p><b style="color:var(--text)">🎨 Practice Round.</b> Draw any prompt solo for sixty seconds — for warming up your brush.</p>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT PROFILE MODAL -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal glass-strong">
+    <div class="modal-header">
+      <div class="modal-title">Edit Profile</div>
+      <button class="modal-close" data-action="close-modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <label style="font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-mute);display:block;margin-bottom:8px">Display Name</label>
+      <input type="text" class="input" id="profile-name-input" maxlength="20" placeholder="Your name…" />
+
+      <div class="settings-row" style="margin-top:18px">
+        <div>
+          <div class="settings-label">Sound effects</div>
+          <div style="font-size:11px;color:var(--text-mute);margin-top:2px">Countdown beeps, win/lose fanfares</div>
+        </div>
+        <div class="settings-control">
+          <button class="toggle-pill" id="audio-toggle" data-on="on">On</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">Hand tracking</div>
+          <div style="font-size:11px;color:var(--text-mute);margin-top:2px">Draw mid-air with your camera — toggled per match</div>
+        </div>
+        <div class="settings-control">
+          <div style="font-size:11px;color:var(--text-mute);align-self:center">Toolbar ✋</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+        <button class="btn" data-action="close-modal">Cancel</button>
+        <button class="btn btn-primary" id="profile-save">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating layers -->
+<div class="countdown-overlay" id="countdown-overlay">
+  <div class="countdown-num" id="countdown-num">3</div>
+  <div class="countdown-prompt" id="countdown-prompt-box">
+    <div class="countdown-prompt-eyebrow">Your prompt</div>
+    <div class="countdown-prompt-text" id="countdown-prompt-text">—</div>
+  </div>
+</div>
+<div class="ach-toast-stack" id="ach-toast-stack"></div>
+<div class="toast-stack" id="toast-stack"></div>
+<div class="levelup-burst" id="levelup-burst">
+  <div class="levelup-center">
+    <div class="levelup-eyebrow">Level Up</div>
+    <div class="levelup-num" id="levelup-num">2</div>
+  </div>
+</div>
+
+<!-- Disconnect / opponent-left overlay -->
+<div class="disconnect-overlay" id="disconnect-overlay">
+  <div class="disconnect-card glass-strong">
+    <div class="disconnect-icon" id="disconnect-icon">🔌</div>
+    <h3 class="disconnect-title" id="disconnect-title">Opponent left the match</h3>
+    <p class="disconnect-sub" id="disconnect-sub">The duel can't continue without two players. Your progress this round was discarded.</p>
+    <button class="btn btn-primary" id="disconnect-back">Back to Menu</button>
+  </div>
+</div>
+
+<!-- Vendor: PeerJS for WebRTC signaling (public broker, no backend needed).
+     Primary: cdnjs (Cloudflare). Fallback chain handles CDN outage / ad-blocker blocks. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.5/peerjs.min.js"></script>
+<script>
+(function(){
+  if (typeof Peer !== 'undefined') return;
+  var sources = [
+    'https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js',
+    'https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js'
+  ];
+  (function tryNext(i){
+    if (i >= sources.length || typeof Peer !== 'undefined') return;
+    var s = document.createElement('script');
+    s.src = sources[i];
+    s.async = false;
+    s.onerror = function(){ tryNext(i + 1); };
+    document.head.appendChild(s);
+  })(0);
+})();
+</script>
+
+<script>
+'use strict';
+
+/* ============================================================
+ * Aether Duels — Phases 1 + 2
+ *
+ * Phase 1: Foundation, profile, achievements, practice round.
+ * Phase 2: Real-time 1v1 multiplayer (host/join via room codes),
+ *          stroke sync, chat, reactions, mutual peer voting
+ *          with simultaneous reveal, best-of-three.
+ *
+ * Architecture (matches the React/TS migration target in Phase 4)
+ *   STATE         single source of truth (screen, profile, match, net)
+ *   storage.*     localStorage profile persistence
+ *   drawing.*     canvas drawing engine (Phase 1 — minor extensions for stroke broadcast hook)
+ *   match.*       state machine — supports 'practice' and 'multiplayer' modes
+ *   net.*         DuelNet class — wraps PeerJS today, swappable for PartyKit later
+ *   chat.*        in-match chat
+ *   reactions.*   emoji burst
+ *   achievements.* event-driven unlock engine
+ *
+ * Network protocol — every message: { type, data }
+ *   hello       { name, level, version }
+ *   ready       { }
+ *   matchStart  { prompts: [str, str, str], startAt: ts }     (host → guest)
+ *   roundStart  { round, prompt, startAt }                     (host → guest, per round)
+ *   stroke      { mode: 'start'|'add'|'end', x?, y?, color?, size? }   (normalized x/y in [0,1])
+ *   strokeUndo  { }
+ *   strokeClear { }
+ *   chat        { msg }
+ *   reaction    { emoji }
+ *   revealDraw  { dataUrl }                                    (sent on round end)
+ *   vote        { choice: 'self'|'opponent' }
+ *   rematchReq  { }
+ *   rematchOk   { }
+ *   bye         { }
+ *
+ * STORAGE_KEY — bump if schema changes
+ * ============================================================ */
+const STORAGE_KEY = 'aether-duels:v2';
+const PROTOCOL_VERSION = 2;
+
+/* ---------- Constants -------------------------------------- */
+
+const PROMPTS = {
+  animals:  ['octopus','dragon','sloth','narwhal','crab','elephant','flamingo','axolotl','hedgehog','butterfly','penguin','tiger','jellyfish','snail','owl'],
+  objects:  ['rocket ship','teapot','lighthouse','old radio','treasure chest','suitcase','umbrella','typewriter','vinyl record','grand piano','wizard hat','ice cream cone','camera','clock tower','bicycle'],
+  fantasy:  ['haunted castle','unicorn drinking coffee','wizard casting spell','alien spaceship','genie in a lamp','dragon riding a bicycle','ghost holding flowers','mermaid','phoenix','floating island'],
+  concepts: ['freedom','chaos','silence','nostalgia','speed','infinity','dreams','time passing','loneliness','joy'],
+  funny:    ['cat using a laptop','dancing banana','penguin in a tuxedo','duck wearing sunglasses','frog with a crown','robot doing yoga','dinosaur on a skateboard'],
+};
+const ALL_PROMPTS = Object.values(PROMPTS).flat();
+
+const BRUSH_COLORS = ['#06080f','#8ab4ff','#ff7ab6','#7af0c1','#ffd166','#c084fc','#ff6b6b','#4ade80'];
+const BRUSH_SIZES = [4, 8, 14, 22];
+
+const xpRequiredForLevel = (L) => Math.round(40 * Math.pow(L, 1.6));
+const xpForLevelUp = (L) => xpRequiredForLevel(L + 1) - xpRequiredForLevel(L);
+
+const ACHIEVEMENTS = [
+  { id: 'firstStrokes',  icon: '🎨', name: 'First Strokes',     desc: 'Complete your first practice round.' },
+  { id: 'palette',       icon: '🌈', name: "Painter's Palette", desc: 'Use every brush color in a single round.' },
+  { id: 'marathon',      icon: '⏱️', name: 'Marathon',          desc: 'Draw for the full sixty seconds without lifting.' },
+  { id: 'firstBlood',    icon: '⚔️', name: 'First Blood',       desc: 'Win your first multiplayer round.' },
+  { id: 'sweep',         icon: '🧹', name: 'Clean Sweep',       desc: 'Win a match without dropping a round.' },
+  { id: 'underdog',      icon: '🐺', name: 'Underdog',          desc: 'Win against a player two levels above you.' },
+  { id: 'veteran',       icon: '🎖️', name: 'Veteran',          desc: 'Play 25 multiplayer matches.' },
+  { id: 'airMaster',     icon: '✋', name: 'Air Master',        desc: 'Win a match using hand-tracking mode.' },
+];
+
+// Game configuration — Phase 5 will move this to a config service
+const GAME = {
+  ROUND_SECONDS: 60,
+  VOTE_SECONDS: 15,
+  TOTAL_ROUNDS: 3,
+  ROUND_BREAK_MS: 2200,        // banner display between rounds
+  COUNTDOWN_STEP_MS: 900,
+  STROKE_THROTTLE_MS: 16,      // ~60Hz max for outgoing stroke points
+};
+
+// Network message types (single source of truth — keep stable across migrations)
+const MSG = {
+  HELLO: 'hello',
+  READY: 'ready',
+  MATCH_START: 'matchStart',
+  ROUND_START: 'roundStart',
+  STROKE: 'stroke',
+  STROKE_UNDO: 'strokeUndo',
+  STROKE_CLEAR: 'strokeClear',
+  CHAT: 'chat',
+  REACTION: 'reaction',
+  REVEAL_DRAW: 'revealDraw',
+  VOTE: 'vote',
+  REMATCH_REQ: 'rematchReq',
+  REMATCH_OK: 'rematchOk',
+  BYE: 'bye',
+};
+
+/* ---------- State ------------------------------------------ */
+
+const STATE = {
+  screen: 'splash',
+  profile: null,
+  onboardStep: 0,
+  match: null,   // populated by match.startPractice() / match.startMultiplayer()
+  net: null,     // populated by net.host() / net.join()
+};
+
+/* ---------- DOM helpers ------------------------------------ */
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => document.querySelectorAll(sel);
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const now = () => performance.now();
+
+/* ============================================================
+ * Storage
+ * ============================================================ */
+const storage = {
+  load() {
+    let p;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) p = JSON.parse(raw);
+    } catch (_) {}
+    if (!p || typeof p !== 'object') p = {};
+    return {
+      // Data shapes mirror eventual Postgres `profiles` table — designed
+      // so migrating to Supabase is `JSON.stringify(localStorage) → INSERT`.
+      id: p.id || cryptoRandomId(),
+      name: p.name || `Player_${Math.floor(Math.random() * 9000 + 1000)}`,
+      xp: p.xp | 0,
+      matchesPlayed: p.matchesPlayed | 0,
+      practiceRoundsPlayed: p.practiceRoundsPlayed | 0,
+      matchesWon: p.matchesWon | 0,
+      matchesLost: p.matchesLost | 0,
+      roundsWon: p.roundsWon | 0,
+      roundsLost: p.roundsLost | 0,
+      ties: p.ties | 0,
+      bestStreak: p.bestStreak | 0,
+      currentStreak: p.currentStreak | 0,
+      achievements: p.achievements && typeof p.achievements === 'object' ? p.achievements : {},
+      onboarded: !!p.onboarded,
+      preferredColor: p.preferredColor || BRUSH_COLORS[1],
+      preferredSize: BRUSH_SIZES.includes(p.preferredSize) ? p.preferredSize : 8,
+      audioEnabled: p.audioEnabled !== false,    // default true; persisted across sessions
+      handModeMatches: p.handModeMatches | 0,     // Phase 3 stat — matches played using hand input
+      handModeWins: p.handModeWins | 0,           // Phase 3 stat — wins using hand input
+    };
+  },
+  save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE.profile)); } catch (_) {}
+  },
+};
+
+function cryptoRandomId() {
+  // Phase 5 will replace with Supabase auth user id
+  const arr = new Uint8Array(8);
+  (crypto && crypto.getRandomValues) ? crypto.getRandomValues(arr) : null;
+  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/* ---------- XP helpers ------------------------------------- */
+function levelFromXp(xp) {
+  let L = 1;
+  while (xpRequiredForLevel(L + 1) <= xp) L++;
+  return L;
+}
+function xpProgressInLevel(xp) {
+  const L = levelFromXp(xp);
+  const floor = xpRequiredForLevel(L);
+  const ceil = xpRequiredForLevel(L + 1);
+  return { level: L, inLevel: xp - floor, needed: ceil - floor, pct: clamp((xp - floor) / (ceil - floor), 0, 1) };
+}
+
+/* ============================================================
+ * Toasts & feedback
+ * ============================================================ */
+function toast(msg, opts = {}) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (opts.error ? ' error' : '');
+  t.textContent = msg;
+  $('toast-stack').appendChild(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity .4s, transform .4s';
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(8px)';
+    setTimeout(() => t.remove(), 400);
+  }, opts.duration || 2200);
+}
+function achievementToast(ach) {
+  const stack = $('ach-toast-stack');
+  const el = document.createElement('div');
+  el.className = 'ach-toast';
+  el.innerHTML = `<div class="ach-toast-icon">${ach.icon}</div><div class="ach-toast-text"><div class="ach-toast-eyebrow">Achievement Unlocked</div><div class="ach-toast-name">${ach.name}</div></div>`;
+  stack.appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'all .4s var(--ease)';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(120%)';
+    setTimeout(() => el.remove(), 400);
+  }, 4200);
+}
+function levelUpBurst(newLevel) {
+  const el = $('levelup-burst');
+  $('levelup-num').textContent = newLevel;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ============================================================
+ * Audio — Web Audio synth SFX (Phase 3)
+ *
+ * No asset files; every sound is generated procedurally. The
+ * AudioContext is lazy-initialized on first user gesture (browser
+ * autoplay policy). Honors profile.audioEnabled.
+ * ============================================================ */
+const audio = {
+  ctx: null,
+  master: null,
+
+  ensure() {
+    if (!STATE.profile || !STATE.profile.audioEnabled) return false;
+    if (!this.ctx) {
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        this.ctx = new AC();
+        this.master = this.ctx.createGain();
+        this.master.gain.value = 0.35;
+        this.master.connect(this.ctx.destination);
+      } catch (_) { return false; }
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    return true;
+  },
+
+  /** Single oscillator tone with ADSR envelope */
+  _tone(freq, durMs, opts = {}) {
+    if (!this.ensure()) return;
+    const ctx = this.ctx;
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = opts.type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    if (opts.glideTo) osc.frequency.exponentialRampToValueAtTime(opts.glideTo, t0 + durMs / 1000);
+    const peak = (opts.gain || 0.6);
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(peak, t0 + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + durMs / 1000);
+    osc.connect(gain).connect(this.master);
+    osc.start(t0);
+    osc.stop(t0 + durMs / 1000 + 0.02);
+  },
+
+  /** Quick click feedback (subtle) */
+  click() { this._tone(900, 40, { type: 'square', gain: 0.18 }); },
+
+  /** Countdown beep for 3, 2, 1 */
+  countdownTick() { this._tone(523, 110, { type: 'sine', gain: 0.4 }); }, // C5
+
+  /** Countdown "Go!" — brighter, higher */
+  countdownGo() {
+    this._tone(880, 220, { type: 'sine', gain: 0.55 });
+    setTimeout(() => this._tone(1320, 180, { type: 'sine', gain: 0.4 }), 60);
+  },
+
+  /** Round won — short ascending chime */
+  roundWon() {
+    this._tone(659, 110, { gain: 0.4 });          // E5
+    setTimeout(() => this._tone(784, 110, { gain: 0.4 }), 100);  // G5
+    setTimeout(() => this._tone(1047, 220, { gain: 0.45 }), 200); // C6
+  },
+
+  /** Round lost — short descent */
+  roundLost() {
+    this._tone(440, 180, { type: 'sine', glideTo: 220, gain: 0.3 });
+  },
+
+  /** Match won — full fanfare */
+  matchWon() {
+    this._tone(523, 150, { gain: 0.45 });          // C5
+    setTimeout(() => this._tone(659, 150, { gain: 0.45 }), 130);  // E5
+    setTimeout(() => this._tone(784, 150, { gain: 0.45 }), 260);  // G5
+    setTimeout(() => this._tone(1047, 420, { gain: 0.5 }), 390);  // C6 (long)
+  },
+
+  /** Match lost — somber descent */
+  matchLost() {
+    this._tone(330, 280, { type: 'sine', gain: 0.35 });          // E4
+    setTimeout(() => this._tone(247, 280, { type: 'sine', gain: 0.35 }), 220);  // B3
+    setTimeout(() => this._tone(196, 480, { type: 'sine', gain: 0.32 }), 440);  // G3
+  },
+
+  /** Match tied — neutral chime */
+  matchTie() {
+    this._tone(523, 160, { gain: 0.4 });
+    setTimeout(() => this._tone(523, 320, { gain: 0.3 }), 180);
+  },
+
+  /** Achievement unlock — bell-like */
+  achievement() {
+    this._tone(1568, 360, { type: 'sine', gain: 0.4 });   // G6
+    setTimeout(() => this._tone(2093, 460, { type: 'sine', gain: 0.3 }), 60);  // C7
+  },
+
+  /** Vote cast feedback */
+  voteCast() { this._tone(700, 80, { type: 'sine', gain: 0.3 }); },
+};
+
+/* ============================================================
+ * Freehand — perfect-freehand lazy loader
+ *
+ * Loads perfect-freehand@1.2.3 from esm.sh on demand. Until it
+ * arrives, renderStroke() falls back to the Phase 1 quadratic
+ * algorithm. Module is cached on window so toggling never re-fetches.
+ * ============================================================ */
+const freehand = {
+  getStroke: null,
+  loading: false,
+
+  async load() {
+    if (this.getStroke || this.loading) return;
+    this.loading = true;
+    try {
+      const mod = await import('https://esm.sh/perfect-freehand@1.2.3');
+      this.getStroke = mod.getStroke;
+      // Repaint everything once the library is available so existing strokes
+      // render with variable widths.
+      if (drawing.mainCtx) drawing.redrawAll();
+      if (oppGhost.ctx) oppGhost.redraw();
+    } catch (e) {
+      // Silent fallback — renderStroke() handles the missing case.
+      console.warn('perfect-freehand failed to load; falling back to quadratic strokes', e);
+    } finally {
+      this.loading = false;
+    }
+  },
+};
+
+/* ============================================================
+ * Achievements engine
+ * Phase 2 wires: firstBlood, sweep, underdog, veteran
+ * Phase 3 wires: airMaster
+ * ============================================================ */
+const achievements = {
+  unlock(id) {
+    if (STATE.profile.achievements[id]) return false;
+    const ach = ACHIEVEMENTS.find(a => a.id === id);
+    if (!ach) return false;
+    STATE.profile.achievements[id] = Date.now();
+    storage.save();
+    achievementToast(ach);
+    audio.achievement();
+    refreshAchievementCount();
+    return true;
+  },
+  check(eventName, payload = {}) {
+    if (eventName === 'practiceComplete') {
+      this.unlock('firstStrokes');
+      if (payload.colorsUsed && payload.colorsUsed.size >= BRUSH_COLORS.length) this.unlock('palette');
+      if (payload.continuousDrawSeconds >= 55) this.unlock('marathon');
+    } else if (eventName === 'roundWon') {
+      this.unlock('firstBlood');
+    } else if (eventName === 'matchWon') {
+      // sweep: didn't drop a single round (opponent score = 0)
+      if (payload.oppScore === 0) this.unlock('sweep');
+      // underdog: opponent level ≥ mine + 2
+      if (payload.oppLevel && payload.oppLevel >= levelFromXp(STATE.profile.xp) + 2) {
+        this.unlock('underdog');
+      }
+    } else if (eventName === 'matchPlayed') {
+      if (STATE.profile.matchesPlayed >= 25) this.unlock('veteran');
+    } else if (eventName === 'matchWonWithHand') {
+      this.unlock('airMaster');
+    }
+  },
+};
+function refreshAchievementCount() {
+  const unlocked = Object.keys(STATE.profile.achievements).length;
+  $('achievement-count').textContent = `${unlocked}/${ACHIEVEMENTS.length}`;
+}
+
+/* ============================================================
+ * Profile UI
+ * ============================================================ */
+function refreshProfileUi() {
+  const p = STATE.profile;
+  const prog = xpProgressInLevel(p.xp);
+  $('profile-name').textContent = p.name;
+  $('profile-avatar').textContent = (p.name[0] || 'P').toUpperCase();
+  $('profile-level').textContent = prog.level;
+  $('profile-xp-fill').style.width = (prog.pct * 100).toFixed(1) + '%';
+  refreshAchievementCount();
+}
+function awardXp(amount, opts = {}) {
+  const before = STATE.profile.xp;
+  const beforeLevel = levelFromXp(before);
+  STATE.profile.xp = before + amount;
+  const afterLevel = levelFromXp(STATE.profile.xp);
+  storage.save();
+  refreshProfileUi();
+  if (afterLevel > beforeLevel) {
+    setTimeout(() => levelUpBurst(afterLevel), opts.levelUpDelay || 600);
+  }
+  return { leveledUp: afterLevel > beforeLevel, newLevel: afterLevel };
+}
+
+/* ============================================================
+ * Screen manager
+ * ============================================================ */
+function showScreen(name) {
+  $$('.screen').forEach(s => s.classList.remove('active'));
+  const el = $(`screen-${name}`);
+  if (el) el.classList.add('active');
+  STATE.screen = name;
+}
+function openModal(name)   { $(`modal-${name}`).classList.add('show'); }
+function closeAllModals()  { $$('.modal-overlay').forEach(m => m.classList.remove('show')); }
+
+/* ============================================================
+ * Onboarding
+ * ============================================================ */
+const ONBOARD_SLIDES = [
+  { icon: '⚔️', title: 'Welcome to <em>Aether Duels</em>', text: 'A real-time drawing battle. You and an opponent get the same prompt, sixty seconds, and a blank canvas. Best of three wins.' },
+  { icon: '🗳️', title: 'Mutual <em>judgment</em>',          text: 'When time runs out, both players vote on the better artwork. Votes reveal at once. Agreement crowns a winner — disagreement is a "Judge\'s Tie."' },
+  { icon: '🏆', title: 'Play. <em>Progress.</em> Prevail.', text: 'Win matches, earn XP, level up, unlock achievements. Your stats persist across every duel.' },
+];
+function renderOnboardSlide(i) {
+  const s = ONBOARD_SLIDES[i];
+  $('onboard-icon').textContent = s.icon;
+  $('onboard-title').innerHTML = s.title;
+  $('onboard-text').textContent = s.text;
+  $$('#onboard-dots .onboard-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+  $('onboard-next').textContent = (i === ONBOARD_SLIDES.length - 1) ? 'Begin' : 'Next';
+}
+function startOnboarding()   { STATE.onboardStep = 0; renderOnboardSlide(0); showScreen('onboard'); }
+function advanceOnboarding() {
+  STATE.onboardStep++;
+  if (STATE.onboardStep >= ONBOARD_SLIDES.length) finishOnboarding();
+  else renderOnboardSlide(STATE.onboardStep);
+}
+function finishOnboarding() {
+  STATE.profile.onboarded = true;
+  storage.save();
+  refreshProfileUi();
+  showScreen('menu');
+}
+
+/* ============================================================
+ * Drawing engine
+ *
+ * Three canvas layers (main / active / cursor) for low-latency
+ * stroke rendering. Stroke history kept in `strokes[]` for undo
+ * and replay. Phase 2 adds an onStrokePoint hook that the match
+ * module uses to broadcast strokes over the network.
+ *
+ * Stroke point storage: pixel-space {x, y, t} on local canvas.
+ * Network transmission converts to normalized [0,1] coordinates
+ * so opponents on different screen sizes render correctly.
+ * ============================================================ */
+const drawing = {
+  mainCanvas: null, mainCtx: null,
+  activeCanvas: null, activeCtx: null,
+  cursorCanvas: null, cursorCtx: null,
+  dpr: 1, w: 0, h: 0,
+
+  color: '#8ab4ff',
+  size: 8,
+  strokes: [],
+  currentStroke: null,
+  isDown: false,
+
+  // metrics
+  colorsUsed: new Set(),
+  drawingTimeMs: 0,
+  lastDrawTickMs: 0,
+  continuousDrawSeconds: 0,
+
+  // hook for network broadcast — set by match module
+  onStrokePoint: null,    // (mode, normX, normY, color, size) — mode: 'start'|'add'|'end'
+  onStrokeUndo:  null,
+  onStrokeClear: null,
+  lastSendTs: 0,
+
+  init() {
+    this.mainCanvas   = $('canvas-main');
+    this.activeCanvas = $('canvas-active');
+    this.cursorCanvas = $('canvas-cursor');
+    this.mainCtx   = this.mainCanvas.getContext('2d', { desynchronized: true });
+    this.activeCtx = this.activeCanvas.getContext('2d', { desynchronized: true });
+    this.cursorCtx = this.cursorCanvas.getContext('2d', { desynchronized: true });
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    const surface = this.activeCanvas;
+    surface.addEventListener('pointerdown', this.onPointerDown.bind(this));
+    surface.addEventListener('pointermove', this.onPointerMove.bind(this));
+    surface.addEventListener('pointerup',   this.onPointerUp.bind(this));
+    surface.addEventListener('pointercancel', this.onPointerUp.bind(this));
+    surface.addEventListener('pointerleave', this.onPointerLeave.bind(this));
+  },
+
+  resize() {
+    this.dpr = Math.min(2, window.devicePixelRatio || 1);
+    const w = window.innerWidth, h = window.innerHeight;
+    this.w = w; this.h = h;
+    [this.mainCanvas, this.activeCanvas, this.cursorCanvas].forEach(c => {
+      c.width = Math.floor(w * this.dpr);
+      c.height = Math.floor(h * this.dpr);
+      c.style.width = w + 'px';
+      c.style.height = h + 'px';
+    });
+    [this.mainCtx, this.activeCtx, this.cursorCtx].forEach(ctx => {
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    });
+    this.redrawAll();
+  },
+
+  reset() {
+    this.strokes = [];
+    this.currentStroke = null;
+    this.isDown = false;
+    this.colorsUsed = new Set();
+    this.drawingTimeMs = 0;
+    this.continuousDrawSeconds = 0;
+    this.clearAll();
+  },
+
+  clearAll() {
+    this.mainCtx.clearRect(0, 0, this.w, this.h);
+    this.activeCtx.clearRect(0, 0, this.w, this.h);
+    this.cursorCtx.clearRect(0, 0, this.w, this.h);
+  },
+
+  redrawAll() {
+    this.mainCtx.clearRect(0, 0, this.w, this.h);
+    for (const s of this.strokes) renderStroke(this.mainCtx, s);
+  },
+
+  onPointerDown(e) {
+    if (!match.isRoundActive()) return;
+    // Ignore pointer events if we're in hand mode — keyboard/mouse take priority for non-hand UI only
+    if (hand && hand.active && e.pointerType !== 'mouse') return;
+    this.activeCanvas.setPointerCapture(e.pointerId);
+    this._beginStroke(this.eventPoint(e));
+  },
+
+  onPointerMove(e) {
+    const p = this.eventPoint(e);
+    this.drawCursor(p.x, p.y);
+    if (!this.isDown || !this.currentStroke) return;
+    this._extendStroke(p);
+  },
+
+  onPointerUp() {
+    if (!this.isDown || !this.currentStroke) return;
+    this._endStroke();
+  },
+
+  onPointerLeave() {
+    this.cursorCtx.clearRect(0, 0, this.w, this.h);
+  },
+
+  /* Hand-input bridge — same as pointer flow but takes raw (x, y) coords
+   * and uses a synthetic pressure of 0.65 (more deliberate than mouse default).
+   * Match state machine routes hand gestures through these methods. */
+  handStart(x, y) {
+    if (!match.isRoundActive()) return;
+    this._beginStroke({ x, y, t: now(), p: 0.65 });
+  },
+  handMove(x, y) {
+    if (!this.isDown || !this.currentStroke) return;
+    this._extendStroke({ x, y, t: now(), p: 0.65 });
+  },
+  handEnd() {
+    if (!this.isDown || !this.currentStroke) return;
+    this._endStroke();
+  },
+
+  /* Internal — shared by both pointer and hand input paths */
+  _beginStroke(p) {
+    this.isDown = true;
+    this.currentStroke = { color: this.color, size: this.size, points: [p] };
+    this.colorsUsed.add(this.color);
+    this.lastDrawTickMs = now();
+    this.drawCursor(p.x, p.y);
+    this.renderActiveIncremental();
+    if (this.onStrokePoint) {
+      this.onStrokePoint('start', p.x / this.w, p.y / this.h, this.color, this.size, p.p);
+      this.lastSendTs = now();
+    }
+  },
+  _extendStroke(p) {
+    const t = now();
+    if (this.lastDrawTickMs > 0) {
+      const dt = t - this.lastDrawTickMs;
+      if (dt < 300) this.drawingTimeMs += dt;
+    }
+    this.lastDrawTickMs = t;
+    this.currentStroke.points.push(p);
+    this.renderActiveIncremental();
+    if (this.onStrokePoint && (t - this.lastSendTs) >= GAME.STROKE_THROTTLE_MS) {
+      this.onStrokePoint('add', p.x / this.w, p.y / this.h, undefined, undefined, p.p);
+      this.lastSendTs = t;
+    }
+  },
+  _endStroke() {
+    this.strokes.push(this.currentStroke);
+    renderStroke(this.mainCtx, this.currentStroke, { last: true });
+    this.activeCtx.clearRect(0, 0, this.w, this.h);
+    this.currentStroke = null;
+    this.isDown = false;
+    if (this.onStrokePoint) this.onStrokePoint('end');
+  },
+
+  renderActiveIncremental() {
+    const s = this.currentStroke;
+    if (!s || s.points.length === 0) return;
+    // Clear active layer and repaint the full current stroke.
+    // perfect-freehand handles {last: false} to produce an in-progress polygon.
+    this.activeCtx.clearRect(0, 0, this.w, this.h);
+    renderStroke(this.activeCtx, s, { last: false });
+  },
+
+  eventPoint(e) {
+    const rect = this.activeCanvas.getBoundingClientRect();
+    // Pressure: pen/touch report real pressure (0–1). Mouse reports 0.5 when down, 0 when up.
+    // We clamp to a usable range so mouse strokes still have moderate weight.
+    let pressure = 0.5;
+    if (typeof e.pressure === 'number' && e.pressure > 0) {
+      pressure = clamp(e.pressure, 0.15, 1);
+    }
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+      t: now(),
+      p: pressure,
+    };
+  },
+
+  drawCursor(x, y) {
+    const ctx = this.cursorCtx;
+    ctx.clearRect(0, 0, this.w, this.h);
+    ctx.save();
+    ctx.strokeStyle = this.color;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x, y, this.size / 2 + 1, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  },
+
+  undo() {
+    if (this.strokes.length === 0) return;
+    this.strokes.pop();
+    this.redrawAll();
+    if (this.onStrokeUndo) this.onStrokeUndo();
+  },
+  clear() {
+    this.strokes = [];
+    this.redrawAll();
+    if (this.onStrokeClear) this.onStrokeClear();
+  },
+
+  setColor(c) { this.color = c; STATE.profile.preferredColor = c; storage.save(); renderToolbar(); },
+  setSize(s)  { this.size  = s; STATE.profile.preferredSize  = s; storage.save(); renderToolbar(); },
+
+  exportTo(targetCanvas, sizePx = 800) {
+    const tctx = targetCanvas.getContext('2d');
+    targetCanvas.width = sizePx;
+    targetCanvas.height = sizePx;
+    tctx.fillStyle = '#ffffff';
+    tctx.fillRect(0, 0, sizePx, sizePx);
+    const scale = Math.min(sizePx / this.w, sizePx / this.h);
+    const offX = (sizePx - this.w * scale) / 2;
+    const offY = (sizePx - this.h * scale) / 2;
+    tctx.save();
+    tctx.translate(offX, offY);
+    tctx.scale(scale, scale);
+    tctx.lineCap = 'round'; tctx.lineJoin = 'round';
+    for (const s of this.strokes) renderStroke(tctx, s);
+    tctx.restore();
+  },
+};
+
+/* Stroke rendering — uses perfect-freehand (variable-width pressure strokes)
+ * when freehand.getStroke is loaded; otherwise falls back to quadratic
+ * curves through midpoints. Both paths handle 1-point dots gracefully.
+ *
+ * Stroke format: { color, size, points: [{x, y, t, p}] }
+ *   p (pressure) defaults to 0.5 if missing — keeps Phase 1/2 strokes intact.
+ */
+function renderStroke(ctx, stroke, opts = {}) {
+  const pts = stroke.points;
+  if (pts.length === 0) return;
+
+  if (freehand.getStroke) {
+    // Pressure-aware variable-width rendering via perfect-freehand
+    const inputs = pts.map(p => [p.x, p.y, typeof p.p === 'number' ? p.p : 0.5]);
+    const outline = freehand.getStroke(inputs, {
+      size: stroke.size,
+      thinning: 0.55,
+      smoothing: 0.55,
+      streamline: 0.5,
+      easing: (t) => t,
+      last: opts.last !== false,    // true unless caller says otherwise
+    });
+    if (!outline || outline.length === 0) return;
+    ctx.save();
+    ctx.fillStyle = stroke.color;
+    ctx.beginPath();
+    ctx.moveTo(outline[0][0], outline[0][1]);
+    for (let i = 1; i < outline.length; i++) {
+      ctx.lineTo(outline[i][0], outline[i][1]);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  // Fallback: Phase 1 quadratic curves (used until perfect-freehand finishes loading)
+  ctx.save();
+  ctx.strokeStyle = stroke.color;
+  ctx.fillStyle = stroke.color;
+  ctx.lineWidth = stroke.size;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  if (pts.length === 1) {
+    const p = pts[0];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, stroke.size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length - 1; i++) {
+    const midX = (pts[i].x + pts[i + 1].x) / 2;
+    const midY = (pts[i].y + pts[i + 1].y) / 2;
+    ctx.quadraticCurveTo(pts[i].x, pts[i].y, midX, midY);
+  }
+  const last = pts[pts.length - 1];
+  ctx.lineTo(last.x, last.y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* ============================================================
+ * Opponent ghost canvas (live multiplayer preview)
+ * Receives normalized stroke points; renders smoothly at small scale.
+ * ============================================================ */
+const oppGhost = {
+  canvas: null, ctx: null,
+  w: 220, h: 220,
+  strokes: [],
+  current: null,
+
+  init() {
+    this.canvas = $('canvas-opp-ghost');
+    this.resize();
+  },
+  resize() {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const rect = this.canvas.getBoundingClientRect();
+    this.w = rect.width || 220;
+    this.h = rect.height || 220;
+    this.canvas.width = Math.floor(this.w * dpr);
+    this.canvas.height = Math.floor(this.h * dpr);
+    this.ctx = this.canvas.getContext('2d');
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
+    this.redraw();
+  },
+  reset() {
+    this.strokes = []; this.current = null;
+    this.ctx && this.ctx.clearRect(0, 0, this.w, this.h);
+  },
+  redraw() {
+    if (!this.ctx) return;
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.fillRect(0, 0, this.w, this.h);
+    for (const s of this.strokes) renderStroke(this.ctx, s, { last: true });
+    if (this.current) renderStroke(this.ctx, this.current, { last: false });
+  },
+  // Handle an incoming stroke message
+  receive(data) {
+    const p = (typeof data.p === 'number') ? data.p : 0.5;
+    if (data.mode === 'start') {
+      this.current = {
+        color: data.color || '#06080f',
+        size: (data.size || 8) * 0.28,  // scale down the brush for ghost canvas
+        points: [{ x: data.x * this.w, y: data.y * this.h, t: 0, p }],
+      };
+      this.redraw();
+    } else if (data.mode === 'add' && this.current) {
+      this.current.points.push({ x: data.x * this.w, y: data.y * this.h, t: 0, p });
+      this.redraw();
+    } else if (data.mode === 'end' && this.current) {
+      this.strokes.push(this.current);
+      this.current = null;
+      this.redraw();
+    }
+  },
+  undo() {
+    if (this.strokes.length === 0) return;
+    this.strokes.pop();
+    this.redraw();
+  },
+  clear() {
+    this.strokes = []; this.current = null;
+    this.redraw();
+  },
+  /** Export to a target canvas at the given size (for reveal screen) */
+  exportTo(targetCanvas, sizePx = 800) {
+    const tctx = targetCanvas.getContext('2d');
+    targetCanvas.width = sizePx;
+    targetCanvas.height = sizePx;
+    tctx.fillStyle = '#ffffff';
+    tctx.fillRect(0, 0, sizePx, sizePx);
+    const scale = Math.min(sizePx / this.w, sizePx / this.h);
+    const offX = (sizePx - this.w * scale) / 2;
+    const offY = (sizePx - this.h * scale) / 2;
+    tctx.save();
+    tctx.translate(offX, offY);
+    tctx.scale(scale, scale);
+    tctx.lineCap = 'round'; tctx.lineJoin = 'round';
+    for (const s of this.strokes) renderStroke(tctx, s);
+    tctx.restore();
+  },
+};
+
+/* ============================================================
+ * Toolbar
+ * ============================================================ */
+function renderToolbar() {
+  const swatchEl = $('tool-swatches');
+  swatchEl.innerHTML = '';
+  for (const c of BRUSH_COLORS) {
+    const d = document.createElement('div');
+    d.className = 'tool-swatch' + (c === drawing.color ? ' active' : '');
+    d.style.background = c === '#06080f' ? `linear-gradient(135deg,#1c1538,#06080f)` : c;
+    d.addEventListener('click', () => drawing.setColor(c));
+    swatchEl.appendChild(d);
+  }
+  const sizeEl = $('tool-sizes');
+  sizeEl.innerHTML = '';
+  for (const s of BRUSH_SIZES) {
+    const d = document.createElement('div');
+    d.className = 'tool-size' + (s === drawing.size ? ' active' : '');
+    const visualSize = Math.max(28, s * 1.4);
+    d.style.width = visualSize + 'px';
+    d.style.height = visualSize + 'px';
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.width = s + 'px';
+    dot.style.height = s + 'px';
+    d.appendChild(dot);
+    d.addEventListener('click', () => drawing.setSize(s));
+    sizeEl.appendChild(d);
+  }
+}
+
+/* ============================================================
+ * DuelNet — networking abstraction
+ *
+ * Wraps PeerJS today. The public surface (host/join/send/on/close)
+ * is identical to what we'll write for PartyKit in Phase 5, so the
+ * migration is a single-file swap with no callsite changes.
+ *
+ * Host: opens a Peer; broadcasts its ID as the "room code"
+ * Guest: opens a Peer; connects to the host's ID
+ * Both: exchange messages over the same DataConnection
+ * ============================================================ */
+class DuelNet {
+  constructor() {
+    this.peer = null;
+    this.conn = null;
+    this.role = null;            // 'host' | 'guest'
+    this.opened = false;
+    this.handlers = {};          // type → fn(data)
+    this.onOpenCallback = null;
+    this.onCloseCallback = null;
+  }
+
+  /** Host a room. Resolves with the room code (= our peer id). */
+  async host() {
+    return new Promise((resolve, reject) => {
+      if (typeof Peer === 'undefined') return reject(new Error('PeerJS not loaded'));
+      this.peer = new Peer();
+      this.role = 'host';
+      const timer = setTimeout(() => reject(new Error('Could not reach signaling broker. Check your connection.')), 12_000);
+
+      this.peer.on('open', (id) => {
+        clearTimeout(timer);
+        resolve(id);
+      });
+      this.peer.on('connection', (conn) => {
+        this.conn = conn;
+        this._wireConn(conn);
+      });
+      this.peer.on('error', (err) => {
+        clearTimeout(timer);
+        this._emit('error', err);
+        if (!this.opened) reject(err);
+      });
+    });
+  }
+
+  /** Join an existing room by code. Resolves once the data channel opens. */
+  async join(code) {
+    return new Promise((resolve, reject) => {
+      if (typeof Peer === 'undefined') return reject(new Error('PeerJS not loaded'));
+      this.peer = new Peer();
+      this.role = 'guest';
+      const timer = setTimeout(() => reject(new Error('Could not reach signaling broker.')), 12_000);
+
+      this.peer.on('open', () => {
+        const conn = this.peer.connect(code, { reliable: true });
+        const joinTimer = setTimeout(() => {
+          conn.close();
+          reject(new Error('No host found at that code. Check the code or ask your friend to re-host.'));
+        }, 15_000);
+
+        conn.on('open', () => {
+          clearTimeout(timer);
+          clearTimeout(joinTimer);
+          this.conn = conn;
+          this._wireConn(conn);
+          resolve();
+        });
+        conn.on('error', (err) => {
+          clearTimeout(timer); clearTimeout(joinTimer);
+          reject(err);
+        });
+      });
+      this.peer.on('error', (err) => {
+        clearTimeout(timer);
+        if (err && err.type === 'peer-unavailable') {
+          reject(new Error('No host found at that code.'));
+        } else if (!this.opened) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  _wireConn(conn) {
+    this.opened = true;
+    conn.on('data', (raw) => {
+      if (!raw || typeof raw !== 'object' || !raw.type) return;
+      const fn = this.handlers[raw.type];
+      if (fn) fn(raw.data);
+    });
+    conn.on('close', () => { this._emit('close'); });
+    conn.on('error', (err) => { this._emit('error', err); });
+    if (this.onOpenCallback) this.onOpenCallback();
+  }
+
+  send(type, data) {
+    if (!this.conn || !this.conn.open) return;
+    try { this.conn.send({ type, data }); }
+    catch (_) { /* silently drop on broken pipe */ }
+  }
+
+  /** Register a handler for incoming messages of a given type. */
+  on(type, fn) { this.handlers[type] = fn; }
+
+  /** Special events: 'open', 'close', 'error' — only one callback each */
+  onOpen(fn)  { this.onOpenCallback = fn; }
+  onClose(fn) { this.onCloseCallback = fn; }
+
+  _emit(event, data) {
+    if (event === 'close' && this.onCloseCallback) this.onCloseCallback(data);
+    if (event === 'error' && this.onCloseCallback) this.onCloseCallback(data);
+  }
+
+  close() {
+    try { this.send(MSG.BYE, {}); } catch (_) {}
+    try { this.conn && this.conn.close(); } catch (_) {}
+    try { this.peer && this.peer.destroy(); } catch (_) {}
+    this.conn = null;
+    this.peer = null;
+    this.opened = false;
+  }
+}
+
+/* ============================================================
+ * Chat module
+ * ============================================================ */
+const chat = {
+  unread: 0,
+  isOpen: false,
+
+  init() {
+    $('chat-header').addEventListener('click', () => this.toggle());
+    $('chat-send').addEventListener('click', () => this.sendCurrent());
+    $('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') this.sendCurrent();
+    });
+  },
+  show() {
+    $('match-chat').style.display = '';
+    this.reset();
+  },
+  hide() {
+    $('match-chat').style.display = 'none';
+  },
+  reset() {
+    $('chat-messages').innerHTML = '';
+    this.unread = 0;
+    this.updateUnread();
+    $('match-chat').classList.add('collapsed');
+    this.isOpen = false;
+  },
+  toggle() {
+    this.isOpen = !this.isOpen;
+    $('match-chat').classList.toggle('collapsed', !this.isOpen);
+    if (this.isOpen) {
+      this.unread = 0;
+      this.updateUnread();
+      setTimeout(() => $('chat-input').focus(), 250);
+    }
+  },
+  updateUnread() {
+    const pill = $('chat-unread');
+    pill.textContent = this.unread;
+    pill.classList.toggle('show', this.unread > 0);
+  },
+  appendMessage(cls, author, msg) {
+    const el = document.createElement('div');
+    el.className = 'chat-msg ' + cls;
+    if (cls === 'system') {
+      el.textContent = msg;
+    } else {
+      const a = document.createElement('div');
+      a.className = 'author';
+      a.textContent = author;
+      const t = document.createElement('div');
+      t.textContent = msg;
+      el.appendChild(a);
+      el.appendChild(t);
+    }
+    $('chat-messages').appendChild(el);
+    $('chat-messages').scrollTop = $('chat-messages').scrollHeight;
+  },
+  appendSystem(msg) { this.appendMessage('system', '', msg); },
+  sendCurrent() {
+    const input = $('chat-input');
+    const v = input.value.trim().slice(0, 120);
+    if (!v) return;
+    if (!STATE.net) return;
+    this.appendMessage('me', STATE.profile.name, v);
+    STATE.net.send(MSG.CHAT, { msg: v });
+    input.value = '';
+  },
+  receive(data) {
+    const oppName = (STATE.match && STATE.match.opponent && STATE.match.opponent.name) || 'Opponent';
+    this.appendMessage('them', oppName, String(data.msg || '').slice(0, 120));
+    if (!this.isOpen) {
+      this.unread++;
+      this.updateUnread();
+    }
+  },
+};
+
+/* ============================================================
+ * Reactions — floating emoji burst
+ * ============================================================ */
+const reactions = {
+  init() {
+    $$('.quick-reaction').forEach(el => {
+      el.addEventListener('click', () => {
+        const emoji = el.dataset.emoji;
+        this.spawn(emoji, 'me');
+        if (STATE.net) STATE.net.send(MSG.REACTION, { emoji });
+      });
+    });
+  },
+  show() { $('quick-reactions').style.display = ''; },
+  hide() { $('quick-reactions').style.display = 'none'; },
+  spawn(emoji, side) {
+    const el = document.createElement('div');
+    el.className = 'float-reaction';
+    el.textContent = emoji;
+    // 'me' spawns from bottom-left (toolbar side); 'them' from bottom-right (opp ghost)
+    const x = side === 'me' ? 80 + Math.random() * 100 : window.innerWidth - 180 - Math.random() * 80;
+    const y = window.innerHeight - 200 - Math.random() * 80;
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2300);
+  },
+  receive(data) { this.spawn(data.emoji || '🎨', 'them'); },
+};
+
+/* ============================================================
+ * Network event wiring — registers handlers on a DuelNet instance
+ * ============================================================ */
+function wireNet(net) {
+  net.on(MSG.HELLO, (data) => match.onHello(data));
+  net.on(MSG.READY, () => match.onReady());
+  net.on(MSG.MATCH_START, (data) => match.onMatchStart(data));
+  net.on(MSG.ROUND_START, (data) => match.onRoundStart(data));
+  net.on(MSG.STROKE, (data) => oppGhost.receive(data));
+  net.on(MSG.STROKE_UNDO, () => oppGhost.undo());
+  net.on(MSG.STROKE_CLEAR, () => oppGhost.clear());
+  net.on(MSG.CHAT, (data) => chat.receive(data));
+  net.on(MSG.REACTION, (data) => reactions.receive(data));
+  net.on(MSG.REVEAL_DRAW, (data) => match.onRevealDraw(data));
+  net.on(MSG.VOTE, (data) => match.onVote(data));
+  net.on(MSG.REMATCH_REQ, () => match.onRematchReq());
+  net.on(MSG.REMATCH_OK, () => match.onRematchOk());
+  net.on(MSG.BYE, () => match.onOpponentLeft('clean'));
+
+  net.onClose(() => match.onOpponentLeft('disconnect'));
+}
+
+/* ============================================================
+ * Hand tracking (Phase 3) — adapted from AETHER
+ *
+ * MediaPipe Tasks Vision HandLandmarker with GPU + CPU fallback.
+ * One Euro Filter smooths the index-finger tip. Two-frame gesture
+ * hysteresis kills single-frame flicker. In-match gesture set is
+ * deliberately small:
+ *   draw  (index up, others down)  → start/extend stroke
+ *   palm  (all fingers up)         → commit and lift brush
+ *
+ * The hand module synthesizes (x,y) inputs to drawing.handStart/Move/End
+ * so all the existing network, undo, and score wiring works unchanged.
+ * ============================================================ */
+
+const MP_TASKS_VISION_VERSION = '0.10.18';
+const HAND_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+const HYST_FRAMES = 2;
+const PINCH_ENTER = 0.33;
+const PINCH_EXIT  = 0.42;
+
+/* One Euro Filter — speed-adaptive low-pass (Casiez/Roussel/Vogel, CHI 2012) */
+class OneEuroFilter {
+  constructor(minCutoff = 1.0, beta = 0.05, dCutoff = 1.0) {
+    this.minCutoff = minCutoff; this.beta = beta; this.dCutoff = dCutoff;
+    this.xPrev = null; this.dxPrev = 0; this.tPrev = 0;
+  }
+  reset() { this.xPrev = null; this.dxPrev = 0; this.tPrev = 0; }
+  static alpha(cutoff, dt) {
+    const r = 2 * Math.PI * cutoff * dt;
+    return r / (r + 1);
+  }
+  filter(x, tMs) {
+    if (this.xPrev === null) { this.xPrev = x; this.tPrev = tMs; this.dxPrev = 0; return x; }
+    const dt = Math.max(1e-3, (tMs - this.tPrev) / 1000);
+    const dx = (x - this.xPrev) / dt;
+    const aD = OneEuroFilter.alpha(this.dCutoff, dt);
+    const dxHat = aD * dx + (1 - aD) * this.dxPrev;
+    const cutoff = this.minCutoff + this.beta * Math.abs(dxHat);
+    const a = OneEuroFilter.alpha(cutoff, dt);
+    const xHat = a * x + (1 - a) * this.xPrev;
+    this.xPrev = xHat; this.dxPrev = dxHat; this.tPrev = tMs;
+    return xHat;
+  }
+}
+
+const hand = {
+  active: false,
+  loading: false,
+  video: null,
+  stream: null,
+  runtime: null,
+  videoFrameHandle: null,
+
+  filterX: null, filterY: null,
+  pendingGesture: null,
+  pendingFrames: 0,
+  gesture: 'none',
+  pinchActive: false,
+  lastTimestamp: 0,
+  isDrawing: false,         // mirrors drawing.isDown for hand strokes
+
+  // Cached MediaPipe module to avoid re-fetching
+  _modCache: null,
+
+  init() {
+    this.video = $('video');
+  },
+
+  async _ensureMediaPipe() {
+    if (this._modCache) return this._modCache;
+    const url = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_TASKS_VISION_VERSION}/vision_bundle.mjs`;
+    const mod = await import(url);
+    this._modCache = mod;
+    return mod;
+  },
+
+  /** Toggle entry point — wired to the toolbar hand button */
+  async toggle() {
+    if (this.active) { this.disable(); return; }
+    await this.enable();
+  },
+
+  async enable() {
+    if (this.loading || this.active) return;
+    if (!match.isRoundActive() && match.mode == null) {
+      toast('Start a round first to use hand mode.', { duration: 2400 });
+      return;
+    }
+    this.loading = true;
+    const btn = $('tool-hand');
+    btn.classList.add('loading');
+    toast('Loading hand tracking…');
+
+    let mod;
+    try {
+      mod = await this._ensureMediaPipe();
+    } catch (e) {
+      toast('Could not load hand tracking. Check your connection.', { error: true, duration: 3500 });
+      btn.classList.remove('loading');
+      this.loading = false;
+      return;
+    }
+
+    // Request camera at modest resolution — the model rescales internally.
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width:  { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: 60, min: 30 },
+          facingMode: 'user',
+        },
+        audio: false,
+      });
+    } catch (_) {
+      toast('Camera permission denied.', { error: true, duration: 3500 });
+      btn.classList.remove('loading');
+      this.loading = false;
+      return;
+    }
+    this.stream = stream;
+    this.video.srcObject = stream;
+    try { await this.video.play(); } catch (_) {}
+
+    // Build HandLandmarker — try GPU first, fall back to CPU.
+    const { FilesetResolver, HandLandmarker } = mod;
+    let runtime;
+    try {
+      const vision = await FilesetResolver.forVisionTasks(
+        `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_TASKS_VISION_VERSION}/wasm`
+      );
+      runtime = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: 'GPU' },
+        runningMode: 'VIDEO',
+        numHands: 1,
+        minHandDetectionConfidence: 0.5,
+        minHandPresenceConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+    } catch (_) {
+      try {
+        const vision = await FilesetResolver.forVisionTasks(
+          `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_TASKS_VISION_VERSION}/wasm`
+        );
+        runtime = await HandLandmarker.createFromOptions(vision, {
+          baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: 'CPU' },
+          runningMode: 'VIDEO',
+          numHands: 1,
+          minHandDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5,
+        });
+      } catch (_) {
+        toast('Hand tracking failed to initialize.', { error: true });
+        stream.getTracks().forEach(t => t.stop());
+        btn.classList.remove('loading');
+        this.loading = false;
+        return;
+      }
+    }
+
+    this.runtime = runtime;
+    this.active = true;
+    this.filterX = new OneEuroFilter(1.0, 0.05, 1.0);
+    this.filterY = new OneEuroFilter(1.0, 0.05, 1.0);
+    this.gesture = 'none';
+    this.pinchActive = false;
+    this.pendingGesture = null;
+    this.pendingFrames = 0;
+    this.lastTimestamp = 0;
+
+    this.video.classList.add('visible');
+    btn.classList.remove('loading');
+    btn.classList.add('active');
+    $('hand-info').classList.add('visible');
+    this._setStatus('Show your hand', 'searching');
+
+    // Track for airMaster achievement
+    if (match.mode === 'multiplayer') match.handModeUsedThisMatch = true;
+
+    // Start per-frame detection loop
+    const hasRVFC = typeof this.video.requestVideoFrameCallback === 'function';
+    const tick = (nowMs, metadata) => {
+      if (!this.active) return;
+      let ts;
+      if (metadata && typeof metadata.mediaTime === 'number') ts = metadata.mediaTime * 1000;
+      else ts = nowMs;
+      if (ts <= this.lastTimestamp) ts = this.lastTimestamp + 1;
+      this.lastTimestamp = ts;
+
+      if (this.video.readyState >= 2) {
+        try {
+          const results = this.runtime.detectForVideo(this.video, ts);
+          this._onResults(results, ts);
+        } catch (_) { /* transient errors are safe to swallow */ }
+      }
+
+      if (hasRVFC) this.videoFrameHandle = this.video.requestVideoFrameCallback(tick);
+      else         this.videoFrameHandle = requestAnimationFrame(t => tick(t, null));
+    };
+    if (hasRVFC) this.videoFrameHandle = this.video.requestVideoFrameCallback(tick);
+    else         this.videoFrameHandle = requestAnimationFrame(t => tick(t, null));
+
+    this.loading = false;
+    toast('Hand mode on — point your index finger to draw');
+  },
+
+  disable() {
+    this.active = false;
+
+    // Cancel frame loop
+    if (this.videoFrameHandle != null) {
+      if (typeof this.video.cancelVideoFrameCallback === 'function') {
+        try { this.video.cancelVideoFrameCallback(this.videoFrameHandle); } catch (_) {}
+      } else {
+        try { cancelAnimationFrame(this.videoFrameHandle); } catch (_) {}
+      }
+      this.videoFrameHandle = null;
+    }
+    if (this.runtime) { try { this.runtime.close(); } catch (_) {} this.runtime = null; }
+    if (this.stream)  { try { this.stream.getTracks().forEach(t => t.stop()); } catch (_) {} this.stream = null; }
+    if (this.video && this.video.srcObject) {
+      try { this.video.srcObject.getTracks().forEach(t => t.stop()); } catch (_) {}
+      this.video.srcObject = null;
+    }
+
+    this.video.classList.remove('visible');
+    $('tool-hand').classList.remove('active', 'loading');
+    $('hand-info').classList.remove('visible');
+    $('hand-cursor').classList.remove('visible', 'drawing');
+
+    if (this.isDrawing) { drawing.handEnd(); this.isDrawing = false; }
+    this.filterX = null; this.filterY = null;
+    this.gesture = 'none';
+    this.pinchActive = false;
+  },
+
+  _setStatus(text, cls) {
+    const el = $('hand-info-state');
+    if (!el) return;
+    el.textContent = text;
+    el.className = 'hand-info-state ' + (cls || '');
+  },
+
+  /** 21-landmark gesture detection (subset for in-match use) */
+  _detectGesture(lm, prevPinch) {
+    const tipIds = [4, 8, 12, 16, 20];
+    const pipIds = [2, 6, 10, 14, 18];
+    const handSize = Math.hypot(lm[0].x - lm[9].x, lm[0].y - lm[9].y) || 1e-6;
+
+    const extended = [];
+    for (let i = 0; i < 5; i++) {
+      if (i === 0) {
+        const tip = lm[4], mcp = lm[2];
+        extended.push(
+          Math.hypot(tip.x - lm[0].x, tip.y - lm[0].y) >
+          Math.hypot(mcp.x - lm[0].x, mcp.y - lm[0].y) * 1.05
+        );
+      } else {
+        extended.push(lm[tipIds[i]].y < lm[pipIds[i]].y - 0.015);
+      }
+    }
+    const [, index, middle, ring, pinky] = extended;
+    const pinchRatio = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y) / handSize;
+    const pinching = prevPinch ? (pinchRatio < PINCH_EXIT) : (pinchRatio < PINCH_ENTER);
+
+    if (pinching && !middle && !ring && !pinky)   return 'pinch';
+    if (index && !middle && !ring && !pinky)      return 'draw';
+    if (index && middle && ring && pinky)         return 'palm';
+    if (!index && !middle && !ring && !pinky)     return 'fist';
+    return 'unknown';
+  },
+
+  _onResults(results, tsMs) {
+    const w = window.innerWidth, h = window.innerHeight;
+    const landmarks = results.landmarks || results.multiHandLandmarks || [];
+
+    if (landmarks.length === 0) {
+      $('hand-cursor').classList.remove('visible', 'drawing');
+      if (this.isDrawing) { drawing.handEnd(); this.isDrawing = false; }
+      if (this.filterX) this.filterX.reset();
+      if (this.filterY) this.filterY.reset();
+      this.pendingGesture = null; this.pendingFrames = 0;
+      this.gesture = 'none'; this.pinchActive = false;
+      this._setStatus('Show your hand', 'searching');
+      return;
+    }
+
+    const lm = landmarks[0];
+    const rawGesture = this._detectGesture(lm, this.pinchActive);
+
+    // Hysteresis: candidate must hold for HYST_FRAMES; palm/unknown commit immediately
+    let nextGesture = this.gesture;
+    if (rawGesture === this.gesture) {
+      this.pendingGesture = null; this.pendingFrames = 0;
+    } else if (rawGesture === 'palm' || rawGesture === 'unknown') {
+      nextGesture = rawGesture;
+      this.pendingGesture = null; this.pendingFrames = 0;
+    } else {
+      if (rawGesture === this.pendingGesture) {
+        this.pendingFrames++;
+      } else {
+        this.pendingGesture = rawGesture; this.pendingFrames = 1;
+      }
+      if (this.pendingFrames >= HYST_FRAMES) {
+        nextGesture = rawGesture;
+        this.pendingGesture = null; this.pendingFrames = 0;
+      }
+    }
+    this.gesture = nextGesture;
+    this.pinchActive = (nextGesture === 'pinch');
+
+    // Mirror x because the visible video is flipped (selfie style)
+    const rawX = (1 - lm[8].x) * w;
+    const rawY = lm[8].y * h;
+    const sx = this.filterX.filter(rawX, tsMs);
+    const sy = this.filterY.filter(rawY, tsMs);
+
+    // Update hand cursor visualization
+    const cursor = $('hand-cursor');
+    cursor.style.left = sx + 'px';
+    cursor.style.top  = sy + 'px';
+    cursor.classList.add('visible');
+
+    // Route gesture → drawing engine
+    if (nextGesture === 'draw') {
+      cursor.classList.add('drawing');
+      if (!this.isDrawing) {
+        drawing.handStart(sx, sy);
+        this.isDrawing = true;
+        this._setStatus('Drawing', 'drawing');
+      } else {
+        drawing.handMove(sx, sy);
+      }
+    } else {
+      cursor.classList.remove('drawing');
+      if (this.isDrawing) {
+        drawing.handEnd();
+        this.isDrawing = false;
+      }
+      if (nextGesture === 'palm')          this._setStatus('Brush lifted — point to draw', 'lifted');
+      else if (nextGesture === 'fist')     this._setStatus('Fist — open hand to lift', 'lifted');
+      else if (nextGesture === 'pinch')    this._setStatus('Pinch detected', 'lifted');
+      else                                 this._setStatus('Tracking', '');
+    }
+  },
+};
+
+/* ============================================================
+ * Match state machine
+ * Supports 'practice' (Phase 1) and 'multiplayer' (Phase 2) modes.
+ * ============================================================ */
+const match = {
+  mode: null,            // 'practice' | 'multiplayer'
+  role: null,            // 'host' | 'guest' (mp only)
+  round: 1,
+  totalRounds: 1,
+  scores: [0, 0],        // [you, opponent]
+  prompts: [],           // [r1, r2, r3] in mp; [r1] in practice
+  prompt: '',
+  active: false,
+  timerEnd: 0,
+  timerInterval: null,
+  voteInterval: null,
+  voteEnd: 0,
+  opponent: null,        // { id, name, level, ready }
+  myReady: false,
+  myVote: null,          // 'self' | 'opponent'
+  theirVote: null,       // 'self' | 'opponent'
+  votesRevealed: false,
+  myDrawing: null,       // base64 dataURL after round end
+  theirDrawing: null,    // base64 dataURL from opponent after round end
+  lastRoundOutcome: null,// 'me' | 'them' | 'tie'
+  handModeUsedThisMatch: false,  // Phase 3 — tracks whether airMaster qualifies
+
+  isRoundActive() { return this.active; },
+
+  /* ----------- PRACTICE MODE (Phase 1) -------------------- */
+  startPractice() {
+    this.mode = 'practice';
+    this.role = null;
+    this.round = 1;
+    this.totalRounds = 1;
+    this.scores = [0, 0];
+    this.prompt = ALL_PROMPTS[Math.floor(Math.random() * ALL_PROMPTS.length)];
+    this.opponent = null;
+    drawing.reset();
+    drawing.color = STATE.profile.preferredColor;
+    drawing.size  = STATE.profile.preferredSize;
+    drawing.onStrokePoint = null;
+    drawing.onStrokeUndo = null;
+    drawing.onStrokeClear = null;
+    renderToolbar();
+    this.applyMatchHud('practice');
+    $('match-round-num').textContent = this.round;
+    $('match-total-rounds').textContent = this.totalRounds;
+    $('match-prompt').textContent = this.prompt;
+    showScreen('match');
+    setTimeout(() => this.runCountdown(), 350);
+  },
+
+  /* ----------- MULTIPLAYER MODE (Phase 2) ----------------- */
+  async startHost() {
+    showScreen('host');
+    $('room-code').textContent = 'connecting…';
+    $('host-status-text').textContent = 'Reaching signaling broker…';
+
+    const net = new DuelNet();
+    STATE.net = net;
+    wireNet(net);
+
+    try {
+      const code = await net.host();
+      $('room-code').textContent = code;
+      $('host-status-text').textContent = 'Waiting for opponent…';
+      // when opponent's data channel opens, we'll receive HELLO; transition to lobby
+    } catch (err) {
+      toast(err.message || 'Failed to start hosting', { error: true, duration: 4000 });
+      STATE.net = null;
+      showScreen('menu');
+    }
+  },
+
+  showJoin() {
+    $('join-code-input').value = '';
+    $('join-error').textContent = '';
+    showScreen('join');
+    setTimeout(() => $('join-code-input').focus(), 250);
+  },
+
+  async startJoin(code) {
+    code = (code || '').trim();
+    if (!code) { $('join-error').textContent = 'Please enter a code.'; return; }
+    $('join-error').textContent = '';
+    $('join-go').disabled = true;
+    $('join-go').textContent = 'Connecting…';
+
+    const net = new DuelNet();
+    STATE.net = net;
+    wireNet(net);
+    try {
+      await net.join(code);
+      // Send HELLO to host on open
+      net.send(MSG.HELLO, {
+        id: STATE.profile.id,
+        name: STATE.profile.name,
+        level: levelFromXp(STATE.profile.xp),
+        version: PROTOCOL_VERSION,
+      });
+    } catch (err) {
+      $('join-error').textContent = err.message || 'Could not connect.';
+      $('join-go').disabled = false;
+      $('join-go').textContent = 'Enter Duel';
+      STATE.net = null;
+      return;
+    }
+    $('join-go').disabled = false;
+    $('join-go').textContent = 'Enter Duel';
+    // Wait briefly for HELLO from host to populate opponent, then enter lobby
+    setTimeout(() => { if (!this.opponent) this.enterLobby(); }, 800);
+  },
+
+  /** Host receives HELLO from guest (or guest receives HELLO from host) */
+  onHello(data) {
+    this.opponent = {
+      id: data.id,
+      name: String(data.name || 'Opponent').slice(0, 20),
+      level: data.level | 0 || 1,
+      ready: false,
+    };
+    // Mirror our own HELLO back if we're the host (so guest gets it too)
+    if (STATE.net && STATE.net.role === 'host') {
+      STATE.net.send(MSG.HELLO, {
+        id: STATE.profile.id,
+        name: STATE.profile.name,
+        level: levelFromXp(STATE.profile.xp),
+        version: PROTOCOL_VERSION,
+      });
+    }
+    this.enterLobby();
+  },
+
+  enterLobby() {
+    this.mode = 'multiplayer';
+    this.role = STATE.net.role;
+    this.round = 1;
+    this.totalRounds = GAME.TOTAL_ROUNDS;
+    this.scores = [0, 0];
+    this.myReady = false;
+    this.handModeUsedThisMatch = false;
+    if (this.opponent) this.opponent.ready = false;
+
+    // Populate lobby UI
+    const p = STATE.profile;
+    const prog = xpProgressInLevel(p.xp);
+    $('lobby-p1-avatar').textContent = (p.name[0] || 'P').toUpperCase();
+    $('lobby-p1-name').textContent = p.name;
+    $('lobby-p1-level').textContent = `LVL ${prog.level}`;
+    $('lobby-p1-ready').textContent = 'Not Ready';
+    $('lobby-p1-ready').classList.remove('ready');
+
+    if (this.opponent) {
+      $('lobby-p2-avatar').textContent = (this.opponent.name[0] || 'O').toUpperCase();
+      $('lobby-p2-name').textContent = this.opponent.name;
+      $('lobby-p2-level').textContent = `LVL ${this.opponent.level}`;
+    }
+    $('lobby-p2-ready').textContent = 'Not Ready';
+    $('lobby-p2-ready').classList.remove('ready');
+
+    $('lobby-ready-btn').textContent = "I'm Ready";
+    $('lobby-ready-btn').disabled = false;
+
+    showScreen('lobby');
+  },
+
+  /** User clicks "I'm Ready" in the lobby */
+  setReady() {
+    if (this.myReady) return;
+    this.myReady = true;
+    $('lobby-p1-ready').textContent = 'Ready';
+    $('lobby-p1-ready').classList.add('ready');
+    $('lobby-ready-btn').textContent = 'Ready — waiting…';
+    $('lobby-ready-btn').disabled = true;
+    STATE.net.send(MSG.READY, {});
+    this.maybeStartMatch();
+  },
+
+  /** Receive 'ready' from opponent */
+  onReady() {
+    if (this.opponent) this.opponent.ready = true;
+    $('lobby-p2-ready').textContent = 'Ready';
+    $('lobby-p2-ready').classList.add('ready');
+    this.maybeStartMatch();
+  },
+
+  /** Host only: when both ready, pick prompts and broadcast match start */
+  maybeStartMatch() {
+    if (!this.myReady) return;
+    if (!this.opponent || !this.opponent.ready) return;
+    if (this.role !== 'host') return; // guest waits for host's MATCH_START
+
+    // Pick three distinct prompts
+    const pool = [...ALL_PROMPTS];
+    const chosen = [];
+    for (let i = 0; i < GAME.TOTAL_ROUNDS; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      chosen.push(pool.splice(idx, 1)[0]);
+    }
+    this.prompts = chosen;
+    const startAt = Date.now() + 1500;
+    STATE.net.send(MSG.MATCH_START, { prompts: chosen, startAt });
+    setTimeout(() => this.beginMatchAt(chosen, 0), Math.max(0, startAt - Date.now()));
+  },
+
+  /** Guest receives match start (with prompts and timing from host) */
+  onMatchStart(data) {
+    this.prompts = Array.isArray(data.prompts) ? data.prompts : ALL_PROMPTS.slice(0, GAME.TOTAL_ROUNDS);
+    const wait = Math.max(0, (data.startAt || Date.now()) - Date.now());
+    setTimeout(() => this.beginMatchAt(this.prompts, 0), wait);
+  },
+
+  beginMatchAt(prompts, roundIdx) {
+    this.round = roundIdx + 1;
+    this.prompt = prompts[roundIdx];
+    this.scores = roundIdx === 0 ? [0, 0] : this.scores;
+    drawing.reset();
+    oppGhost.reset();
+    drawing.color = STATE.profile.preferredColor;
+    drawing.size  = STATE.profile.preferredSize;
+    drawing.onStrokePoint = (mode, x, y, color, size, p) => {
+      const payload = (mode === 'start')
+        ? { mode, x, y, color, size, p }
+        : (mode === 'add' ? { mode, x, y, p } : { mode });
+      STATE.net && STATE.net.send(MSG.STROKE, payload);
+    };
+    drawing.onStrokeUndo  = () => STATE.net && STATE.net.send(MSG.STROKE_UNDO, {});
+    drawing.onStrokeClear = () => STATE.net && STATE.net.send(MSG.STROKE_CLEAR, {});
+
+    renderToolbar();
+    this.applyMatchHud('multiplayer');
+    $('match-round-num').textContent = this.round;
+    $('match-total-rounds').textContent = this.totalRounds;
+    $('match-prompt').textContent = this.prompt;
+    $('score-p1').textContent = this.scores[0];
+    $('score-p2').textContent = this.scores[1];
+    $('opp-ghost-name').textContent = (this.opponent && this.opponent.name) || 'OPPONENT';
+
+    // Reset vote/draw state for round
+    this.myVote = null;
+    this.theirVote = null;
+    this.votesRevealed = false;
+    this.myDrawing = null;
+    this.theirDrawing = null;
+
+    showScreen('match');
+    oppGhost.init(); // (re)size after screen is visible
+    setTimeout(() => this.runCountdown(), 350);
+  },
+
+  /** Apply HUD show/hide based on mode */
+  applyMatchHud(mode) {
+    if (mode === 'practice') {
+      $('match-mode-pill').textContent = 'PRACTICE';
+      $('match-mode-pill').classList.remove('mp');
+      $('match-score').style.display = 'none';
+      $('opp-ghost').classList.remove('show');
+      chat.hide();
+      reactions.hide();
+    } else {
+      $('match-mode-pill').textContent = 'DUEL';
+      $('match-mode-pill').classList.add('mp');
+      $('match-score').style.display = '';
+      $('opp-ghost').classList.add('show');
+      chat.show();
+      reactions.show();
+    }
+  },
+
+  /** Synced countdown shown over the match canvas */
+  runCountdown() {
+    const overlay = $('countdown-overlay');
+    const numEl = $('countdown-num');
+    $('countdown-prompt-text').textContent = this.prompt;
+    overlay.classList.add('show');
+    const sequence = ['3', '2', '1', 'Go'];
+    let i = 0;
+    const tick = () => {
+      numEl.textContent = sequence[i];
+      numEl.style.animation = 'none';
+      void numEl.offsetWidth;
+      numEl.style.animation = '';
+      // SFX: ticks beep, Go! is brighter
+      if (sequence[i] === 'Go') audio.countdownGo();
+      else                       audio.countdownTick();
+      i++;
+      if (i < sequence.length) {
+        setTimeout(tick, GAME.COUNTDOWN_STEP_MS);
+      } else {
+        setTimeout(() => {
+          overlay.classList.remove('show');
+          this.beginDrawPhase();
+        }, 750);
+      }
+    };
+    tick();
+  },
+
+  beginDrawPhase() {
+    this.active = true;
+    this.timerEnd = now() + GAME.ROUND_SECONDS * 1000;
+    this.tickTimer();
+  },
+
+  tickTimer() {
+    if (!this.active) return;
+    const remainMs = Math.max(0, this.timerEnd - now());
+    const remainSec = Math.ceil(remainMs / 1000);
+    $('match-timer').textContent = remainSec;
+    $('match-timer').classList.toggle('urgent', remainSec <= 10);
+    if (remainMs <= 0) { this.endDrawPhase(); return; }
+    this.timerInterval = setTimeout(() => this.tickTimer(), 100);
+  },
+
+  endDrawPhase() {
+    if (!this.active) return;
+    this.active = false;
+    if (this.timerInterval) clearTimeout(this.timerInterval);
+    if (drawing.isDown) drawing.onPointerUp();
+    $('match-timer').classList.remove('urgent');
+
+    if (this.mode === 'practice') {
+      this.openPracticeReveal();
+    } else {
+      this.openMultiplayerReveal();
+    }
+  },
+
+  /* ----------- PRACTICE REVEAL & RESULT ------------------- */
+  openPracticeReveal() {
+    $('reveal-prompt').textContent = this.prompt;
+    // Use the left canvas only; hide the right via inline style
+    drawing.exportTo($('reveal-canvas-you'), 800);
+    $('reveal-art-p2').style.display = 'none';
+    $('reveal-art-p1').style.gridColumn = '1 / -1';
+    $('reveal-p1-name').textContent = 'You';
+    $('reveal-p1-badge').style.display = 'none';
+    $('reveal-status').textContent = 'A warmup round. Real duels reveal both drawings side-by-side.';
+    $('reveal-timer').style.display = 'none';
+    $('reveal-continue').style.display = '';
+    showScreen('reveal');
+  },
+
+  completePractice() {
+    STATE.profile.practiceRoundsPlayed++;
+    drawing.continuousDrawSeconds = drawing.drawingTimeMs / 1000;
+    achievements.check('practiceComplete', {
+      colorsUsed: drawing.colorsUsed,
+      continuousDrawSeconds: drawing.continuousDrawSeconds,
+    });
+    const earned = 10;
+    awardXp(earned);
+    $('result-eyebrow').textContent = 'Practice Round Complete';
+    $('result-headline').textContent = 'Nice work.';
+    $('result-headline').className = 'result-headline practice';
+    $('result-sub').textContent = 'A warmup against an empty canvas. Real XP comes from duels.';
+    $('result-xp').textContent = `+${earned}`;
+    $('result-level').textContent = levelFromXp(STATE.profile.xp);
+    showScreen('result');
+  },
+
+  /* ----------- MULTIPLAYER REVEAL & VOTE ------------------ */
+  openMultiplayerReveal() {
+    // Restore both reveal slots in case practice mode hid one
+    $('reveal-art-p2').style.display = '';
+    $('reveal-art-p1').style.gridColumn = '';
+    $('reveal-p1-badge').style.display = '';
+    $('reveal-timer').style.display = '';
+    $('reveal-continue').style.display = 'none';
+
+    $('reveal-prompt').textContent = this.prompt;
+    $('reveal-p1-name').textContent = `${STATE.profile.name} (You)`;
+    $('reveal-p2-name').textContent = (this.opponent && this.opponent.name) || 'Opponent';
+    $('reveal-p1-badge').textContent = 'Pick'; $('reveal-p1-badge').className = 'reveal-art-vote-badge';
+    $('reveal-p2-badge').textContent = 'Pick'; $('reveal-p2-badge').className = 'reveal-art-vote-badge';
+    $('reveal-art-p1').classList.remove('chosen', 'winner', 'locked');
+    $('reveal-art-p2').classList.remove('chosen', 'winner', 'locked');
+
+    // Render OUR drawing into the left reveal canvas
+    drawing.exportTo($('reveal-canvas-you'), 800);
+
+    // Send OUR drawing to opponent so they can render it on their right canvas
+    const dataUrl = (() => {
+      const tmp = document.createElement('canvas');
+      drawing.exportTo(tmp, 800);
+      return tmp.toDataURL('image/png');
+    })();
+    this.myDrawing = dataUrl;
+    STATE.net && STATE.net.send(MSG.REVEAL_DRAW, { dataUrl });
+
+    // Render opponent's drawing if we already have it
+    if (this.theirDrawing) {
+      this.paintOpponentReveal(this.theirDrawing);
+    } else {
+      // Placeholder while we wait
+      const ctx = $('reveal-canvas-opp').getContext('2d');
+      $('reveal-canvas-opp').width = 400; $('reveal-canvas-opp').height = 400;
+      ctx.fillStyle = '#f3f4f6';
+      ctx.fillRect(0, 0, 400, 400);
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '14px Manrope, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Waiting for opponent…', 200, 200);
+    }
+
+    $('reveal-status').textContent = 'Pick the better artwork. Votes flip face-up at once.';
+    showScreen('reveal');
+    this.startVoteTimer();
+  },
+
+  onRevealDraw(data) {
+    if (!data || !data.dataUrl) return;
+    this.theirDrawing = data.dataUrl;
+    if (STATE.screen === 'reveal') this.paintOpponentReveal(data.dataUrl);
+  },
+
+  paintOpponentReveal(dataUrl) {
+    const canvas = $('reveal-canvas-opp');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = dataUrl;
+  },
+
+  startVoteTimer() {
+    this.voteEnd = now() + GAME.VOTE_SECONDS * 1000;
+    if (this.voteInterval) clearTimeout(this.voteInterval);
+    const tick = () => {
+      const remainMs = Math.max(0, this.voteEnd - now());
+      const remainSec = Math.ceil(remainMs / 1000);
+      $('reveal-timer').textContent = remainSec;
+      $('reveal-timer').classList.toggle('urgent', remainSec <= 5);
+      if (remainMs <= 0) {
+        if (!this.myVote) this.castVote('self'); // default if afk
+        this.maybeReveal(true);
+        return;
+      }
+      this.voteInterval = setTimeout(tick, 100);
+    };
+    tick();
+  },
+
+  castVote(choice) {
+    if (this.myVote || this.votesRevealed) return;
+    this.myVote = choice;  // 'self' | 'opponent'
+    audio.voteCast();
+    // Highlight chosen card
+    if (choice === 'self') $('reveal-art-p1').classList.add('chosen');
+    else $('reveal-art-p2').classList.add('chosen');
+    // Update badges (locally — show that I voted, but don't say what)
+    const myBadgeId = choice === 'self' ? 'reveal-p1-badge' : 'reveal-p2-badge';
+    $(myBadgeId).textContent = 'You ✓';
+    $(myBadgeId).classList.add('you-voted');
+    $('reveal-art-p1').classList.add('locked');
+    $('reveal-art-p2').classList.add('locked');
+    STATE.net && STATE.net.send(MSG.VOTE, { choice });
+    this.maybeReveal(false);
+  },
+
+  onVote(data) {
+    if (!data || !data.choice) return;
+    this.theirVote = data.choice;
+    this.maybeReveal(false);
+  },
+
+  /** Reveal votes when both are in (or when timer expires) */
+  maybeReveal(timerExpired) {
+    if (this.votesRevealed) return;
+    if (!timerExpired && (!this.myVote || !this.theirVote)) return;
+    if (timerExpired && !this.theirVote) this.theirVote = 'self'; // default opp choice on timeout
+
+    this.votesRevealed = true;
+    if (this.voteInterval) clearTimeout(this.voteInterval);
+
+    // Determine outcome
+    // 'self' from my POV = vote for p1 (me); 'opponent' = vote for p2 (them)
+    // 'self' from their POV = vote for p2 (them, from my POV); 'opponent' = vote for p1 (me, from my POV)
+    const myVoteTarget   = this.myVote === 'self'   ? 'p1' : 'p2';
+    const theirVoteTarget = this.theirVote === 'self' ? 'p2' : 'p1';
+
+    // Both must agree on the same target for a winner
+    let outcome; // 'me' | 'them' | 'tie'
+    if (myVoteTarget === 'p1' && theirVoteTarget === 'p1') outcome = 'me';
+    else if (myVoteTarget === 'p2' && theirVoteTarget === 'p2') outcome = 'them';
+    else outcome = 'tie';
+
+    this.lastRoundOutcome = outcome;
+
+    // Show "their vote" badge on the target they voted for
+    const theirBadgeId = theirVoteTarget === 'p1' ? 'reveal-p1-badge' : 'reveal-p2-badge';
+    const theirBadgeEl = $(theirBadgeId);
+    const oppName = (this.opponent && this.opponent.name) || 'Opp';
+    const prev = theirBadgeEl.textContent;
+    theirBadgeEl.textContent = (prev.endsWith('✓') ? prev + ' ' : '') + oppName + ' ✓';
+    // If both voted for the same card, escalate badge style
+    if (myVoteTarget === theirVoteTarget) {
+      theirBadgeEl.className = 'reveal-art-vote-badge both-voted';
+      $(myVoteTarget === 'p1' ? 'reveal-p1-badge' : 'reveal-p2-badge').className = 'reveal-art-vote-badge both-voted';
+      // Crown the winner
+      $(`reveal-art-${myVoteTarget}`).classList.add('winner');
+    } else {
+      theirBadgeEl.classList.add('they-voted');
+    }
+
+    // Update score
+    if (outcome === 'me')       this.scores[0]++;
+    else if (outcome === 'them') this.scores[1]++;
+
+    // Persistent stats
+    if (outcome === 'me')       STATE.profile.roundsWon++;
+    else if (outcome === 'them') STATE.profile.roundsLost++;
+    storage.save();
+
+    if (outcome === 'me') achievements.check('roundWon');
+
+    // Round outcome SFX
+    if (outcome === 'me')       audio.roundWon();
+    else if (outcome === 'them') audio.roundLost();
+    // (no sound for tie — let the visual carry it)
+
+    // Show outcome banner briefly, then advance
+    $('reveal-status').innerHTML = outcome === 'me' ? '<b style="color:var(--gold)">Round to you.</b>'
+                                  : outcome === 'them' ? '<b style="color:var(--text-dim)">Round to them.</b>'
+                                  : '<b style="color:var(--accent-3)">Judge\'s Tie — both vote differently.</b>';
+
+    setTimeout(() => this.advanceAfterRound(), GAME.ROUND_BREAK_MS + 600);
+  },
+
+  advanceAfterRound() {
+    // Best of 3 win condition
+    const winThreshold = Math.floor(this.totalRounds / 2) + 1;
+    if (this.scores[0] >= winThreshold || this.scores[1] >= winThreshold || this.round >= this.totalRounds) {
+      this.showMatchResult();
+    } else {
+      this.round++;
+      this.beginMatchAt(this.prompts, this.round - 1);
+    }
+  },
+
+  /* ----------- MATCH RESULT ------------------------------- */
+  showMatchResult() {
+    // Determine match outcome
+    const [me, them] = this.scores;
+    let outcome; // 'win' | 'lose' | 'tie'
+    if (me > them) outcome = 'win';
+    else if (them > me) outcome = 'lose';
+    else outcome = 'tie';
+
+    STATE.profile.matchesPlayed++;
+    let xp = 0;
+    if (outcome === 'win') {
+      STATE.profile.matchesWon++;
+      STATE.profile.currentStreak++;
+      if (STATE.profile.currentStreak > STATE.profile.bestStreak) STATE.profile.bestStreak = STATE.profile.currentStreak;
+      xp = 25 * me + 10 * them + 40; // round wins + round losses + match bonus
+      achievements.check('matchWon', { oppScore: them, oppLevel: this.opponent && this.opponent.level });
+      // airMaster: win a match with hand mode active at any point
+      if (this.handModeUsedThisMatch) achievements.check('matchWonWithHand');
+    } else if (outcome === 'lose') {
+      STATE.profile.matchesLost++;
+      STATE.profile.currentStreak = 0;
+      xp = 25 * me + 10 * them; // no match bonus
+    } else {
+      STATE.profile.ties++;
+      xp = 25 * me + 10 * them + 10;
+    }
+    achievements.check('matchPlayed');
+
+    // Phase 3 stats — hand-mode tracking
+    if (this.handModeUsedThisMatch) {
+      STATE.profile.handModeMatches++;
+      if (outcome === 'win') STATE.profile.handModeWins++;
+    }
+    storage.save();
+
+    awardXp(xp);
+
+    // Match outcome SFX (delayed slightly so it lands with the visual reveal)
+    setTimeout(() => {
+      if (outcome === 'win')       audio.matchWon();
+      else if (outcome === 'lose') audio.matchLost();
+      else                          audio.matchTie();
+    }, 220);
+
+    // Render result screen
+    $('result-eyebrow').textContent = 'Match Complete';
+    if (outcome === 'win') {
+      $('result-headline').textContent = 'Victory.';
+      $('result-headline').className = 'result-headline victory';
+      $('result-sub').textContent = `You defeated ${this.opponent && this.opponent.name || 'your opponent'} ${me}–${them}.`;
+    } else if (outcome === 'lose') {
+      $('result-headline').textContent = 'Defeat.';
+      $('result-headline').className = 'result-headline defeat';
+      $('result-sub').textContent = `${this.opponent && this.opponent.name || 'They'} took it ${them}–${me}. Get them next time.`;
+    } else {
+      $('result-headline').textContent = 'A draw.';
+      $('result-headline').className = 'result-headline draw';
+      $('result-sub').textContent = `Both judges hung. ${me}–${them} after three rounds.`;
+    }
+    $('result-xp').textContent = `+${xp}`;
+    $('result-level').textContent = levelFromXp(STATE.profile.xp);
+    $('result-again').textContent = 'Rematch';
+    showScreen('result');
+  },
+
+  /* ----------- REMATCH ------------------------------------ */
+  requestRematch() {
+    if (this.mode !== 'multiplayer' || !STATE.net) return;
+    STATE.net.send(MSG.REMATCH_REQ, {});
+    toast('Rematch requested — waiting on your opponent…', { duration: 3000 });
+  },
+  onRematchReq() {
+    if (this.mode !== 'multiplayer' || !STATE.net) return;
+    // Auto-accept and return both to lobby
+    STATE.net.send(MSG.REMATCH_OK, {});
+    this.enterLobby();
+  },
+  onRematchOk() {
+    this.enterLobby();
+  },
+
+  /* ----------- OPPONENT LEFT ------------------------------ */
+  onOpponentLeft(kind) {
+    if (this.mode !== 'multiplayer') return;
+    const overlay = $('disconnect-overlay');
+    $('disconnect-icon').textContent = kind === 'clean' ? '👋' : '🔌';
+    $('disconnect-title').textContent = kind === 'clean' ? 'Opponent left the match' : 'Opponent disconnected';
+    $('disconnect-sub').textContent = 'The duel can\'t continue without two players. No XP was lost.';
+    overlay.classList.add('show');
+    this.quitToMenuSoft();
+  },
+
+  /** Tear down network + local match state but stay on overlay/menu */
+  quitToMenuSoft() {
+    if (this.timerInterval) clearTimeout(this.timerInterval);
+    if (this.voteInterval) clearTimeout(this.voteInterval);
+    this.active = false;
+    if (hand && hand.active) hand.disable();
+    drawing.onStrokePoint = null;
+    drawing.onStrokeUndo = null;
+    drawing.onStrokeClear = null;
+    drawing.reset();
+    oppGhost.reset();
+    if (STATE.net) { STATE.net.close(); STATE.net = null; }
+    chat.reset();
+    this.mode = null;
+    this.role = null;
+    this.opponent = null;
+  },
+
+  quitToMenu() {
+    this.quitToMenuSoft();
+    showScreen('menu');
+  },
+};
+
+/* ============================================================
+ * Achievements & Stats panels
+ * ============================================================ */
+function renderAchievementsModal() {
+  const grid = $('ach-grid');
+  grid.innerHTML = '';
+  for (const a of ACHIEVEMENTS) {
+    const unlocked = !!STATE.profile.achievements[a.id];
+    const el = document.createElement('div');
+    el.className = 'ach-item' + (unlocked ? ' unlocked' : '');
+    el.innerHTML = `<div class="ach-icon">${a.icon}</div><div class="ach-info"><div class="ach-name">${a.name}</div><div class="ach-desc">${a.desc}</div></div>`;
+    grid.appendChild(el);
+  }
+}
+function renderStatsModal() {
+  const p = STATE.profile;
+  const prog = xpProgressInLevel(p.xp);
+  $('stats-body').innerHTML = `
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="stat-label">Level</div><div class="stat-value accent">${prog.level}</div></div>
+      <div class="stat-cell"><div class="stat-label">Total XP</div><div class="stat-value">${p.xp}</div></div>
+      <div class="stat-cell"><div class="stat-label">Matches</div><div class="stat-value">${p.matchesPlayed}</div></div>
+      <div class="stat-cell"><div class="stat-label">Wins</div><div class="stat-value gold">${p.matchesWon}</div></div>
+      <div class="stat-cell"><div class="stat-label">Losses</div><div class="stat-value">${p.matchesLost}</div></div>
+      <div class="stat-cell"><div class="stat-label">Ties</div><div class="stat-value">${p.ties}</div></div>
+      <div class="stat-cell"><div class="stat-label">Best Streak</div><div class="stat-value gold">${p.bestStreak}</div></div>
+      <div class="stat-cell"><div class="stat-label">Rounds Won</div><div class="stat-value">${p.roundsWon}</div></div>
+    </div>
+    <p style="margin-top:18px;font-size:12px;color:var(--text-mute);text-align:center;line-height:1.5">Hand-tracking mode lands in the next phase.</p>
+  `;
+}
+
+/* ============================================================
+ * Event wiring
+ * ============================================================ */
+function bindUi() {
+  // Splash auto-advance
+  setTimeout(() => {
+    if (STATE.screen === 'splash') {
+      if (STATE.profile.onboarded) showScreen('menu');
+      else startOnboarding();
+    }
+  }, 2300);
+  $('screen-splash').addEventListener('click', () => {
+    if (STATE.screen !== 'splash') return;
+    if (STATE.profile.onboarded) showScreen('menu');
+    else startOnboarding();
+  });
+
+  $('onboard-next').addEventListener('click', advanceOnboarding);
+  $('onboard-skip').addEventListener('click', finishOnboarding);
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-action]');
+    if (!t || t.disabled) return;
+    const action = t.dataset.action;
+    switch (action) {
+      case 'practice':            match.startPractice(); break;
+      case 'multiplayer-host':    match.startHost(); break;
+      case 'multiplayer-join':    match.showJoin(); break;
+      case 'achievements':        renderAchievementsModal(); openModal('achievements'); break;
+      case 'stats':               renderStatsModal(); openModal('stats'); break;
+      case 'howto':               openModal('howto'); break;
+      case 'profile':
+        $('profile-name-input').value = STATE.profile.name;
+        openModal('profile');
+        setTimeout(() => $('profile-name-input').focus(), 250);
+        break;
+      case 'close-modal':         closeAllModals(); break;
+      case 'back-to-menu':        showScreen('menu'); break;
+      case 'back-to-menu-from-net':
+        if (STATE.net) { STATE.net.close(); STATE.net = null; }
+        showScreen('menu');
+        break;
+      case 'leave-match':
+        if (STATE.net) { STATE.net.close(); STATE.net = null; }
+        match.quitToMenu();
+        break;
+    }
+  });
+
+  $('profile-card-btn').addEventListener('click', () => {
+    $('profile-name-input').value = STATE.profile.name;
+    openModal('profile');
+    setTimeout(() => $('profile-name-input').focus(), 250);
+  });
+
+  $('profile-save').addEventListener('click', () => {
+    const v = $('profile-name-input').value.trim();
+    if (!v) { toast('Name can\'t be blank.', { error: true }); return; }
+    STATE.profile.name = v;
+    storage.save();
+    refreshProfileUi();
+    closeAllModals();
+    toast('Profile saved');
+  });
+  $('profile-name-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') $('profile-save').click();
+  });
+
+  $$('.modal-overlay').forEach(m => {
+    m.addEventListener('click', (e) => { if (e.target === m) closeAllModals(); });
+  });
+
+  // Match toolbar buttons
+  $('tool-undo').addEventListener('click', () => drawing.undo());
+  $('tool-clear').addEventListener('click', () => drawing.clear());
+  $('tool-hand').addEventListener('click', () => hand.toggle());
+  $('tool-quit').addEventListener('click', () => {
+    const msg = match.mode === 'multiplayer'
+      ? 'Quit the match? Your opponent will be notified.'
+      : 'Quit this round? Your drawing will be discarded.';
+    if (confirm(msg)) {
+      if (STATE.net) { STATE.net.close(); STATE.net = null; }
+      match.quitToMenu();
+    }
+  });
+
+  // Audio toggle in profile modal
+  function refreshAudioToggle() {
+    const btn = $('audio-toggle');
+    if (!btn) return;
+    const on = STATE.profile.audioEnabled;
+    btn.textContent = on ? 'On' : 'Off';
+    btn.classList.toggle('on', on);
+  }
+  $('audio-toggle').addEventListener('click', () => {
+    STATE.profile.audioEnabled = !STATE.profile.audioEnabled;
+    storage.save();
+    refreshAudioToggle();
+    if (STATE.profile.audioEnabled) audio.click();
+  });
+  // refresh toggle state every time the profile modal opens
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-action="profile"]');
+    if (t) setTimeout(refreshAudioToggle, 50);
+  });
+  $('profile-card-btn').addEventListener('click', () => setTimeout(refreshAudioToggle, 50));
+
+  // Host screen
+  $('room-copy-btn').addEventListener('click', async () => {
+    const code = $('room-code').textContent;
+    if (!code || code === 'connecting…' || code === '------') return;
+    try {
+      await navigator.clipboard.writeText(code);
+      toast('Code copied to clipboard');
+    } catch (_) {
+      // Fallback for browsers blocking clipboard
+      const r = document.createRange(); r.selectNodeContents($('room-code'));
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+      toast('Code selected — copy with Ctrl/Cmd+C');
+    }
+  });
+
+  // Join screen
+  $('join-go').addEventListener('click', () => match.startJoin($('join-code-input').value));
+  $('join-code-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') match.startJoin($('join-code-input').value);
+  });
+
+  // Lobby
+  $('lobby-ready-btn').addEventListener('click', () => match.setReady());
+
+  // Reveal — clicking on a canvas casts a vote (multiplayer only)
+  $('reveal-art-p1').addEventListener('click', () => { if (match.mode === 'multiplayer') match.castVote('self'); });
+  $('reveal-art-p2').addEventListener('click', () => { if (match.mode === 'multiplayer') match.castVote('opponent'); });
+
+  // Reveal continue (practice only)
+  $('reveal-continue').addEventListener('click', () => {
+    if (match.mode === 'practice') match.completePractice();
+    else showScreen('menu');
+  });
+
+  // Result actions
+  $('result-again').addEventListener('click', () => {
+    if (match.mode === 'practice') match.startPractice();
+    else if (match.mode === 'multiplayer') match.requestRematch();
+  });
+
+  // Disconnect overlay
+  $('disconnect-back').addEventListener('click', () => {
+    $('disconnect-overlay').classList.remove('show');
+    showScreen('menu');
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+    if (STATE.screen === 'match' && match.active) {
+      if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); drawing.undo(); }
+      if (e.key === 'c' || e.key === 'C') { e.preventDefault(); drawing.clear(); }
+    }
+    if (e.key === 'Escape') {
+      closeAllModals();
+      if ($('disconnect-overlay').classList.contains('show')) {
+        $('disconnect-overlay').classList.remove('show');
+        showScreen('menu');
+      }
+    }
+  });
+
+  // Auto-resize opp ghost canvas when window changes
+  window.addEventListener('resize', () => {
+    if (oppGhost.canvas) oppGhost.resize();
+  });
+}
+
+/* ============================================================
+ * Boot
+ * ============================================================ */
+function checkPeerJsReady() {
+  // Called shortly after boot. If PeerJS still hasn't loaded after both
+  // the primary cdnjs script tag AND the jsdelivr/unpkg fallback chain,
+  // gracefully degrade multiplayer UI rather than failing on click.
+  if (typeof Peer !== 'undefined') return;
+
+  const hostBtn = document.querySelector('[data-action="multiplayer-host"]');
+  const joinBtn = document.querySelector('[data-action="multiplayer-join"]');
+  [hostBtn, joinBtn].forEach(btn => {
+    if (!btn) return;
+    btn.disabled = true;
+    btn.style.opacity = '0.55';
+    btn.style.cursor = 'not-allowed';
+    btn.title = 'Multiplayer needs an internet connection to load PeerJS.';
+    // Add an "Offline" pill if not already present
+    if (!btn.querySelector('.menu-btn-pill')) {
+      const pill = document.createElement('div');
+      pill.className = 'menu-btn-pill';
+      pill.textContent = 'Offline';
+      pill.style.background = 'rgba(255,107,107,.18)';
+      pill.style.borderColor = 'rgba(255,107,107,.4)';
+      pill.style.color = '#ff9b9b';
+      btn.appendChild(pill);
+    }
+  });
+  toast('Multiplayer offline — PeerJS couldn\'t load. Check your connection or extensions.', { error: true, duration: 5000 });
+}
+
+function boot() {
+  STATE.profile = storage.load();
+  drawing.init();
+  oppGhost.init();
+  drawing.color = STATE.profile.preferredColor;
+  drawing.size  = STATE.profile.preferredSize;
+  renderToolbar();
+  refreshProfileUi();
+  chat.init();
+  reactions.init();
+  hand.init();
+  bindUi();
+  // Lazy-load perfect-freehand in the background. Quadratic strokes work
+  // immediately; once freehand resolves, the next redraw produces variable-width.
+  setTimeout(() => freehand.load(), 800);
+  // Give the CDN fallback chain a moment to resolve before deciding it failed.
+  setTimeout(checkPeerJsReady, 2500);
+}
+boot();
+</script>
+</body>
+</html>
