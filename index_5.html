@@ -423,6 +423,35 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   .vs-divider{font-size:28px}
   .room-code{font-size:18px;padding:12px 18px;min-width:160px}
 }
+
+/* ---- White drawing surface (enables eraser) ---- */
+#canvas-main{background:#ffffff}
+
+/* ---- Quickplay screen ---- */
+#screen-quickplay .screen-content{align-items:center;justify-content:center}
+.quickplay-elapsed{font-size:11px;color:var(--text-mute);letter-spacing:0.18em;margin-top:6px}
+
+/* ---- Eraser tool ---- */
+.tool-btn-icon.tool-eraser.active{background:rgba(255,107,107,.18);border-color:rgba(255,107,107,.5);color:var(--warn)}
+
+/* ---- AI Judge reveal badge ---- */
+.reveal-ai-judge{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:100px;background:rgba(138,180,255,.07);border:1px solid rgba(138,180,255,.18);font-size:13px;color:var(--text-mute);transition:all .5s var(--ease)}
+.reveal-ai-judge.fired{background:rgba(138,180,255,.18);border-color:rgba(138,180,255,.45);color:var(--text)}
+.reveal-ai-judge-icon{font-size:18px}
+.reveal-ai-verdict{font-weight:700;color:var(--accent)}
+
+/* ---- Onboarding interactive vote demo ---- */
+.onboard-demo{margin:16px 0 4px}
+.onboard-demo-prompt{font-size:12px;color:var(--text-mute);margin-bottom:12px;letter-spacing:0.06em}
+.onboard-demo-prompt em{color:var(--accent);font-style:normal;font-weight:700}
+.onboard-demo-canvases{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px}
+.onboard-demo-art{border-radius:12px;overflow:hidden;cursor:pointer;border:2px solid var(--glass-border);background:#fff;transition:all .35s var(--ease);transform:scale(1)}
+.onboard-demo-art:hover{transform:scale(1.03);border-color:rgba(138,180,255,.55)}
+.onboard-demo-art.chosen{border-color:var(--accent);box-shadow:0 0 0 3px rgba(138,180,255,.22)}
+.onboard-demo-art.winner{border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,209,102,.28),0 8px 28px rgba(255,209,102,.2);transform:scale(1.04)}
+.onboard-demo-art canvas{width:100%;display:block}
+.onboard-demo-art-label{padding:7px 11px;font-size:11px;font-weight:700;background:rgba(6,8,15,.72);color:var(--text)}
+.onboard-demo-hint{font-size:12px;color:var(--text-dim);text-align:center;min-height:18px;transition:color .3s var(--ease)}
 </style>
 </head>
 <body>
@@ -442,6 +471,21 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       <p class="onboard-text" id="onboard-text">A real-time drawing battle. You and an opponent get the same prompt, sixty seconds, and a blank canvas. Best of three wins.</p>
       <div class="onboard-progress" id="onboard-dots">
         <div class="onboard-dot active"></div><div class="onboard-dot"></div><div class="onboard-dot"></div>
+      </div>
+      <!-- Interactive vote demo (only shown on slide 3) -->
+      <div class="onboard-demo" id="onboard-demo" style="display:none">
+        <div class="onboard-demo-prompt">The prompt was: <em>Cat</em> — tap the better drawing</div>
+        <div class="onboard-demo-canvases">
+          <div class="onboard-demo-art" id="demo-art-left">
+            <canvas id="demo-canvas-left" width="200" height="160"></canvas>
+            <div class="onboard-demo-art-label">Alex</div>
+          </div>
+          <div class="onboard-demo-art" id="demo-art-right">
+            <canvas id="demo-canvas-right" width="200" height="160"></canvas>
+            <div class="onboard-demo-art-label">Sam</div>
+          </div>
+        </div>
+        <div class="onboard-demo-hint" id="demo-hint">Pick the drawing you think is better →</div>
       </div>
       <div class="onboard-actions">
         <button class="btn btn-ghost" id="onboard-skip">Skip</button>
@@ -483,6 +527,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       <button class="menu-btn glass" data-action="multiplayer-join">
         <div class="menu-btn-icon">🎯</div>
         <div class="menu-btn-text"><div class="menu-btn-title">Enter the Arena</div><div class="menu-btn-sub">Join a friend's code</div></div>
+      </button>
+      <button class="menu-btn glass" data-action="quickplay" id="quickplay-btn">
+        <div class="menu-btn-icon">⚡</div>
+        <div class="menu-btn-text"><div class="menu-btn-title">Quick Match</div><div class="menu-btn-sub">Find an opponent instantly — no code needed</div></div>
+        <div class="menu-btn-pill">NEW</div>
       </button>
     </div>
     <div class="menu-footer">
@@ -530,6 +579,23 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       <div style="margin-top:22px;display:flex;gap:10px;justify-content:center">
         <button class="btn" data-action="back-to-menu-from-net">← Back</button>
         <button class="btn btn-primary" id="join-go">Enter Duel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICKPLAY (auto-matchmaking) -->
+<div class="screen" id="screen-quickplay">
+  <div class="screen-content lobby-content">
+    <div class="lobby-card glass-strong">
+      <div class="lobby-eyebrow">Quick Match</div>
+      <h2 class="lobby-title">Finding an Opponent</h2>
+      <p class="lobby-sub">Scanning the arena for a worthy challenger. This usually takes under 30 seconds.</p>
+      <div class="spinner"></div>
+      <div class="waiting-status"><span class="pulse-dot"></span><span id="quickplay-status-text">Scanning for challengers…</span></div>
+      <div class="quickplay-elapsed" id="quickplay-elapsed">0s</div>
+      <div style="margin-top:28px">
+        <button class="btn btn-danger" id="quickplay-cancel">Cancel</button>
       </div>
     </div>
   </div>
@@ -621,6 +687,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       <div class="tool-sizes" id="tool-sizes"></div>
     </div>
     <div class="tool-group">
+      <button class="tool-btn-icon tool-eraser" id="tool-eraser" title="Eraser (E)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l9-9 8 8-2 2"/><path d="M6 17.5l5-5"/></svg>
+      </button>
       <button class="tool-btn-icon tool-hand" id="tool-hand" title="Hand tracking mode (camera)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
       </button>
@@ -690,6 +759,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
     <div class="reveal-bottom">
       <div class="reveal-status" id="reveal-status">Pick the better artwork. You can vote for yourself — but be honest…</div>
       <div class="match-timer glass" id="reveal-timer" style="margin:0">15</div>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:10px">
+      <div class="reveal-ai-judge" id="reveal-ai-judge">
+        <div class="reveal-ai-judge-icon">🤖</div>
+        <div>AI Judge: <span class="reveal-ai-verdict" id="reveal-ai-verdict">analysing…</span></div>
+      </div>
     </div>
     <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
       <button class="btn btn-primary" id="reveal-continue" style="display:none">Continue</button>
@@ -1316,8 +1391,122 @@ function renderOnboardSlide(i) {
   $('onboard-title').innerHTML = s.title;
   $('onboard-text').textContent = s.text;
   $$('#onboard-dots .onboard-dot').forEach((d, idx) => d.classList.toggle('active', idx === i));
-  $('onboard-next').textContent = (i === ONBOARD_SLIDES.length - 1) ? 'Begin' : 'Next';
+  const isLast = (i === ONBOARD_SLIDES.length - 1);
+  $('onboard-next').textContent = isLast ? 'Begin' : 'Next';
+
+  // Slide 3 (index 2): interactive vote demo replaces body text
+  $('onboard-demo').style.display  = isLast ? '' : 'none';
+  $('onboard-text').style.display  = isLast ? 'none' : '';
+  if (isLast) {
+    $('onboard-next').disabled = true; // unlock after player votes
+    onboardDemo.init();
+  } else {
+    $('onboard-next').disabled = false;
+  }
 }
+/* ============================================================
+ * Onboarding interactive vote demo
+ * Draws two simple cat sketches and lets the player tap to vote,
+ * demonstrating the mutual-judgment mechanic before their first duel.
+ * ============================================================ */
+const onboardDemo = {
+  voted: false,
+
+  init() {
+    this.voted = false;
+    $('demo-hint').textContent = 'Pick the drawing you think is better →';
+    $('demo-art-left').classList.remove('chosen', 'winner');
+    $('demo-art-right').classList.remove('chosen', 'winner');
+    this._drawLeft($('demo-canvas-left'));
+    this._drawRight($('demo-canvas-right'));
+
+    // Replace listener nodes to avoid stacking duplicate handlers
+    const L = $('demo-art-left');
+    const R = $('demo-art-right');
+    L.replaceWith(L.cloneNode(true));
+    R.replaceWith(R.cloneNode(true));
+    $('demo-art-left').addEventListener('click',  () => this.vote('left'));
+    $('demo-art-right').addEventListener('click', () => this.vote('right'));
+  },
+
+  vote(side) {
+    if (this.voted) return;
+    this.voted = true;
+    audio.voteCast();
+    $(`demo-art-${side}`).classList.add('chosen');
+    $('demo-hint').textContent = 'Both votes flipping…';
+
+    setTimeout(() => {
+      // The chosen drawing always wins — reward any choice, the point is the mechanic
+      $(`demo-art-${side}`).classList.remove('chosen');
+      $(`demo-art-${side}`).classList.add('winner');
+      audio.roundWon();
+      $('demo-hint').textContent = 'That\'s it — votes reveal at once. Best of three wins the duel.';
+      // Unlock Begin button, auto-advance after 2.2 s
+      $('onboard-next').disabled = false;
+      setTimeout(() => {
+        if (STATE.onboardStep === ONBOARD_SLIDES.length - 1) finishOnboarding();
+      }, 2200);
+    }, 900);
+  },
+
+  _drawLeft(canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = 200; canvas.height = 160;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 200, 160);
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 2.8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // Head
+    ctx.beginPath(); ctx.arc(100, 96, 52, 0, Math.PI * 2); ctx.stroke();
+    // Ears
+    ctx.beginPath(); ctx.moveTo(58, 58); ctx.lineTo(44, 28); ctx.lineTo(78, 50); ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(142, 58); ctx.lineTo(156, 28); ctx.lineTo(122, 50); ctx.closePath(); ctx.stroke();
+    // Eyes
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.arc(82, 92, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(118, 92, 7, 0, Math.PI * 2); ctx.fill();
+    // Nose
+    ctx.fillStyle = '#ff7ab6';
+    ctx.beginPath(); ctx.arc(100, 107, 4.5, 0, Math.PI * 2); ctx.fill();
+    // Mouth
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(88, 111, 10, 0.1, Math.PI - 0.1); ctx.stroke();
+    ctx.beginPath(); ctx.arc(112, 111, 10, 0.1, Math.PI - 0.1); ctx.stroke();
+  },
+
+  _drawRight(canvas) {
+    const ctx = canvas.getContext('2d');
+    canvas.width = 200; canvas.height = 160;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 200, 160);
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // Head (oval)
+    ctx.beginPath(); ctx.ellipse(100, 96, 56, 50, 0, 0, Math.PI * 2); ctx.stroke();
+    // Ears with color fill
+    ctx.fillStyle = '#ffd166';
+    ctx.beginPath(); ctx.moveTo(52, 62); ctx.lineTo(37, 26); ctx.lineTo(78, 54); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(148, 62); ctx.lineTo(163, 26); ctx.lineTo(122, 54); ctx.closePath(); ctx.fill(); ctx.stroke();
+    // Colored eyes
+    ctx.fillStyle = '#7af0c1';
+    ctx.beginPath(); ctx.ellipse(82, 90, 11, 8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.ellipse(82, 90, 4, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#7af0c1';
+    ctx.beginPath(); ctx.ellipse(118, 90, 11, 8, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.ellipse(118, 90, 4, 7, 0, 0, Math.PI * 2); ctx.fill();
+    // Nose triangle
+    ctx.fillStyle = '#ff7ab6';
+    ctx.beginPath(); ctx.moveTo(100, 104); ctx.lineTo(94, 112); ctx.lineTo(106, 112); ctx.closePath(); ctx.fill();
+    // Whiskers
+    ctx.strokeStyle = '#999'; ctx.lineWidth = 1.4;
+    [[90,110,40,103],[90,114,40,114],[90,118,40,125],[110,110,160,103],[110,114,160,114],[110,118,160,125]]
+      .forEach(([x1,y1,x2,y2]) => { ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); });
+    // Smile
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(88, 116, 10, 0.1, Math.PI - 0.1); ctx.stroke();
+    ctx.beginPath(); ctx.arc(112, 116, 10, 0.1, Math.PI - 0.1); ctx.stroke();
+  },
+};
+
 function startOnboarding()   { STATE.onboardStep = 0; renderOnboardSlide(0); showScreen('onboard'); }
 function advanceOnboarding() {
   STATE.onboardStep++;
@@ -1351,6 +1540,7 @@ const drawing = {
 
   color: '#8ab4ff',
   size: 8,
+  isEraser: false,
   strokes: [],
   currentStroke: null,
   isDown: false,
@@ -1405,6 +1595,7 @@ const drawing = {
     this.strokes = [];
     this.currentStroke = null;
     this.isDown = false;
+    this.isEraser = false;
     this.colorsUsed = new Set();
     this.drawingTimeMs = 0;
     this.continuousDrawSeconds = 0;
@@ -1465,13 +1656,14 @@ const drawing = {
   /* Internal — shared by both pointer and hand input paths */
   _beginStroke(p) {
     this.isDown = true;
-    this.currentStroke = { color: this.color, size: this.size, points: [p] };
-    this.colorsUsed.add(this.color);
+    const strokeColor = this.isEraser ? '#ffffff' : this.color;
+    this.currentStroke = { color: strokeColor, size: this.isEraser ? Math.max(this.size * 1.5, 16) : this.size, points: [p], eraser: this.isEraser };
+    if (!this.isEraser) this.colorsUsed.add(this.color);
     this.lastDrawTickMs = now();
     this.drawCursor(p.x, p.y);
     this.renderActiveIncremental();
     if (this.onStrokePoint) {
-      this.onStrokePoint('start', p.x / this.w, p.y / this.h, this.color, this.size, p.p);
+      this.onStrokePoint('start', p.x / this.w, p.y / this.h, strokeColor, this.currentStroke.size, p.p);
       this.lastSendTs = now();
     }
   },
@@ -1548,8 +1740,9 @@ const drawing = {
     if (this.onStrokeClear) this.onStrokeClear();
   },
 
-  setColor(c) { this.color = c; STATE.profile.preferredColor = c; storage.save(); renderToolbar(); },
+  setColor(c) { this.color = c; this.isEraser = false; STATE.profile.preferredColor = c; storage.save(); renderToolbar(); },
   setSize(s)  { this.size  = s; STATE.profile.preferredSize  = s; storage.save(); renderToolbar(); },
+  toggleEraser() { this.isEraser = !this.isEraser; renderToolbar(); },
 
   exportTo(targetCanvas, sizePx = 800) {
     const tctx = targetCanvas.getContext('2d');
@@ -1746,6 +1939,9 @@ function renderToolbar() {
     d.addEventListener('click', () => drawing.setSize(s));
     sizeEl.appendChild(d);
   }
+  /* Sync eraser button active state */
+  const eraserBtn = $('tool-eraser');
+  if (eraserBtn) eraserBtn.classList.toggle('active', drawing.isEraser);
 }
 
 /* ============================================================
@@ -1770,11 +1966,12 @@ class DuelNet {
     this.onCloseCallback = null;
   }
 
-  /** Host a room. Resolves with the room code (= our peer id). */
-  async host() {
+  /** Host a room. Resolves with the room code (= our peer id).
+   *  Pass a peerId to host at a specific known ID (used by quickplay matchmaking). */
+  async host(peerId = undefined) {
     return new Promise((resolve, reject) => {
       if (typeof Peer === 'undefined') return reject(new Error('PeerJS not loaded'));
-      this.peer = new Peer();
+      this.peer = peerId !== undefined ? new Peer(peerId) : new Peer();
       this.role = 'host';
       const timer = setTimeout(() => reject(new Error('Could not reach signaling broker. Check your connection.')), 12_000);
 
@@ -2352,6 +2549,179 @@ const hand = {
 };
 
 /* ============================================================
+ * Quickplay — serverless slot-based matchmaking
+ *
+ * Divides time into 30-second "slots". Everyone searching in the
+ * same slot tries to meet at a shared deterministic PeerJS ID.
+ *   • First try: join as guest (maybe someone is already hosting)
+ *   • If no host: become the host at that ID and wait
+ *   • If ID conflict (race): retry joining immediately, then try next slot
+ * No backend required — PeerJS public broker handles signaling.
+ * ============================================================ */
+const quickplay = {
+  SLOT_MS: 30_000,
+  searching: false,
+  retryTimer: null,
+  elapsedTimer: null,
+  elapsedSec: 0,
+
+  slotId(offset = 0) {
+    const base = Math.floor(Date.now() / this.SLOT_MS) + offset;
+    return `aether-qp-${base.toString(36)}`;
+  },
+
+  start() {
+    if (typeof Peer === 'undefined') {
+      toast('Multiplayer is offline — check your connection.', { error: true, duration: 3500 });
+      return;
+    }
+    this.searching = true;
+    this.elapsedSec = 0;
+    showScreen('quickplay');
+    this._startElapsed();
+    this._tryMatch(this.slotId());
+  },
+
+  _startElapsed() {
+    clearInterval(this.elapsedTimer);
+    this.elapsedTimer = setInterval(() => {
+      this.elapsedSec++;
+      const el = $('quickplay-elapsed');
+      if (el) el.textContent = `${this.elapsedSec}s`;
+    }, 1000);
+  },
+
+  _updateStatus(text) {
+    const el = $('quickplay-status-text');
+    if (el) el.textContent = text;
+  },
+
+  async _tryMatch(slotId) {
+    if (!this.searching) return;
+
+    /* 1 — Try joining an existing host at this slot */
+    this._updateStatus('Scanning for a challenger…');
+    try {
+      const net = new DuelNet();
+      await net.join(slotId);
+      if (!this.searching) { net.close(); return; }
+      STATE.net = net;
+      wireNet(net);
+      net.send(MSG.HELLO, {
+        id: STATE.profile.id,
+        name: STATE.profile.name,
+        level: levelFromXp(STATE.profile.xp),
+        version: PROTOCOL_VERSION,
+      });
+      this.searching = false;
+      clearInterval(this.elapsedTimer);
+      /* match.onHello → enterLobby handles the rest; fallback if HELLO never arrives */
+      setTimeout(() => { if (match.mode !== 'multiplayer') match.enterLobby(); }, 900);
+      return;
+    } catch (_) { /* no host at this slot yet */ }
+
+    if (!this.searching) return;
+
+    /* 2 — Try hosting this slot */
+    this._updateStatus('Opening an arena…');
+    try {
+      const net = new DuelNet();
+      await net.host(slotId);
+      if (!this.searching) { net.close(); return; }
+      STATE.net = net;
+      wireNet(net);
+      this._updateStatus('Waiting for a challenger…');
+
+      /* When a guest connects and the data channel opens, stop searching */
+      net.onOpen(() => {
+        this.searching = false;
+        clearInterval(this.elapsedTimer);
+        clearTimeout(this.retryTimer);
+        /* Host mirrors its own HELLO in match.onHello after receiving guest HELLO */
+      });
+
+      /* If slot window expires before anyone joins, roll to next slot */
+      const msLeft = Math.max(8000, this.SLOT_MS - (Date.now() % this.SLOT_MS));
+      this.retryTimer = setTimeout(() => {
+        if (!this.searching) return;
+        net.close();
+        STATE.net = null;
+        this._tryMatch(this.slotId(1)); // next slot
+      }, msLeft + 600);
+      return;
+    } catch (_) { /* ID conflict — someone just claimed host */ }
+
+    if (!this.searching) return;
+
+    /* 3 — ID was taken mid-race; try joining as guest immediately */
+    this._updateStatus('Joining existing arena…');
+    try {
+      const net2 = new DuelNet();
+      await net2.join(slotId);
+      if (!this.searching) { net2.close(); return; }
+      STATE.net = net2;
+      wireNet(net2);
+      net2.send(MSG.HELLO, {
+        id: STATE.profile.id,
+        name: STATE.profile.name,
+        level: levelFromXp(STATE.profile.xp),
+        version: PROTOCOL_VERSION,
+      });
+      this.searching = false;
+      clearInterval(this.elapsedTimer);
+      setTimeout(() => { if (match.mode !== 'multiplayer') match.enterLobby(); }, 900);
+    } catch (_) {
+      /* All attempts failed — wait and retry */
+      if (this.searching) {
+        this.retryTimer = setTimeout(() => this._tryMatch(this.slotId()), 3500);
+      }
+    }
+  },
+
+  cancel() {
+    this.searching = false;
+    clearTimeout(this.retryTimer);
+    clearInterval(this.elapsedTimer);
+    if (STATE.net) { STATE.net.close(); STATE.net = null; }
+    showScreen('menu');
+  },
+};
+
+/* ============================================================
+ * AI Judge — heuristic 3rd vote that breaks ties
+ *
+ * Scores each drawing from captured stroke data at round end:
+ *   strokeCount  — effort/detail proxy (capped to avoid spam bonus)
+ *   colorDiversity — intentional palette use
+ *   pointDensity — smoothness / line complexity
+ * If the difference is below the confidence threshold the AI abstains.
+ * ============================================================ */
+const aiJudge = {
+  scoreStrokes(strokes) {
+    if (!strokes || strokes.length === 0) return 0;
+    const real = strokes.filter(s => s.color !== '#ffffff'); // exclude eraser strokes
+    if (real.length === 0) return 0;
+    const strokeCount   = Math.min(real.length, 50);
+    const colorSet      = new Set(real.map(s => s.color).filter(Boolean));
+    const colorDiv      = colorSet.size;
+    const totalPoints   = Math.min(real.reduce((sum, s) => sum + (s.points ? s.points.length : 0), 0), 2500);
+    return strokeCount * 3 + colorDiv * 9 + totalPoints / 28;
+  },
+
+  /** Returns 'self' (vote for me), 'opponent' (vote for them), or null (abstain). */
+  judge(myStrokes, theirStrokes) {
+    const ms = this.scoreStrokes(myStrokes);
+    const ts = this.scoreStrokes(theirStrokes);
+    const total = ms + ts;
+    if (total < 6) return null;                          // both drew nothing
+    const diff = Math.abs(ms - ts);
+    const threshold = Math.max(6, total * 0.09);        // need ≥9% lead to commit
+    if (diff < threshold) return null;                   // too close — abstain
+    return ms >= ts ? 'self' : 'opponent';
+  },
+};
+
+/* ============================================================
  * Match state machine
  * Supports 'practice' (Phase 1) and 'multiplayer' (Phase 2) modes.
  * ============================================================ */
@@ -2718,12 +3088,20 @@ const match = {
 
   /* ----------- MULTIPLAYER REVEAL & VOTE ------------------ */
   openMultiplayerReveal() {
+    // Capture stroke snapshots NOW for AI judge (before any reset/clear)
+    this._myStrokesForAI    = drawing.strokes.map(s => ({ color: s.color, points: s.points }));
+    this._theirStrokesForAI = oppGhost.strokes.map(s => ({ color: s.color, points: s.points }));
+
     // Restore both reveal slots in case practice mode hid one
     $('reveal-art-p2').style.display = '';
     $('reveal-art-p1').style.gridColumn = '';
     $('reveal-p1-badge').style.display = '';
     $('reveal-timer').style.display = '';
     $('reveal-continue').style.display = 'none';
+
+    // Reset AI judge badge
+    const aiEl = $('reveal-ai-judge');
+    if (aiEl) { aiEl.classList.remove('fired'); $('reveal-ai-verdict').textContent = 'analysing…'; }
 
     $('reveal-prompt').textContent = this.prompt;
     $('reveal-p1-name').textContent = `${STATE.profile.name} (You)`;
@@ -2845,6 +3223,30 @@ const match = {
     else if (myVoteTarget === 'p2' && theirVoteTarget === 'p2') outcome = 'them';
     else outcome = 'tie';
 
+    // === AI Judge: breaks ties when humans vote differently ===
+    let aiUsed = false;
+    if (outcome === 'tie') {
+      const aiVote = aiJudge.judge(this._myStrokesForAI || [], this._theirStrokesForAI || []);
+      const oppName = (this.opponent && this.opponent.name) || 'Opponent';
+      const aiEl = $('reveal-ai-judge');
+      const aiVerdict = $('reveal-ai-verdict');
+      if (aiVote === 'self') {
+        outcome = 'me';
+        aiUsed = true;
+        if (aiEl)     aiEl.classList.add('fired');
+        if (aiVerdict) aiVerdict.textContent = `${STATE.profile.name}`;
+      } else if (aiVote === 'opponent') {
+        outcome = 'them';
+        aiUsed = true;
+        if (aiEl)     aiEl.classList.add('fired');
+        if (aiVerdict) aiVerdict.textContent = oppName;
+      } else {
+        // AI abstains — true tie
+        if (aiEl)     aiEl.classList.add('fired');
+        if (aiVerdict) aiVerdict.textContent = 'Too close to call';
+      }
+    }
+
     this.lastRoundOutcome = outcome;
 
     // Show "their vote" badge on the target they voted for
@@ -2880,9 +3282,11 @@ const match = {
     // (no sound for tie — let the visual carry it)
 
     // Show outcome banner briefly, then advance
-    $('reveal-status').innerHTML = outcome === 'me' ? '<b style="color:var(--gold)">Round to you.</b>'
-                                  : outcome === 'them' ? '<b style="color:var(--text-dim)">Round to them.</b>'
-                                  : '<b style="color:var(--accent-3)">Judge\'s Tie — both vote differently.</b>';
+    $('reveal-status').innerHTML = outcome === 'me'
+      ? `<b style="color:var(--gold)">${aiUsed ? '🤖 AI awarded the round to you.' : 'Round to you.'}</b>`
+      : outcome === 'them'
+      ? `<b style="color:var(--text-dim)">${aiUsed ? '🤖 AI awarded the round to your opponent.' : 'Round to them.'}</b>`
+      : '<b style="color:var(--accent-3)">True Tie — AI couldn\'t split it either.</b>';
 
     setTimeout(() => this.advanceAfterRound(), GAME.ROUND_BREAK_MS + 600);
   },
@@ -3075,6 +3479,7 @@ function bindUi() {
       case 'practice':            match.startPractice(); break;
       case 'multiplayer-host':    match.startHost(); break;
       case 'multiplayer-join':    match.showJoin(); break;
+      case 'quickplay':           quickplay.start(); break;
       case 'achievements':        renderAchievementsModal(); openModal('achievements'); break;
       case 'stats':               renderStatsModal(); openModal('stats'); break;
       case 'howto':               openModal('howto'); break;
@@ -3086,7 +3491,7 @@ function bindUi() {
       case 'close-modal':         closeAllModals(); break;
       case 'back-to-menu':        showScreen('menu'); break;
       case 'back-to-menu-from-net':
-        if (STATE.net) { STATE.net.close(); STATE.net = null; }
+        quickplay.cancel();
         showScreen('menu');
         break;
       case 'leave-match':
@@ -3119,7 +3524,11 @@ function bindUi() {
     m.addEventListener('click', (e) => { if (e.target === m) closeAllModals(); });
   });
 
+  // Quickplay cancel
+  $('quickplay-cancel').addEventListener('click', () => quickplay.cancel());
+
   // Match toolbar buttons
+  $('tool-eraser').addEventListener('click', () => drawing.toggleEraser());
   $('tool-undo').addEventListener('click', () => drawing.undo());
   $('tool-clear').addEventListener('click', () => drawing.clear());
   $('tool-hand').addEventListener('click', () => hand.toggle());
@@ -3207,6 +3616,7 @@ function bindUi() {
     if (STATE.screen === 'match' && match.active) {
       if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); drawing.undo(); }
       if (e.key === 'c' || e.key === 'C') { e.preventDefault(); drawing.clear(); }
+      if (e.key === 'e' || e.key === 'E') { e.preventDefault(); drawing.toggleEraser(); }
     }
     if (e.key === 'Escape') {
       closeAllModals();
@@ -3232,9 +3642,10 @@ function checkPeerJsReady() {
   // gracefully degrade multiplayer UI rather than failing on click.
   if (typeof Peer !== 'undefined') return;
 
-  const hostBtn = document.querySelector('[data-action="multiplayer-host"]');
-  const joinBtn = document.querySelector('[data-action="multiplayer-join"]');
-  [hostBtn, joinBtn].forEach(btn => {
+  const hostBtn  = document.querySelector('[data-action="multiplayer-host"]');
+  const joinBtn  = document.querySelector('[data-action="multiplayer-join"]');
+  const quickBtn = document.querySelector('[data-action="quickplay"]');
+  [hostBtn, joinBtn, quickBtn].forEach(btn => {
     if (!btn) return;
     btn.disabled = true;
     btn.style.opacity = '0.55';
