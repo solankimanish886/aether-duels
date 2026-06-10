@@ -107,6 +107,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 
 .menu-footer{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .menu-footer .btn-ghost{display:inline-flex;align-items:center;gap:8px}
+.daily-challenge{display:flex;align-items:center;gap:14px;max-width:720px;width:100%;margin:0 auto 6px;padding:14px 20px;border-radius:16px;cursor:default}
+.daily-header{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);font-weight:700;white-space:nowrap}
+.daily-label{flex:1;font-size:14px;color:var(--text)}
+.daily-bonus{font-size:13px;font-weight:700;color:var(--gold);white-space:nowrap}
+.daily-check{font-size:13px;font-weight:700;color:#4ade80;white-space:nowrap}
 .badge{display:inline-flex;align-items:center;justify-content:center;background:var(--glass-bg-strong);border:1px solid var(--glass-border);color:var(--accent);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
 
 #screen-match{background:var(--bg-0)}
@@ -130,7 +135,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .canvas-stage #canvas-cursor{pointer-events:none}
 .drawing-frame{position:absolute;inset:0;pointer-events:none;z-index:10;border:2px solid rgba(138,180,255,.3);box-shadow:inset 0 0 0 1px rgba(138,180,255,.06),inset 0 0 80px rgba(138,180,255,.04)}
 
-.match-toolbar{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:12;padding:14px 12px;display:flex;flex-direction:column;gap:14px;border-radius:18px}
+.match-toolbar{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:12;padding:14px 12px;display:flex;flex-direction:column;gap:14px;border-radius:18px;transition:opacity .2s ease,transform .2s ease}
+.match-toolbar.is-drawing{opacity:.1;transform:translateY(-50%) translateX(-76%);pointer-events:none}
 .tool-group{display:flex;flex-direction:column;gap:8px;align-items:center}
 .tool-group-label{font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-mute);margin-bottom:2px}
 .tool-swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
@@ -227,7 +233,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .levelup-center{text-align:center;animation:levelup 2.2s var(--ease-out-quart)}
 .levelup-eyebrow{font-size:14px;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;text-shadow:0 0 24px rgba(255,209,102,.6)}
 .levelup-num{font-family:'Instrument Serif',serif;font-size:clamp(120px,18vw,220px);line-height:1;color:var(--gold);text-shadow:0 0 60px rgba(255,209,102,.8);font-style:italic}
+.levelup-unlock{font-size:16px;color:var(--gold);margin-top:14px;letter-spacing:0.05em;opacity:0.9;animation:levelup 2.2s var(--ease-out-quart)}
 @keyframes levelup{0%{transform:scale(.4);opacity:0;filter:blur(20px)}25%{transform:scale(1.1);opacity:1;filter:blur(0)}75%{transform:scale(1);opacity:1}100%{transform:scale(.95);opacity:0}}
+
+/* Match screen HUD — dark glass so white text is readable over white canvas */
+#screen-match .match-hud-top .glass,
+#screen-match .match-prompt-banner.glass,
+#screen-match .match-toolbar.glass,
+#screen-match .quick-reactions.glass,
+#screen-match .match-chat.glass{background:rgba(6,8,15,0.62);border-color:rgba(255,255,255,0.18)}
 
 /* ============================================================
  * Phase 2 — multiplayer additions
@@ -534,6 +548,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
         <div class="menu-btn-pill">NEW</div>
       </button>
     </div>
+    <div class="daily-challenge glass" id="daily-challenge-card">
+      <div class="daily-header">Daily Challenge</div>
+      <div class="daily-label" id="daily-label">Win any duel today</div>
+      <div class="daily-bonus" id="daily-bonus">+50 XP</div>
+      <div class="daily-check" id="daily-check" style="display:none">✓ Complete!</div>
+    </div>
     <div class="menu-footer">
       <button class="btn btn-ghost" data-action="achievements"><span>🏆</span> Achievements <span class="badge" id="achievement-count">0/8</span></button>
       <button class="btn btn-ghost" data-action="stats"><span>📊</span> Stats</button>
@@ -558,6 +578,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
         </button>
+        <button class="room-copy" id="room-share-btn" title="Share invite">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
       </div>
       <div class="waiting-status"><span class="pulse-dot"></span><span id="host-status-text">Waiting for opponent…</span></div>
       <div style="margin-top:28px;display:flex;gap:10px;justify-content:center">
@@ -574,7 +600,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       <div class="lobby-eyebrow">Enter the Arena</div>
       <h2 class="lobby-title">Have a Code?</h2>
       <p class="lobby-sub">Paste the room code your opponent sent.</p>
-      <input type="text" class="input mono" id="join-code-input" placeholder="ENTER CODE" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <input type="text" class="input mono" id="join-code-input" placeholder="ENTER CODE" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false" style="text-transform:uppercase" />
       <div id="join-error" style="color:var(--warn);font-size:12px;margin-top:10px;min-height:16px"></div>
       <div style="margin-top:22px;display:flex;gap:10px;justify-content:center">
         <button class="btn" data-action="back-to-menu-from-net">← Back</button>
@@ -677,7 +703,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
     <div class="match-prompt-ref-emoji" id="match-prompt-ref-emoji">🎨</div>
     <div class="match-prompt-text" id="match-prompt">—</div>
   </div>
-  <div class="match-toolbar glass">
+  <div class="match-toolbar glass" id="match-toolbar">
     <div class="tool-group">
       <div class="tool-group-label">Color</div>
       <div class="tool-swatches" id="tool-swatches"></div>
@@ -766,8 +792,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
         <div>AI Judge: <span class="reveal-ai-verdict" id="reveal-ai-verdict">analysing…</span></div>
       </div>
     </div>
-    <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
+    <div style="display:flex;gap:12px;margin-top:8px;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-primary" id="reveal-continue" style="display:none">Continue</button>
+      <button class="btn" id="reveal-replay-btn" style="display:none">▶ Replay</button>
+      <button class="btn" id="reveal-save-btn" style="display:none">💾 Save</button>
     </div>
   </div>
 </div>
@@ -797,6 +825,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
       </div>
       <div class="result-actions">
         <button class="btn" data-action="back-to-menu">Menu</button>
+        <button class="btn" id="result-save-btn" style="display:none">💾 Save</button>
         <button class="btn btn-primary" id="result-again">Another Round</button>
       </div>
     </div>
@@ -898,6 +927,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   <div class="levelup-center">
     <div class="levelup-eyebrow">Level Up</div>
     <div class="levelup-num" id="levelup-num">2</div>
+    <div class="levelup-unlock" id="levelup-unlock" style="display:none"></div>
   </div>
 </div>
 
@@ -1026,6 +1056,32 @@ const ACHIEVEMENTS = [
   { id: 'airMaster',     icon: '✋', name: 'Air Master',        desc: 'Win a match using hand-tracking mode.' },
 ];
 
+const LEVEL_UNLOCKS = [
+  { level: 3,  type: 'color', value: '#f97316', label: 'Deep Orange'   },
+  { level: 5,  type: 'color', value: '#38bdf8', label: 'Sky Blue'      },
+  { level: 7,  type: 'title', value: 'Brushstroke', label: 'Title: Brushstroke' },
+  { level: 8,  type: 'color', value: '#fb7185', label: 'Rose'          },
+  { level: 10, type: 'title', value: 'Artisan',    label: 'Title: Artisan'  },
+  { level: 12, type: 'color', value: '#a3e635', label: 'Lime Green'    },
+  { level: 15, type: 'title', value: 'Master',     label: 'Title: Master'   },
+  { level: 18, type: 'color', value: '#fbbf24', label: 'Amber Gold'   },
+  { level: 25, type: 'title', value: 'Grand Master', label: 'Title: Grand Master' },
+];
+
+const DAILY_CHALLENGES = [
+  { id: 'win_any',     label: 'Win any duel today',          xpBonus: 50,  check: s => s._todayWins    >= 1 },
+  { id: 'play_2',      label: 'Play 2 duels today',           xpBonus: 50,  check: s => s._todayPlayed  >= 2 },
+  { id: 'play_3',      label: 'Play 3 duels today',           xpBonus: 60,  check: s => s._todayPlayed  >= 3 },
+  { id: 'win_3',       label: 'Win 3 duels today',            xpBonus: 100, check: s => s._todayWins    >= 3 },
+  { id: 'clean_sweep', label: 'Win a match 3–0',              xpBonus: 90,  check: s => s._todaySwept   >= 1 },
+  { id: 'win_ai',      label: 'Win a round via AI judgment',  xpBonus: 80,  check: s => s._todayAiWins  >= 1 },
+  { id: 'all_colors',  label: 'Use 6+ colors in one round',   xpBonus: 70,  check: s => s._todayBigPalette >= 1 },
+  { id: 'play_5',      label: 'Play 5 duels today',           xpBonus: 75,  check: s => s._todayPlayed  >= 5 },
+];
+function getDailyChallenge() {
+  return DAILY_CHALLENGES[Math.floor(Date.now() / 86400000) % DAILY_CHALLENGES.length];
+}
+
 // Game configuration — Phase 5 will move this to a config service
 const GAME = {
   ROUND_SECONDS: 60,
@@ -1062,6 +1118,12 @@ const STATE = {
   onboardStep: 0,
   match: null,   // populated by match.startPractice() / match.startMultiplayer()
   net: null,     // populated by net.host() / net.join()
+  // Session-only daily challenge counters (reset when calendar day changes)
+  _todayWins: 0,
+  _todayPlayed: 0,
+  _todaySwept: 0,
+  _todayAiWins: 0,
+  _todayBigPalette: 0,
 };
 
 /* ---------- DOM helpers ------------------------------------ */
@@ -1104,6 +1166,11 @@ const storage = {
       audioEnabled: p.audioEnabled !== false,    // default true; persisted across sessions
       handModeMatches: p.handModeMatches | 0,     // Phase 3 stat — matches played using hand input
       handModeWins: p.handModeWins | 0,           // Phase 3 stat — wins using hand input
+      unlockedColors: Array.isArray(p.unlockedColors) ? p.unlockedColors : [],
+      unlockedTitles: Array.isArray(p.unlockedTitles) ? p.unlockedTitles : [],
+      activeTitle: p.activeTitle || '',
+      dailyChallengeDate: p.dailyChallengeDate | 0,
+      dailyChallengeId:   p.dailyChallengeId   || '',
     };
   },
   save() {
@@ -1159,9 +1226,14 @@ function achievementToast(ach) {
     setTimeout(() => el.remove(), 400);
   }, 4200);
 }
-function levelUpBurst(newLevel) {
+function levelUpBurst(newLevel, unlock = null) {
   const el = $('levelup-burst');
   $('levelup-num').textContent = newLevel;
+  const unlockEl = $('levelup-unlock');
+  if (unlockEl) {
+    if (unlock) { unlockEl.textContent = `🎁 Unlocked: ${unlock.label}`; unlockEl.style.display = ''; }
+    else { unlockEl.style.display = 'none'; }
+  }
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2200);
 }
@@ -1357,11 +1429,21 @@ function awardXp(amount, opts = {}) {
   const beforeLevel = levelFromXp(before);
   STATE.profile.xp = before + amount;
   const afterLevel = levelFromXp(STATE.profile.xp);
+  if (afterLevel > beforeLevel) {
+    // Grant any level-gated unlocks crossed in this jump
+    const newUnlocks = LEVEL_UNLOCKS.filter(u => u.level > beforeLevel && u.level <= afterLevel);
+    for (const u of newUnlocks) {
+      if (u.type === 'color' && !STATE.profile.unlockedColors.includes(u.value))
+        STATE.profile.unlockedColors.push(u.value);
+      else if (u.type === 'title' && !STATE.profile.unlockedTitles.includes(u.value))
+        STATE.profile.unlockedTitles.push(u.value);
+    }
+    if (newUnlocks.length > 0) renderToolbar();
+    const firstUnlock = newUnlocks[0] || null;
+    setTimeout(() => levelUpBurst(afterLevel, firstUnlock), opts.levelUpDelay || 600);
+  }
   storage.save();
   refreshProfileUi();
-  if (afterLevel > beforeLevel) {
-    setTimeout(() => levelUpBurst(afterLevel), opts.levelUpDelay || 600);
-  }
   return { leveledUp: afterLevel > beforeLevel, newLevel: afterLevel };
 }
 
@@ -1660,6 +1742,7 @@ const drawing = {
     this.currentStroke = { color: strokeColor, size: this.isEraser ? Math.max(this.size * 1.5, 16) : this.size, points: [p], eraser: this.isEraser };
     if (!this.isEraser) this.colorsUsed.add(this.color);
     this.lastDrawTickMs = now();
+    document.getElementById('match-toolbar')?.classList.add('is-drawing');
     this.drawCursor(p.x, p.y);
     this.renderActiveIncremental();
     if (this.onStrokePoint) {
@@ -1687,6 +1770,7 @@ const drawing = {
     this.activeCtx.clearRect(0, 0, this.w, this.h);
     this.currentStroke = null;
     this.isDown = false;
+    document.getElementById('match-toolbar')?.classList.remove('is-drawing');
     if (this.onStrokePoint) this.onStrokePoint('end');
   },
 
@@ -1832,6 +1916,7 @@ function renderStroke(ctx, stroke, opts = {}) {
  * ============================================================ */
 const oppGhost = {
   canvas: null, ctx: null,
+  offscreen: null, offCtx: null,  // cached bitmap of committed strokes
   w: 220, h: 220,
   strokes: [],
   current: null,
@@ -1850,17 +1935,29 @@ const oppGhost = {
     this.ctx = this.canvas.getContext('2d');
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
+    // Rebuild offscreen cache at new dimensions
+    this._resetOffscreen();
+    for (const s of this.strokes) renderStroke(this.offCtx, s, { last: true });
     this.redraw();
+  },
+  _resetOffscreen() {
+    this.offscreen = document.createElement('canvas');
+    this.offscreen.width = this.w;
+    this.offscreen.height = this.h;
+    this.offCtx = this.offscreen.getContext('2d');
+    this.offCtx.lineCap = 'round'; this.offCtx.lineJoin = 'round';
+    this.offCtx.fillStyle = '#ffffff';
+    this.offCtx.fillRect(0, 0, this.w, this.h);
   },
   reset() {
     this.strokes = []; this.current = null;
+    this._resetOffscreen();
     this.ctx && this.ctx.clearRect(0, 0, this.w, this.h);
   },
   redraw() {
-    if (!this.ctx) return;
-    this.ctx.fillStyle = '#ffffff';
-    this.ctx.fillRect(0, 0, this.w, this.h);
-    for (const s of this.strokes) renderStroke(this.ctx, s, { last: true });
+    if (!this.ctx || !this.offscreen) return;
+    // O(1): composite cached committed strokes + current in-progress stroke
+    this.ctx.drawImage(this.offscreen, 0, 0);
     if (this.current) renderStroke(this.ctx, this.current, { last: false });
   },
   // Handle an incoming stroke message
@@ -1870,25 +1967,31 @@ const oppGhost = {
       this.current = {
         color: data.color || '#06080f',
         size: (data.size || 8) * 0.28,  // scale down the brush for ghost canvas
-        points: [{ x: data.x * this.w, y: data.y * this.h, t: 0, p }],
+        points: [{ x: data.x * this.w, y: data.y * this.h, t: now(), p }],
       };
       this.redraw();
     } else if (data.mode === 'add' && this.current) {
-      this.current.points.push({ x: data.x * this.w, y: data.y * this.h, t: 0, p });
+      this.current.points.push({ x: data.x * this.w, y: data.y * this.h, t: now(), p });
       this.redraw();
     } else if (data.mode === 'end' && this.current) {
+      renderStroke(this.offCtx, this.current, { last: true }); // commit stroke to cache
       this.strokes.push(this.current);
       this.current = null;
       this.redraw();
     }
   },
   undo() {
-    if (this.strokes.length === 0) return;
-    this.strokes.pop();
+    if (this.strokes.length === 0 && !this.current) return;
+    if (this.current) { this.current = null; }
+    else { this.strokes.pop(); }
+    // Rebuild cache from remaining committed strokes
+    this._resetOffscreen();
+    for (const s of this.strokes) renderStroke(this.offCtx, s, { last: true });
     this.redraw();
   },
   clear() {
     this.strokes = []; this.current = null;
+    this._resetOffscreen();
     this.redraw();
   },
   /** Export to a target canvas at the given size (for reveal screen) */
@@ -1916,7 +2019,8 @@ const oppGhost = {
 function renderToolbar() {
   const swatchEl = $('tool-swatches');
   swatchEl.innerHTML = '';
-  for (const c of BRUSH_COLORS) {
+  const allColors = [...BRUSH_COLORS, ...(STATE.profile && STATE.profile.unlockedColors ? STATE.profile.unlockedColors : [])];
+  for (const c of allColors) {
     const d = document.createElement('div');
     d.className = 'tool-swatch' + (c === drawing.color ? ' active' : '');
     d.style.background = c === '#06080f' ? `linear-gradient(135deg,#1c1538,#06080f)` : c;
@@ -2701,11 +2805,38 @@ const aiJudge = {
     if (!strokes || strokes.length === 0) return 0;
     const real = strokes.filter(s => s.color !== '#ffffff'); // exclude eraser strokes
     if (real.length === 0) return 0;
-    const strokeCount   = Math.min(real.length, 50);
-    const colorSet      = new Set(real.map(s => s.color).filter(Boolean));
-    const colorDiv      = colorSet.size;
-    const totalPoints   = Math.min(real.reduce((sum, s) => sum + (s.points ? s.points.length : 0), 0), 2500);
-    return strokeCount * 3 + colorDiv * 9 + totalPoints / 28;
+
+    // Effort: stroke count (capped to prevent spam)
+    const strokeCount = Math.min(real.length, 50);
+
+    // Palette use: color diversity capped at 5 to prevent easy gaming
+    const colorDiv = Math.min(new Set(real.map(s => s.color).filter(Boolean)).size, 5);
+
+    // Detail: total point count (smoothness / line complexity)
+    const allPts = real.flatMap(s => s.points || []);
+    const totalPoints = Math.min(allPts.length, 2500);
+
+    // Coverage: did drawing spread across the canvas, not just one corner?
+    let coverageScore = 0;
+    if (allPts.length >= 4) {
+      const xs = allPts.map(p => p.x || 0);
+      const ys = allPts.map(p => p.y || 0);
+      const xRange = Math.max(...xs) - Math.min(...xs);
+      const yRange = Math.max(...ys) - Math.min(...ys);
+      const maxX = Math.max(...xs) || 1;
+      const maxY = Math.max(...ys) || 1;
+      coverageScore = Math.min((xRange / maxX) * (yRange / maxY) * 20, 20);
+    }
+
+    // Spread: did the player draw throughout the round, not just at the end?
+    let spreadScore = 0;
+    const tPts = allPts.filter(p => p.t > 0);
+    if (tPts.length >= 2) {
+      const span = Math.max(...tPts.map(p => p.t)) - Math.min(...tPts.map(p => p.t));
+      spreadScore = Math.min(span / 40000, 1) * 10;
+    }
+
+    return strokeCount * 2 + colorDiv * 4 + totalPoints / 35 + coverageScore + spreadScore;
   },
 
   /** Returns 'self' (vote for me), 'opponent' (vote for them), or null (abstain). */
@@ -2786,12 +2917,16 @@ const match = {
     wireNet(net);
 
     try {
-      const code = await net.host();
+      const friendlyCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const code = await net.host(friendlyCode);
       $('room-code').textContent = code;
       $('host-status-text').textContent = 'Waiting for opponent…';
       // when opponent's data channel opens, we'll receive HELLO; transition to lobby
     } catch (err) {
-      toast(err.message || 'Failed to start hosting', { error: true, duration: 4000 });
+      const msg = (err && err.type === 'unavailable-id')
+        ? 'Room code taken — please try again.'
+        : (err.message || 'Failed to start hosting');
+      toast(msg, { error: true, duration: 4000 });
       STATE.net = null;
       showScreen('menu');
     }
@@ -2805,7 +2940,7 @@ const match = {
   },
 
   async startJoin(code) {
-    code = (code || '').trim();
+    code = (code || '').trim().toUpperCase();
     if (!code) { $('join-error').textContent = 'Please enter a code.'; return; }
     $('join-error').textContent = '';
     $('join-go').disabled = true;
@@ -3065,6 +3200,7 @@ const match = {
     $('reveal-status').textContent = 'A warmup round. Real duels reveal both drawings side-by-side.';
     $('reveal-timer').style.display = 'none';
     $('reveal-continue').style.display = '';
+    $('reveal-save-btn').style.display = '';
     showScreen('reveal');
   },
 
@@ -3075,22 +3211,33 @@ const match = {
       colorsUsed: drawing.colorsUsed,
       continuousDrawSeconds: drawing.continuousDrawSeconds,
     });
+    if (drawing.colorsUsed && drawing.colorsUsed.size >= 6) STATE._todayBigPalette++;
     const earned = 10;
     awardXp(earned);
+    checkDailyChallenge();
     $('result-eyebrow').textContent = 'Practice Round Complete';
     $('result-headline').textContent = 'Nice work.';
     $('result-headline').className = 'result-headline practice';
     $('result-sub').textContent = 'A warmup against an empty canvas. Real XP comes from duels.';
     $('result-xp').textContent = `+${earned}`;
     $('result-level').textContent = levelFromXp(STATE.profile.xp);
+    $('result-save-btn').style.display = '';
     showScreen('result');
   },
 
   /* ----------- MULTIPLAYER REVEAL & VOTE ------------------ */
   openMultiplayerReveal() {
-    // Capture stroke snapshots NOW for AI judge (before any reset/clear)
+    // Capture stroke snapshots NOW for AI judge and replay (before any reset/clear)
     this._myStrokesForAI    = drawing.strokes.map(s => ({ color: s.color, points: s.points }));
     this._theirStrokesForAI = oppGhost.strokes.map(s => ({ color: s.color, points: s.points }));
+    // Replay strokes: scale opponent ghost (220px space) up to reveal canvas (800px)
+    const gs = 800 / (oppGhost.w || 220);
+    this._myReplayStrokes = drawing.strokes.map(s => ({ color: s.color, size: s.size, points: s.points.slice(), eraser: s.eraser }));
+    this._myReplayW = drawing.w; this._myReplayH = drawing.h;
+    this._theirReplayStrokes = oppGhost.strokes.map(s => ({
+      color: s.color, size: s.size * gs, eraser: s.eraser,
+      points: s.points.map(p => ({ x: p.x * gs, y: p.y * gs, t: p.t, p: p.p })),
+    }));
 
     // Restore both reveal slots in case practice mode hid one
     $('reveal-art-p2').style.display = '';
@@ -3098,6 +3245,8 @@ const match = {
     $('reveal-p1-badge').style.display = '';
     $('reveal-timer').style.display = '';
     $('reveal-continue').style.display = 'none';
+    $('reveal-save-btn').style.display = 'none';   // shown after both drawings load
+    $('reveal-replay-btn').style.display = 'none'; // shown after both drawings load
 
     // Reset AI judge badge
     const aiEl = $('reveal-ai-judge');
@@ -3140,7 +3289,20 @@ const match = {
 
     $('reveal-status').textContent = 'Pick the better artwork. Votes flip face-up at once.';
     showScreen('reveal');
-    this.startVoteTimer();
+    // Pause timer until opponent's drawing has loaded; start immediately if already received
+    this._waitingForTheirDrawing = !this.theirDrawing;
+    if (!this._waitingForTheirDrawing) {
+      this.startVoteTimer();
+    } else {
+      $('reveal-timer').textContent = '…';
+      // Safety cap: if drawing never arrives, start timer after 10s anyway
+      this._drawWaitTimeout = setTimeout(() => {
+        if (this._waitingForTheirDrawing) {
+          this._waitingForTheirDrawing = false;
+          this.startVoteTimer();
+        }
+      }, 10000);
+    }
   },
 
   onRevealDraw(data) {
@@ -3157,6 +3319,14 @@ const match = {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
+      $('reveal-save-btn').style.display = '';
+      if (match._myReplayStrokes && match._myReplayStrokes.length > 0) $('reveal-replay-btn').style.display = '';
+      // If we were waiting for this drawing, now start the vote timer
+      if (this._waitingForTheirDrawing && STATE.screen === 'reveal') {
+        this._waitingForTheirDrawing = false;
+        if (this._drawWaitTimeout) { clearTimeout(this._drawWaitTimeout); this._drawWaitTimeout = null; }
+        this.startVoteTimer();
+      }
     };
     img.src = dataUrl;
   },
@@ -3274,6 +3444,10 @@ const match = {
     else if (outcome === 'them') STATE.profile.roundsLost++;
     storage.save();
 
+    // Daily challenge counters (session-only)
+    if (outcome === 'me' && aiUsed) STATE._todayAiWins++;
+    if (drawing.colorsUsed && drawing.colorsUsed.size >= 6) STATE._todayBigPalette++;
+
     if (outcome === 'me') achievements.check('roundWon');
 
     // Round outcome SFX
@@ -3338,7 +3512,15 @@ const match = {
     }
     storage.save();
 
+    // Daily challenge counters (session-only)
+    STATE._todayPlayed++;
+    if (outcome === 'win') {
+      STATE._todayWins++;
+      if (me >= 2 && them === 0) STATE._todaySwept++;
+    }
+
     awardXp(xp);
+    checkDailyChallenge();
 
     // Match outcome SFX (delayed slightly so it lands with the visual reveal)
     setTimeout(() => {
@@ -3365,6 +3547,7 @@ const match = {
     $('result-xp').textContent = `+${xp}`;
     $('result-level').textContent = levelFromXp(STATE.profile.xp);
     $('result-again').textContent = 'Rematch';
+    $('result-save-btn').style.display = '';
     showScreen('result');
   },
 
@@ -3452,6 +3635,113 @@ function renderStatsModal() {
 }
 
 /* ============================================================
+ * Stroke-by-stroke replay
+ * ============================================================ */
+function replayOnCanvas(strokes, destCanvas, srcW, srcH) {
+  if (!strokes || strokes.length === 0) return;
+  const tmp = document.createElement('canvas');
+  tmp.width = srcW; tmp.height = srcH;
+  const tmpCtx = tmp.getContext('2d');
+  tmpCtx.lineCap = 'round'; tmpCtx.lineJoin = 'round';
+  tmpCtx.fillStyle = '#ffffff'; tmpCtx.fillRect(0, 0, srcW, srcH);
+  const dCtx = destCanvas.getContext('2d');
+  for (let i = 0; i < strokes.length; i++) {
+    setTimeout(() => {
+      renderStroke(tmpCtx, strokes[i], { last: true });
+      dCtx.fillStyle = '#ffffff'; dCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
+      dCtx.drawImage(tmp, 0, 0, destCanvas.width, destCanvas.height);
+    }, i * 45); // ~22 strokes per second
+  }
+}
+
+/* ============================================================
+ * Drawing save / share
+ * ============================================================ */
+async function saveDrawingImage() {
+  const myCanvas = $('reveal-canvas-you');
+  const theirCanvas = $('reveal-canvas-opp');
+  const prompt = ($('reveal-prompt').textContent || 'drawing').trim();
+  const filename = 'aether-duels-' + prompt.replace(/[^a-z0-9]/gi, '-').toLowerCase().slice(0, 30) + '.png';
+  const hasOpponent = match.mode === 'multiplayer' && theirCanvas && theirCanvas.width > 10;
+
+  let blob;
+  if (hasOpponent) {
+    // Composite: both drawings side by side with a header banner
+    const mW = myCanvas.width, mH = myCanvas.height;
+    const tW = theirCanvas.width, tH = theirCanvas.height;
+    const gap = 20, headerH = 70;
+    const c = document.createElement('canvas');
+    c.width = mW + gap + tW; c.height = Math.max(mH, tH) + headerH;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#06080f';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#e8ecff';
+    ctx.font = 'bold 22px Manrope, Arial, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(`Aether Duels — "${prompt}"`, c.width / 2, headerH / 2);
+    ctx.drawImage(myCanvas, 0, headerH);
+    ctx.drawImage(theirCanvas, mW + gap, headerH);
+    blob = await new Promise(r => c.toBlob(r, 'image/png'));
+  } else {
+    blob = await new Promise(r => myCanvas.toBlob(r, 'image/png'));
+  }
+
+  if (!blob) return;
+
+  // Try native share (mobile)
+  if (navigator.share && navigator.canShare) {
+    const file = new File([blob], filename, { type: 'image/png' });
+    try {
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Aether Duels', text: `I drew "${prompt}"!` });
+        return;
+      }
+    } catch (_) { /* user cancelled or share unsupported — fall through */ }
+  }
+
+  // Download fallback
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* ============================================================
+ * Daily challenge helpers
+ * ============================================================ */
+function refreshDailyChallengeUi() {
+  const card = $('daily-challenge-card');
+  if (!card) return;
+  const challenge = getDailyChallenge();
+  const todayNum = Math.floor(Date.now() / 86400000);
+  const done = STATE.profile.dailyChallengeDate === todayNum &&
+               STATE.profile.dailyChallengeId   === challenge.id;
+  $('daily-label').textContent = challenge.label;
+  $('daily-bonus').textContent = `+${challenge.xpBonus} XP`;
+  const checkEl = $('daily-check');
+  if (done) {
+    checkEl.style.display = '';
+    $('daily-bonus').style.display = 'none';
+  } else {
+    checkEl.style.display = 'none';
+    $('daily-bonus').style.display = '';
+  }
+}
+
+function checkDailyChallenge() {
+  const challenge = getDailyChallenge();
+  const todayNum = Math.floor(Date.now() / 86400000);
+  if (STATE.profile.dailyChallengeDate === todayNum && STATE.profile.dailyChallengeId === challenge.id) return;
+  if (!challenge.check(STATE)) return;
+  STATE.profile.dailyChallengeDate = todayNum;
+  STATE.profile.dailyChallengeId   = challenge.id;
+  storage.save();
+  awardXp(challenge.xpBonus);
+  toast(`Daily challenge complete! +${challenge.xpBonus} XP`, { duration: 3000 });
+  refreshDailyChallengeUi();
+}
+
+/* ============================================================
  * Event wiring
  * ============================================================ */
 function bindUi() {
@@ -3530,7 +3820,12 @@ function bindUi() {
   // Match toolbar buttons
   $('tool-eraser').addEventListener('click', () => drawing.toggleEraser());
   $('tool-undo').addEventListener('click', () => drawing.undo());
-  $('tool-clear').addEventListener('click', () => drawing.clear());
+  let _clearTapTs = 0;
+  $('tool-clear').addEventListener('click', () => {
+    const now = Date.now();
+    if (now - _clearTapTs < 1500) { drawing.clear(); _clearTapTs = 0; }
+    else { _clearTapTs = now; toast('Tap again to clear canvas', { duration: 1400 }); }
+  });
   $('tool-hand').addEventListener('click', () => hand.toggle());
   $('tool-quit').addEventListener('click', () => {
     const msg = match.mode === 'multiplayer'
@@ -3577,6 +3872,19 @@ function bindUi() {
       toast('Code selected — copy with Ctrl/Cmd+C');
     }
   });
+  $('room-share-btn').addEventListener('click', async () => {
+    const code = $('room-code').textContent;
+    if (!code || code === 'connecting…' || code === '------') return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Aether Duels', text: `Join my duel! Room code: ${code}` });
+      } catch (_) { /* user dismissed share sheet */ }
+    } else {
+      // Fallback: copy to clipboard
+      try { await navigator.clipboard.writeText(code); toast('Code copied to clipboard'); }
+      catch (_) { toast('Copy the code manually: ' + code); }
+    }
+  });
 
   // Join screen
   $('join-go').addEventListener('click', () => match.startJoin($('join-code-input').value));
@@ -3596,6 +3904,13 @@ function bindUi() {
     if (match.mode === 'practice') match.completePractice();
     else showScreen('menu');
   });
+  $('reveal-save-btn').addEventListener('click', () => saveDrawingImage());
+  $('result-save-btn').addEventListener('click', () => saveDrawingImage());
+  $('reveal-replay-btn').addEventListener('click', () => {
+    if (!match._myReplayStrokes) return;
+    replayOnCanvas(match._myReplayStrokes, $('reveal-canvas-you'), match._myReplayW, match._myReplayH);
+    replayOnCanvas(match._theirReplayStrokes, $('reveal-canvas-opp'), 800, 800);
+  });
 
   // Result actions
   $('result-again').addEventListener('click', () => {
@@ -3614,8 +3929,14 @@ function bindUi() {
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
     if (STATE.screen === 'match' && match.active) {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); drawing.undo(); return; }
       if (e.key === 'z' || e.key === 'Z') { e.preventDefault(); drawing.undo(); }
-      if (e.key === 'c' || e.key === 'C') { e.preventDefault(); drawing.clear(); }
+      if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        const now = Date.now();
+        if (now - _clearTapTs < 1500) { drawing.clear(); _clearTapTs = 0; }
+        else { _clearTapTs = now; toast('Tap again to clear canvas', { duration: 1400 }); }
+      }
       if (e.key === 'e' || e.key === 'E') { e.preventDefault(); drawing.toggleEraser(); }
     }
     if (e.key === 'Escape') {
@@ -3667,12 +3988,19 @@ function checkPeerJsReady() {
 
 function boot() {
   STATE.profile = storage.load();
+  // Reset session daily counters when the calendar day has changed
+  const todayNum = Math.floor(Date.now() / 86400000);
+  if (STATE.profile.dailyChallengeDate !== todayNum) {
+    STATE._todayWins = 0; STATE._todayPlayed = 0; STATE._todaySwept = 0;
+    STATE._todayAiWins = 0; STATE._todayBigPalette = 0;
+  }
   drawing.init();
   oppGhost.init();
   drawing.color = STATE.profile.preferredColor;
   drawing.size  = STATE.profile.preferredSize;
   renderToolbar();
   refreshProfileUi();
+  refreshDailyChallengeUi();
   chat.init();
   reactions.init();
   hand.init();
