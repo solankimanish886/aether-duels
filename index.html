@@ -125,15 +125,20 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 @keyframes heartbeat{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .match-mode-pill{font-size:10px;letter-spacing:0.32em;text-transform:uppercase;color:var(--accent);padding:10px 16px;border-radius:100px;background:rgba(138,180,255,.1);border:1px solid rgba(138,180,255,.3)}
 
-.match-prompt-banner{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:13;padding:14px 28px;border-radius:20px;text-align:center;max-width:90%;pointer-events:none}
-.match-prompt-eyebrow{font-size:9px;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-mute);margin-bottom:4px}
-.match-prompt-ref-emoji{font-size:48px;line-height:1;margin:6px 0 4px}
-.match-prompt-text{font-family:'Instrument Serif',serif;font-size:22px;color:var(--text);line-height:1.2}
+.match-prompt-label{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:13;pointer-events:none}
+.match-prompt-label-word{font-family:'Instrument Serif',serif;font-size:13px;font-style:italic;color:rgba(40,30,20,0.36);letter-spacing:0.06em;text-shadow:0 1px 3px rgba(255,255,255,.5)}
+.match-timer-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.match-hud-prompt{font-family:'Instrument Serif',serif;font-size:11px;font-style:italic;color:rgba(255,255,255,0.4);letter-spacing:0.04em;text-align:center}
 
 .canvas-stage{position:absolute;inset:0}
 .canvas-stage canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .canvas-stage #canvas-cursor{pointer-events:none}
-.drawing-frame{position:absolute;inset:0;pointer-events:none;z-index:10;border:2px solid rgba(138,180,255,.3);box-shadow:inset 0 0 0 1px rgba(138,180,255,.06),inset 0 0 80px rgba(138,180,255,.04)}
+.drawing-frame{position:absolute;inset:0;pointer-events:none;z-index:10;border:2px solid rgba(138,180,255,.18);box-shadow:inset 0 0 0 1px rgba(138,180,255,.06),inset 0 0 60px rgba(0,0,0,.10),inset 0 0 120px rgba(0,0,0,.07)}
+.drawing-guide-overlay{position:absolute;inset:0;pointer-events:none;z-index:9;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 1s ease}
+.drawing-guide-overlay.visible{opacity:1}
+.drawing-guide-overlay.fading{opacity:0;transition:opacity 1.5s ease}
+.drawing-guide-svg{width:62%;height:62%;max-width:400px;max-height:400px;pointer-events:none}
+#drawing-guide-path{fill:none;stroke:rgba(70,50,30,0.12);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 
 .match-toolbar{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:12;padding:14px 12px;display:flex;flex-direction:column;gap:14px;border-radius:18px;transition:opacity .2s ease,transform .2s ease}
 .match-toolbar.is-drawing{opacity:.1;transform:translateY(-50%) translateX(-76%);pointer-events:none}
@@ -157,16 +162,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .countdown-overlay.show{opacity:1;visibility:visible}
 .countdown-num{font-family:'Instrument Serif',serif;font-size:clamp(140px,22vw,280px);line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent-2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-style:italic;animation:countPop .95s var(--ease-out-quart)}
 @keyframes countPop{0%{opacity:0;transform:scale(2);filter:blur(20px)}35%{opacity:1;transform:scale(1);filter:blur(0)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.7);filter:blur(8px)}}
-.countdown-prompt{position:absolute;bottom:18vh;left:50%;transform:translateX(-50%);text-align:center;animation:splashFade .6s var(--ease-out-quart) .3s both}
-.countdown-prompt-eyebrow{font-size:10px;letter-spacing:0.4em;text-transform:uppercase;color:var(--text-mute);margin-bottom:8px}
-.countdown-ref-emoji{font-size:96px;line-height:1;margin-bottom:16px;animation:splashFade .6s var(--ease-out-quart) .1s both}
-.countdown-prompt-text{font-family:'Instrument Serif',serif;font-size:28px;color:var(--text)}
+.countdown-num.go{font-size:clamp(72px,11vw,140px);background:linear-gradient(135deg,var(--accent-3),var(--accent));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
 #screen-reveal .screen-content{padding:24px;gap:18px;align-items:center;justify-content:center}
 .reveal-header{text-align:center}
 .reveal-eyebrow{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--text-mute);margin-bottom:6px}
 .reveal-prompt{font-family:'Instrument Serif',serif;font-size:32px;line-height:1.1}
-.reveal-single{width:min(640px,92%);aspect-ratio:1;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#fff;box-shadow:0 16px 48px rgba(0,0,0,.4)}
+.reveal-single{width:min(640px,92%);aspect-ratio:1;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#f8f5ef;box-shadow:0 16px 48px rgba(0,0,0,.4)}
 .reveal-single canvas{width:100%;height:100%;object-fit:contain;display:block}
 
 #screen-result .screen-content{align-items:center;justify-content:center;gap:20px}
@@ -236,9 +238,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .levelup-unlock{font-size:16px;color:var(--gold);margin-top:14px;letter-spacing:0.05em;opacity:0.9;animation:levelup 2.2s var(--ease-out-quart)}
 @keyframes levelup{0%{transform:scale(.4);opacity:0;filter:blur(20px)}25%{transform:scale(1.1);opacity:1;filter:blur(0)}75%{transform:scale(1);opacity:1}100%{transform:scale(.95);opacity:0}}
 
-/* Match screen HUD — dark glass so white text is readable over white canvas */
+/* Match screen HUD — dark glass so text is readable over the paper canvas */
 #screen-match .match-hud-top .glass,
-#screen-match .match-prompt-banner.glass,
 #screen-match .match-toolbar.glass,
 #screen-match .quick-reactions.glass,
 #screen-match .match-chat.glass{background:rgba(6,8,15,0.62);border-color:rgba(255,255,255,0.18)}
@@ -289,7 +290,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .match-mode-pill.mp{background:rgba(255,122,182,.1);border-color:rgba(255,122,182,.3);color:var(--accent-2)}
 
 /* Opponent live ghost canvas (small picture-in-picture during match) */
-.opp-ghost{position:fixed;right:18px;bottom:18px;width:220px;height:220px;border-radius:18px;overflow:hidden;background:#fff;border:1px solid var(--glass-border);box-shadow:0 12px 36px rgba(0,0,0,.4);z-index:12;opacity:0;visibility:hidden;transform:translateY(10px) scale(.96);transition:opacity .35s var(--ease),visibility .35s,transform .35s var(--ease-out-quart)}
+.opp-ghost{position:fixed;right:18px;bottom:18px;width:220px;height:220px;border-radius:18px;overflow:hidden;background:#f8f5ef;border:1px solid var(--glass-border);box-shadow:0 12px 36px rgba(0,0,0,.4);z-index:12;opacity:0;visibility:hidden;transform:translateY(10px) scale(.96);transition:opacity .35s var(--ease),visibility .35s,transform .35s var(--ease-out-quart)}
 .opp-ghost.show{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
 .opp-ghost canvas{width:100%;height:100%;display:block;touch-action:none}
 .opp-ghost-label{position:absolute;top:8px;left:8px;font-size:9px;letter-spacing:0.24em;text-transform:uppercase;color:#fff;padding:4px 8px;border-radius:100px;background:rgba(6,8,15,.6);backdrop-filter:blur(8px);font-weight:700;display:flex;align-items:center;gap:6px;pointer-events:none}
@@ -336,14 +337,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 
 /* Reveal screen — dual canvas vote layout */
 .reveal-canvases{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:22px;max-height:calc(100vh - 280px);min-height:0;width:min(1100px,96%);margin:0 auto}
-.reveal-art{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#fff;transition:all .45s var(--ease-out-quart);cursor:pointer;display:flex;flex-direction:column;min-height:0}
+.reveal-art{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--glass-border);background:#f8f5ef;transition:all .45s var(--ease-out-quart);cursor:pointer;display:flex;flex-direction:column;min-height:0}
 .reveal-art:not(.locked):hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
 .reveal-art.chosen{box-shadow:0 0 0 3px var(--accent),0 12px 40px rgba(138,180,255,.3);transform:translateY(-4px)}
 .reveal-art.winner{box-shadow:0 0 0 3px var(--gold),0 16px 48px rgba(255,209,102,.3)}
 .reveal-art.winner::before{content:'';position:absolute;inset:-30%;background:conic-gradient(from 0deg,transparent 70%,rgba(255,209,102,.35) 80%,transparent 90%);animation:winnerSpin 4s linear infinite;pointer-events:none}
 @keyframes winnerSpin{to{transform:rotate(360deg)}}
 .reveal-art.locked{cursor:default}
-.reveal-art-img{flex:1;background:#fff;position:relative;overflow:hidden;min-height:0}
+.reveal-art-img{flex:1;background:#f8f5ef;position:relative;overflow:hidden;min-height:0}
 .reveal-art-img canvas{width:100%;height:100%;object-fit:contain;display:block}
 .reveal-art-label{padding:12px 16px;display:flex;align-items:center;gap:10px;background:rgba(6,8,15,.7);border-top:1px solid var(--glass-border);position:relative;z-index:1}
 .reveal-art-color-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
@@ -420,13 +421,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   .quick-reaction{width:28px;height:28px;font-size:13px}
 }
 @media (max-width:640px){
-  .match-prompt-text{font-size:16px}
-  .match-prompt-ref-emoji{font-size:36px}
-  .countdown-ref-emoji{font-size:72px}
-  .match-prompt-banner{top:70px;padding:10px 18px}
   .menu-actions{grid-template-columns:1fr}
   .result-headline{font-size:42px}
-  .countdown-prompt-text{font-size:20px}
   .opp-ghost{width:120px;height:120px;right:10px;bottom:10px;border-radius:14px}
   .match-chat{width:200px;max-height:240px;left:10px;bottom:10px}
   .match-chat.collapsed{max-height:40px}
@@ -438,8 +434,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   .room-code{font-size:18px;padding:12px 18px;min-width:160px}
 }
 
-/* ---- White drawing surface (enables eraser) ---- */
-#canvas-main{background:#ffffff}
+/* ---- Drawing surface — warm paper background ---- */
+#canvas-main{background:#f8f5ef}
 
 /* ---- Quickplay screen ---- */
 #screen-quickplay .screen-content{align-items:center;justify-content:center}
@@ -665,6 +661,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
     <canvas id="canvas-active"></canvas>
     <canvas id="canvas-cursor"></canvas>
     <div class="drawing-frame"></div>
+    <div id="drawing-guide-overlay" class="drawing-guide-overlay" aria-hidden="true">
+      <svg id="drawing-guide-svg" class="drawing-guide-svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+        <path id="drawing-guide-path" d="" />
+      </svg>
+    </div>
   </div>
 
   <!-- Hand-mode floating cursor (positioned via JS) -->
@@ -690,7 +691,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 
   <div class="match-hud-top">
     <div class="match-round glass"><span>Round</span><b id="match-round-num">1</b><span>of <span id="match-total-rounds">1</span></span></div>
-    <div class="match-timer glass" id="match-timer">60</div>
+    <div class="match-timer-wrap">
+      <div class="match-timer glass" id="match-timer">60</div>
+      <div class="match-hud-prompt" id="match-hud-prompt"></div>
+    </div>
     <div class="match-score glass" id="match-score" style="display:none">
       <span class="match-score-pill p1" id="score-p1">0</span>
       <span class="match-score-sep">·</span>
@@ -698,10 +702,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
     </div>
     <div class="match-mode-pill glass" id="match-mode-pill">PRACTICE</div>
   </div>
-  <div class="match-prompt-banner glass">
-    <div class="match-prompt-eyebrow">Draw</div>
-    <div class="match-prompt-ref-emoji" id="match-prompt-ref-emoji">🎨</div>
-    <div class="match-prompt-text" id="match-prompt">—</div>
+  <span id="match-prompt-ref-emoji" style="display:none"></span>
+  <div class="match-prompt-label">
+    <span class="match-prompt-label-word" id="match-prompt">—</span>
   </div>
   <div class="match-toolbar glass" id="match-toolbar">
     <div class="tool-group">
@@ -915,11 +918,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 <!-- Floating layers -->
 <div class="countdown-overlay" id="countdown-overlay">
   <div class="countdown-num" id="countdown-num">3</div>
-  <div class="countdown-prompt" id="countdown-prompt-box">
-    <div class="countdown-ref-emoji" id="countdown-ref-emoji">🎨</div>
-    <div class="countdown-prompt-eyebrow">Your prompt</div>
-    <div class="countdown-prompt-text" id="countdown-prompt-text">—</div>
-  </div>
 </div>
 <div class="ach-toast-stack" id="ach-toast-stack"></div>
 <div class="toast-stack" id="toast-stack"></div>
@@ -1038,6 +1036,70 @@ const PROMPT_EMOJI = {
   'robot doing yoga':'🤖','dinosaur on a skateboard':'🦕',
 };
 function getPromptEmoji(p){ return PROMPT_EMOJI[p] || '🎨'; }
+
+const CANVAS_BG = '#f8f5ef'; // warm off-white paper — must match #canvas-main CSS and eraser color
+
+const PROMPT_GUIDES = {
+  'camera':              'M160,180 L160,340 L340,340 L340,180 L290,180 L278,155 L222,155 L210,180 Z M250,260 A42,42 0 1,0 250.1,260Z M320,198 A8,8 0 1,0 320.1,198Z',
+  'rocket ship':         'M250,55 C235,90 215,160 213,230 L200,270 L220,278 L220,305 Q235,325 250,325 Q265,325 280,305 L280,278 L300,270 L287,230 C285,160 265,90 250,55Z M200,270 Q182,278 178,298 Q200,292 220,305 M300,270 Q318,278 322,298 Q300,292 280,305 M230,190 A22,22 0 1,0 230.1,190Z',
+  'bicycle':             'M155,305 A75,75 0 1,0 155.1,305Z M345,305 A75,75 0 1,0 345.1,305Z M155,305 L250,175 L345,305 M250,175 L305,305 M250,175 L250,135 M228,135 L272,135 L265,155 M235,155 L265,155',
+  'umbrella':            'M250,75 Q345,78 375,205 L375,215 Q250,215 125,215 L125,205 Q155,78 250,75Z M250,215 L250,365 Q250,395 282,395 Q314,395 314,365 L314,335',
+  'lighthouse':          'M218,345 L228,150 L250,118 L272,150 L282,345 Z M210,345 L290,345 M207,362 L293,362 M232,200 L268,200 M235,240 L265,240 M238,170 A22,16 0 1,0 238.1,170',
+  'teapot':              'M175,205 Q165,205 160,238 Q155,268 166,288 Q186,328 250,328 Q314,328 334,288 Q345,268 340,238 Q335,205 325,205 Z M175,205 Q250,172 325,205 M325,235 Q357,220 362,248 Q367,272 346,277',
+  'ice cream cone':      'M195,272 L250,408 L305,272 Z M250,272 A62,62 0 1,0 250.1,272Z',
+  'suitcase':            'M188,172 L188,362 L312,362 L312,172 Z M210,172 L210,148 L290,148 L290,172 M188,252 L312,252 M238,172 L262,172',
+  'clock tower':         'M208,362 L208,198 L292,198 L292,362 Z M250,198 A52,52 0 1,0 250.1,198Z M212,362 L288,362 M250,152 L250,130',
+  'grand piano':         'M158,205 L158,322 Q158,342 178,342 L362,320 L362,198 Z M158,205 Q198,152 282,162 Q342,172 362,205 M198,342 L198,362 M322,326 L322,346',
+  'vinyl record':        'M250,250 A130,130 0 1,0 250.1,250Z M250,250 A90,90 0 1,0 250.1,250Z M250,250 A22,22 0 1,0 250.1,250Z',
+  'typewriter':          'M148,198 L148,342 L352,342 L352,198 Z M168,222 L332,222 M172,245 L194,245 M214,245 L236,245 M256,245 L278,245 M298,245 L320,245 M172,270 L194,270 M214,270 L236,270 M256,270 L278,270 M298,270 L320,270 M182,295 L318,295 L318,316 L182,316 Z',
+  'wizard hat':          'M250,80 L145,368 L355,368 Z M145,368 Q250,345 355,368 M250,80 L250,62',
+  'butterfly':           'M250,248 C228,215 155,155 125,188 C95,221 128,285 202,272 C222,268 240,260 250,248Z M250,248 C272,215 345,155 375,188 C405,221 372,285 298,272 C278,268 260,260 250,248Z M250,248 L250,318 M238,266 C226,284 214,296 202,308 M262,266 C274,284 286,296 298,308',
+  'penguin':             'M250,98 A52,52 0 1,0 250.1,98Z M208,162 Q175,205 182,285 Q188,345 250,355 Q312,345 318,285 Q325,205 292,162 Z M222,222 A9,9 0 1,0 222.1,222Z M278,222 A9,9 0 1,0 278.1,222Z M244,258 L256,258 M222,172 L182,202 Q172,222 182,238 M278,172 L318,202 Q328,222 318,238 M228,348 L216,378 M272,348 L284,378',
+  'snail':               'M200,282 Q178,240 200,208 Q242,168 295,188 Q345,208 345,262 Q345,325 282,335 Q240,340 208,312 M200,282 Q148,282 136,314 Q124,346 156,356 L325,356',
+  'crab':                'M250,252 A62,62 0 1,0 250.1,252Z M188,230 L148,198 M188,252 L138,252 M188,272 L148,305 M312,230 L352,198 M312,252 L362,252 M312,272 L352,305 M218,314 L208,355 M250,318 L250,362 M282,314 L292,355',
+  'jellyfish':           'M168,202 Q200,138 250,128 Q300,138 332,202 Q342,242 312,272 Q282,302 250,302 Q218,302 188,272 Q158,242 168,202Z M208,302 Q198,342 192,384 M228,308 Q222,348 218,388 M250,310 L250,392 M272,308 Q278,348 282,388 M292,302 Q302,342 308,384',
+  'owl':                 'M250,162 A82,72 0 1,0 250.1,162Z M218,162 A26,32 0 1,0 218.1,162Z M282,162 A26,32 0 1,0 282.1,162Z M238,138 Q250,122 262,138 M250,228 L240,265 L260,265 Z M240,265 L208,285 M260,265 L292,285',
+  'dancing banana':      'M198,118 Q178,158 200,242 Q222,325 252,365 Q282,325 302,242 Q322,158 302,118 Q282,78 252,88 Q222,78 198,118Z M198,118 L172,98 Q162,88 168,78 Q188,98 198,118 M302,118 L328,98 Q338,88 332,78 Q312,98 302,118 M218,200 L175,212 M282,200 L325,212',
+  'frog with a crown':   'M250,375 A102,82 0 1,0 250.1,375Z M178,312 A32,32 0 1,0 178.1,312Z M322,312 A32,32 0 1,0 322.1,312Z M218,218 A16,16 0 1,0 218.1,218Z M282,218 A16,16 0 1,0 282.1,218Z M218,198 L208,138 L240,164 L250,128 L260,164 L292,138 L282,198',
+  'mermaid':             'M250,118 A52,52 0 1,0 250.1,118Z M218,172 Q188,215 195,285 Q202,335 222,362 M282,172 Q312,215 305,285 Q298,335 278,362 M198,362 Q222,395 250,388 Q278,395 302,362 Q272,352 250,358 Q228,352 198,362Z M230,172 L270,172',
+  'ghost holding flowers':'M178,202 Q178,138 250,128 Q322,138 322,202 L322,355 Q302,375 282,355 Q262,375 250,355 Q238,375 218,355 Q198,375 178,355 Z M222,202 A10,10 0 1,0 222.1,202Z M278,202 A10,10 0 1,0 278.1,202Z M148,255 Q128,232 138,202 Q158,182 174,202 L174,255 M142,202 Q138,175 154,164 Q158,185 148,202 M142,185 L118,174',
+};
+function getPromptGuide(p) { return PROMPT_GUIDES[p] || null; }
+
+const guide = {
+  _overlay: null, _path: null, _fadeTimer: null, _strokeFired: false,
+  init() {
+    this._overlay = $('drawing-guide-overlay');
+    this._path    = $('drawing-guide-path');
+  },
+  show(prompt) {
+    const d = getPromptGuide(prompt);
+    if (!this._overlay || !d) return;
+    this._strokeFired = false;
+    this._path.setAttribute('d', d);
+    this._overlay.classList.remove('fading');
+    this._overlay.classList.add('visible');
+    if (this._fadeTimer) clearTimeout(this._fadeTimer);
+    this._fadeTimer = setTimeout(() => this.fadeOut(), 7000);
+  },
+  onFirstStroke() {
+    if (this._strokeFired) return;
+    this._strokeFired = true;
+    if (this._fadeTimer) { clearTimeout(this._fadeTimer); this._fadeTimer = null; }
+    this.fadeOut();
+  },
+  fadeOut() {
+    if (!this._overlay) return;
+    this._overlay.classList.remove('visible');
+    this._overlay.classList.add('fading');
+    setTimeout(() => this._overlay.classList.remove('fading'), 1500);
+  },
+  hide() {
+    if (!this._overlay) return;
+    if (this._fadeTimer) { clearTimeout(this._fadeTimer); this._fadeTimer = null; }
+    this._overlay.classList.remove('visible', 'fading');
+  },
+};
 
 const BRUSH_COLORS = ['#06080f','#8ab4ff','#ff7ab6','#7af0c1','#ffd166','#c084fc','#ff6b6b','#4ade80'];
 const BRUSH_SIZES = [4, 8, 14, 22];
@@ -1681,6 +1743,7 @@ const drawing = {
     this.colorsUsed = new Set();
     this.drawingTimeMs = 0;
     this.continuousDrawSeconds = 0;
+    guide.hide();
     this.clearAll();
   },
 
@@ -1738,7 +1801,8 @@ const drawing = {
   /* Internal — shared by both pointer and hand input paths */
   _beginStroke(p) {
     this.isDown = true;
-    const strokeColor = this.isEraser ? '#ffffff' : this.color;
+    guide.onFirstStroke();
+    const strokeColor = this.isEraser ? CANVAS_BG : this.color;
     this.currentStroke = { color: strokeColor, size: this.isEraser ? Math.max(this.size * 1.5, 16) : this.size, points: [p], eraser: this.isEraser };
     if (!this.isEraser) this.colorsUsed.add(this.color);
     this.lastDrawTickMs = now();
@@ -1832,7 +1896,7 @@ const drawing = {
     const tctx = targetCanvas.getContext('2d');
     targetCanvas.width = sizePx;
     targetCanvas.height = sizePx;
-    tctx.fillStyle = '#ffffff';
+    tctx.fillStyle = CANVAS_BG;
     tctx.fillRect(0, 0, sizePx, sizePx);
     const scale = Math.min(sizePx / this.w, sizePx / this.h);
     const offX = (sizePx - this.w * scale) / 2;
@@ -1946,7 +2010,7 @@ const oppGhost = {
     this.offscreen.height = this.h;
     this.offCtx = this.offscreen.getContext('2d');
     this.offCtx.lineCap = 'round'; this.offCtx.lineJoin = 'round';
-    this.offCtx.fillStyle = '#ffffff';
+    this.offCtx.fillStyle = CANVAS_BG;
     this.offCtx.fillRect(0, 0, this.w, this.h);
   },
   reset() {
@@ -1999,7 +2063,7 @@ const oppGhost = {
     const tctx = targetCanvas.getContext('2d');
     targetCanvas.width = sizePx;
     targetCanvas.height = sizePx;
-    tctx.fillStyle = '#ffffff';
+    tctx.fillStyle = CANVAS_BG;
     tctx.fillRect(0, 0, sizePx, sizePx);
     const scale = Math.min(sizePx / this.w, sizePx / this.h);
     const offX = (sizePx - this.w * scale) / 2;
@@ -2803,7 +2867,7 @@ const quickplay = {
 const aiJudge = {
   scoreStrokes(strokes) {
     if (!strokes || strokes.length === 0) return 0;
-    const real = strokes.filter(s => s.color !== '#ffffff'); // exclude eraser strokes
+    const real = strokes.filter(s => !s.eraser && s.color !== CANVAS_BG); // exclude eraser strokes
     if (real.length === 0) return 0;
 
     // Effort: stroke count (capped to prevent spam)
@@ -2902,6 +2966,7 @@ const match = {
     $('match-total-rounds').textContent = this.totalRounds;
     $('match-prompt').textContent = this.prompt;
     $('match-prompt-ref-emoji').textContent = getPromptEmoji(this.prompt);
+    const hudP = $('match-hud-prompt'); if (hudP) hudP.textContent = this.prompt;
     showScreen('match');
     setTimeout(() => this.runCountdown(), 350);
   },
@@ -3093,6 +3158,7 @@ const match = {
     $('match-total-rounds').textContent = this.totalRounds;
     $('match-prompt').textContent = this.prompt;
     $('match-prompt-ref-emoji').textContent = getPromptEmoji(this.prompt);
+    const hudPr = $('match-hud-prompt'); if (hudPr) hudPr.textContent = this.prompt;
     $('score-p1').textContent = this.scores[0];
     $('score-p2').textContent = this.scores[1];
     $('opp-ghost-name').textContent = (this.opponent && this.opponent.name) || 'OPPONENT';
@@ -3132,19 +3198,18 @@ const match = {
   runCountdown() {
     const overlay = $('countdown-overlay');
     const numEl = $('countdown-num');
-    $('countdown-prompt-text').textContent = this.prompt;
-    $('countdown-ref-emoji').textContent = getPromptEmoji(this.prompt);
     overlay.classList.add('show');
-    const sequence = ['3', '2', '1', 'Go'];
+    const sequence = ['3', '2', '1', 'DRAW!'];
     let i = 0;
     const tick = () => {
       numEl.textContent = sequence[i];
+      numEl.classList.toggle('go', sequence[i] === 'DRAW!');
       numEl.style.animation = 'none';
       void numEl.offsetWidth;
       numEl.style.animation = '';
-      // SFX: ticks beep, Go! is brighter
-      if (sequence[i] === 'Go') audio.countdownGo();
-      else                       audio.countdownTick();
+      // SFX: ticks beep, DRAW! is brighter
+      if (sequence[i] === 'DRAW!') audio.countdownGo();
+      else                          audio.countdownTick();
       i++;
       if (i < sequence.length) {
         setTimeout(tick, GAME.COUNTDOWN_STEP_MS);
@@ -3161,6 +3226,7 @@ const match = {
   beginDrawPhase() {
     this.active = true;
     this.timerEnd = now() + GAME.ROUND_SECONDS * 1000;
+    guide.show(this.prompt);
     this.tickTimer();
   },
 
@@ -3177,6 +3243,7 @@ const match = {
   endDrawPhase() {
     if (!this.active) return;
     this.active = false;
+    guide.hide();
     if (this.timerInterval) clearTimeout(this.timerInterval);
     if (drawing.isDown) drawing.onPointerUp();
     $('match-timer').classList.remove('urgent');
@@ -3643,12 +3710,12 @@ function replayOnCanvas(strokes, destCanvas, srcW, srcH) {
   tmp.width = srcW; tmp.height = srcH;
   const tmpCtx = tmp.getContext('2d');
   tmpCtx.lineCap = 'round'; tmpCtx.lineJoin = 'round';
-  tmpCtx.fillStyle = '#ffffff'; tmpCtx.fillRect(0, 0, srcW, srcH);
+  tmpCtx.fillStyle = CANVAS_BG; tmpCtx.fillRect(0, 0, srcW, srcH);
   const dCtx = destCanvas.getContext('2d');
   for (let i = 0; i < strokes.length; i++) {
     setTimeout(() => {
       renderStroke(tmpCtx, strokes[i], { last: true });
-      dCtx.fillStyle = '#ffffff'; dCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
+      dCtx.fillStyle = CANVAS_BG; dCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
       dCtx.drawImage(tmp, 0, 0, destCanvas.width, destCanvas.height);
     }, i * 45); // ~22 strokes per second
   }
@@ -4004,6 +4071,7 @@ function boot() {
   chat.init();
   reactions.init();
   hand.init();
+  guide.init();
   bindUi();
   // Lazy-load perfect-freehand in the background. Quadratic strokes work
   // immediately; once freehand resolves, the next redraw produces variable-width.
