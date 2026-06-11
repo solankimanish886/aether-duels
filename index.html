@@ -1631,6 +1631,208 @@ body::after {
   #screen-menu .screen-content { padding: 18px 20px; }
   .hero-title { font-size: clamp(44px, 12vw, 80px); }
 }
+
+/* ============================================================
+ * DRAWING SCREEN — "Wow Factor" UX Improvements
+ * ============================================================ */
+
+/* ── Timer Progress Bar (top edge of screen) ── */
+.timer-progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 3px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%);
+  z-index: 16;
+  transform-origin: left center;
+  transform: scaleX(1);
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(122,184,255,0.5), 0 0 3px rgba(122,184,255,0.9);
+  transition: background 0.7s ease, box-shadow 0.7s ease;
+  opacity: 0; visibility: hidden;
+}
+.timer-progress-bar.active { opacity: 1; visibility: visible; }
+.timer-progress-bar.warning {
+  background: linear-gradient(90deg, var(--gold) 0%, #ff9840 100%);
+  box-shadow: 0 0 10px rgba(255,200,68,0.55), 0 0 3px rgba(255,200,68,0.9);
+}
+.timer-progress-bar.critical {
+  background: linear-gradient(90deg, var(--warn) 0%, #ff8c42 100%);
+  box-shadow: 0 0 14px rgba(255,92,92,0.65), 0 0 4px rgba(255,92,92,1);
+}
+
+/* ── Canvas Frame — timer-linked glow states + transition ── */
+.drawing-frame { transition: box-shadow 1s ease !important; }
+.drawing-frame.timer-warning {
+  box-shadow:
+    inset 0 0 0 2px rgba(255,200,68,0.22),
+    inset 60px 0 120px rgba(3,5,13,0.22),
+    inset -60px 0 120px rgba(3,5,13,0.22),
+    inset 0 60px 120px rgba(3,5,13,0.25),
+    inset 0 -60px 120px rgba(3,5,13,0.25) !important;
+}
+.drawing-frame.timer-critical {
+  box-shadow:
+    inset 0 0 0 3px rgba(255,92,92,0.38),
+    inset 60px 0 120px rgba(3,5,13,0.22),
+    inset -60px 0 120px rgba(3,5,13,0.22),
+    inset 0 60px 120px rgba(3,5,13,0.25),
+    inset 0 -60px 120px rgba(3,5,13,0.25) !important;
+  animation: frameCritPulse 0.88s cubic-bezier(.65,0,.35,1) infinite;
+}
+@keyframes frameCritPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.82; }
+}
+
+/* ── Canvas round-start pulse ── */
+@keyframes canvasRoundStart {
+  0%   { box-shadow: inset 0 0 0 0   rgba(122,184,255,0),    inset 60px 0 120px rgba(3,5,13,.22), inset -60px 0 120px rgba(3,5,13,.22), inset 0 60px 120px rgba(3,5,13,.25), inset 0 -60px 120px rgba(3,5,13,.25); }
+  22%  { box-shadow: inset 0 0 0 4px rgba(122,184,255,0.55), inset 60px 0 120px rgba(3,5,13,.22), inset -60px 0 120px rgba(3,5,13,.22), inset 0 60px 120px rgba(3,5,13,.25), inset 0 -60px 120px rgba(3,5,13,.25); }
+  100% { box-shadow: inset 0 0 0 0   rgba(122,184,255,0),    inset 60px 0 120px rgba(3,5,13,.22), inset -60px 0 120px rgba(3,5,13,.22), inset 0 60px 120px rgba(3,5,13,.25), inset 0 -60px 120px rgba(3,5,13,.25); }
+}
+.drawing-frame.round-start {
+  animation: canvasRoundStart 1.3s var(--ease-out-quart) forwards !important;
+}
+
+/* ── Canvas Ghost Prompt (pre-first-stroke overlay) ── */
+.canvas-ghost-prompt {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  gap: 4px;
+  padding-bottom: 72px;
+}
+.canvas-ghost-prompt.visible { opacity: 1; }
+.canvas-ghost-prompt.fading  { opacity: 0; transition: opacity 0.45s ease; }
+.canvas-ghost-icon {
+  font-size: 34px;
+  margin-bottom: 12px;
+  animation: ghostIconBob 2.6s ease-in-out infinite;
+  opacity: 0.55;
+}
+@keyframes ghostIconBob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%       { transform: translateY(-9px) rotate(4deg); }
+}
+.canvas-ghost-label {
+  font-size: 9px;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(30,20,10,0.26);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.canvas-ghost-word {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(30px, 4.5vw, 52px);
+  font-style: italic;
+  color: rgba(30,20,10,0.14);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* ── Brush Spark Particles ── */
+.brush-spark {
+  position: fixed;
+  pointer-events: none;
+  z-index: 11;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: brushSparkFly 0.52s var(--ease-out-quart) forwards;
+}
+@keyframes brushSparkFly {
+  0%   { opacity: 0.85; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0;    transform: translate(calc(-50% + var(--sdx,10px)), calc(-50% + var(--sdy,-10px))) scale(0.1); }
+}
+
+/* ── Time's-up Flash ── */
+.time-up-flash {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,92,92,0.11);
+  pointer-events: none;
+  z-index: 20;
+  animation: timeUpFlash 0.6s ease forwards;
+}
+@keyframes timeUpFlash {
+  0%   { opacity: 0; }
+  18%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── HUD Prompt — larger and legible ── */
+.match-hud-prompt {
+  font-family: 'Manrope', sans-serif !important;
+  font-style: normal !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: rgba(255,255,255,0.48) !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── Bottom Prompt Label — more visible ── */
+.match-prompt-label-word {
+  font-size: 15px !important;
+  color: rgba(30,20,10,0.44) !important;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(255,255,255,0.65) !important;
+  letter-spacing: 0.12em;
+}
+
+/* ── Score Pop on round win ── */
+@keyframes scorePop {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(1.55); box-shadow: 0 0 22px rgba(255,200,68,0.85), inset 0 1px 0 rgba(255,255,255,.25); }
+  100% { transform: scale(1); }
+}
+.match-score-pill.scoring { animation: scorePop 0.6s var(--ease-spring) forwards; }
+
+/* ── Guide path — slightly more visible ── */
+#drawing-guide-path {
+  stroke: rgba(60,40,20,0.18) !important;
+  stroke-width: 2.5 !important;
+}
+
+/* ── Toolbar custom tooltips ── */
+.tool-btn-icon { position: relative; overflow: visible !important; }
+.tool-btn-icon[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: calc(100% + 11px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-5px);
+  white-space: nowrap;
+  background: rgba(3,5,13,0.94);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 30;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.tool-btn-icon[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
 </style>
 </head>
 <body>
@@ -1833,12 +2035,21 @@ body::after {
 
 <!-- MATCH (gameplay screen) — kept before countdown overlay -->
 <div class="screen" id="screen-match">
+  <!-- Timer edge progress bar — shrinks left-to-right as round time drains -->
+  <div class="timer-progress-bar" id="timer-progress-bar"></div>
+
   <div class="canvas-stage">
     <video id="video" playsinline autoplay muted></video>
     <canvas id="canvas-main"></canvas>
     <canvas id="canvas-active"></canvas>
     <canvas id="canvas-cursor"></canvas>
     <div class="drawing-frame"></div>
+    <!-- Ghost prompt: "Draw your best [word]" — fades on first stroke -->
+    <div class="canvas-ghost-prompt" id="canvas-ghost-prompt">
+      <div class="canvas-ghost-icon">✏️</div>
+      <div class="canvas-ghost-label">Draw your best</div>
+      <div class="canvas-ghost-word" id="canvas-ghost-word">—</div>
+    </div>
     <div id="drawing-guide-overlay" class="drawing-guide-overlay" aria-hidden="true">
       <svg id="drawing-guide-svg" class="drawing-guide-svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <path id="drawing-guide-path" d="" />
@@ -1894,19 +2105,19 @@ body::after {
       <div class="tool-sizes" id="tool-sizes"></div>
     </div>
     <div class="tool-group">
-      <button class="tool-btn-icon tool-eraser" id="tool-eraser" title="Eraser (E)">
+      <button class="tool-btn-icon tool-eraser" id="tool-eraser" title="Eraser (E)" data-tip="Eraser [E]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l9-9 8 8-2 2"/><path d="M6 17.5l5-5"/></svg>
       </button>
-      <button class="tool-btn-icon tool-hand" id="tool-hand" title="Hand tracking mode (camera)">
+      <button class="tool-btn-icon tool-hand" id="tool-hand" title="Hand tracking mode (camera)" data-tip="Hand Mode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
       </button>
-      <button class="tool-btn-icon" id="tool-undo" title="Undo (Z)">
+      <button class="tool-btn-icon" id="tool-undo" title="Undo (Z)" data-tip="Undo [Z]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
       </button>
-      <button class="tool-btn-icon" id="tool-clear" title="Clear">
+      <button class="tool-btn-icon" id="tool-clear" title="Clear (C C)" data-tip="Clear [C C]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
       </button>
-      <button class="tool-btn-icon" id="tool-quit" title="Quit match">
+      <button class="tool-btn-icon" id="tool-quit" title="Quit match" data-tip="Quit">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
     </div>
@@ -2247,6 +2458,47 @@ const PROMPT_GUIDES = {
   'ghost holding flowers':'M178,202 Q178,138 250,128 Q322,138 322,202 L322,355 Q302,375 282,355 Q262,375 250,355 Q238,375 218,355 Q198,375 178,355 Z M222,202 A10,10 0 1,0 222.1,202Z M278,202 A10,10 0 1,0 278.1,202Z M148,255 Q128,232 138,202 Q158,182 174,202 L174,255 M142,202 Q138,175 154,164 Q158,185 148,202 M142,185 L118,174',
 };
 function getPromptGuide(p) { return PROMPT_GUIDES[p] || null; }
+
+/* Ghost prompt: "Draw your best [word]" shown on empty canvas; fades on first stroke */
+const ghostPrompt = {
+  _el: null, _wordEl: null, _dismissed: false,
+  init() {
+    this._el     = $('canvas-ghost-prompt');
+    this._wordEl = $('canvas-ghost-word');
+  },
+  show(prompt) {
+    if (!this._el) return;
+    this._dismissed = false;
+    if (this._wordEl) this._wordEl.textContent = prompt;
+    this._el.classList.remove('fading');
+    void this._el.offsetWidth;
+    this._el.classList.add('visible');
+  },
+  hide() {
+    if (!this._el || this._dismissed) return;
+    this._dismissed = true;
+    this._el.classList.remove('visible');
+    this._el.classList.add('fading');
+    const el = this._el;
+    setTimeout(() => el.classList.remove('fading'), 500);
+  },
+};
+
+/* Tiny burst of colored sparks at (x, y) — called on fast brush strokes */
+function spawnBrushSpark(x, y, color) {
+  const matchEl = document.getElementById('screen-match');
+  if (!matchEl || !matchEl.classList.contains('active')) return;
+  const count = 2 + Math.floor(Math.random() * 2);
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'brush-spark';
+    const angle = Math.random() * Math.PI * 2;
+    const dist  = 5 + Math.random() * 13;
+    el.style.cssText = `left:${Math.round(x)}px;top:${Math.round(y)}px;background:${color};--sdx:${(Math.cos(angle)*dist).toFixed(1)}px;--sdy:${(Math.sin(angle)*dist).toFixed(1)}px`;
+    matchEl.appendChild(el);
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  }
+}
 
 const guide = {
   _overlay: null, _path: null, _fadeTimer: null, _strokeFired: false,
@@ -2984,6 +3236,7 @@ const drawing = {
   _beginStroke(p) {
     this.isDown = true;
     guide.onFirstStroke();
+    ghostPrompt.hide();
     const strokeColor = this.isEraser ? CANVAS_BG : this.color;
     this.currentStroke = { color: strokeColor, size: this.isEraser ? Math.max(this.size * 1.5, 16) : this.size, points: [p], eraser: this.isEraser };
     if (!this.isEraser) this.colorsUsed.add(this.color);
@@ -3008,6 +3261,10 @@ const drawing = {
     if (this.onStrokePoint && (t - this.lastSendTs) >= GAME.STROKE_THROTTLE_MS) {
       this.onStrokePoint('add', p.x / this.w, p.y / this.h, undefined, undefined, p.p);
       this.lastSendTs = t;
+    }
+    // Brush sparkle micro-interaction (1-in-10 chance per move event)
+    if (!this.isEraser && Math.random() < 0.10) {
+      spawnBrushSpark(p.x, p.y, this.color);
     }
   },
   _endStroke() {
@@ -4412,6 +4669,24 @@ const match = {
     this.active = true;
     this.timerEnd = now() + GAME.ROUND_SECONDS * 1000;
     guide.show(this.prompt);
+    ghostPrompt.show(this.prompt);
+
+    // Reset and reveal the timer progress bar
+    const bar = $('timer-progress-bar');
+    if (bar) {
+      bar.style.transform = 'scaleX(1)';
+      bar.classList.remove('warning', 'critical');
+      bar.classList.add('active');
+    }
+    // Canvas round-start pulse + clear leftover timer classes
+    const frame = document.querySelector('#screen-match .drawing-frame');
+    if (frame) {
+      frame.classList.remove('timer-warning', 'timer-critical', 'round-start');
+      void frame.offsetWidth; // force reflow so animation re-triggers
+      frame.classList.add('round-start');
+      setTimeout(() => frame.classList.remove('round-start'), 1400);
+    }
+
     this.tickTimer();
   },
 
@@ -4421,6 +4696,22 @@ const match = {
     const remainSec = Math.ceil(remainMs / 1000);
     $('match-timer').textContent = remainSec;
     $('match-timer').classList.toggle('urgent', remainSec <= 10);
+
+    // Timer progress bar — shrinks from full to zero
+    const fraction = remainMs / (GAME.ROUND_SECONDS * 1000);
+    const bar = $('timer-progress-bar');
+    if (bar) {
+      bar.style.transform = `scaleX(${Math.max(0, fraction).toFixed(4)})`;
+      bar.classList.toggle('warning',  remainSec <= 20 && remainSec > 10);
+      bar.classList.toggle('critical', remainSec <= 10);
+    }
+    // Canvas frame glow: neutral → amber border → red border
+    const frame = document.querySelector('#screen-match .drawing-frame');
+    if (frame) {
+      frame.classList.toggle('timer-warning',  remainSec <= 20 && remainSec > 10);
+      frame.classList.toggle('timer-critical', remainSec <= 10);
+    }
+
     if (remainMs <= 0) { this.endDrawPhase(); return; }
     this.timerInterval = setTimeout(() => this.tickTimer(), 100);
   },
@@ -4429,9 +4720,25 @@ const match = {
     if (!this.active) return;
     this.active = false;
     guide.hide();
+    ghostPrompt.hide();
     if (this.timerInterval) clearTimeout(this.timerInterval);
     if (drawing.isDown) drawing.onPointerUp();
     $('match-timer').classList.remove('urgent');
+
+    // Clean up timer bar + frame glow
+    const bar = $('timer-progress-bar');
+    if (bar) { bar.classList.remove('active', 'warning', 'critical'); bar.style.transform = 'scaleX(0)'; }
+    const frame = document.querySelector('#screen-match .drawing-frame');
+    if (frame) frame.classList.remove('timer-warning', 'timer-critical', 'round-start');
+
+    // Time's-up red flash on the canvas
+    const matchEl = $('screen-match');
+    if (matchEl) {
+      const flash = document.createElement('div');
+      flash.className = 'time-up-flash';
+      matchEl.appendChild(flash);
+      flash.addEventListener('animationend', () => flash.remove(), { once: true });
+    }
 
     if (this.mode === 'practice') {
       this.openPracticeReveal();
@@ -5261,6 +5568,7 @@ function boot() {
   reactions.init();
   hand.init();
   guide.init();
+  ghostPrompt.init();
   bindUi();
   // Lazy-load perfect-freehand in the background. Quadratic strokes work
   // immediately; once freehand resolves, the next redraw produces variable-width.
