@@ -242,7 +242,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 /* Match screen HUD — dark glass so text is readable over the paper canvas */
 #screen-match .match-hud-top .glass,
 #screen-match .match-toolbar.glass,
-#screen-match .quick-reactions.glass,
 #screen-match .match-chat.glass{background:rgba(6,8,15,0.62);border-color:rgba(255,255,255,0.18)}
 
 /* ============================================================
@@ -323,11 +322,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .chat-send{background:var(--accent);color:var(--bg-0);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--ease);flex-shrink:0}
 .chat-send:hover{transform:scale(1.08)}
 
-/* Quick emoji reactions (vertical column on the right) */
-.quick-reactions{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:12;display:flex;gap:6px;padding:8px;border-radius:100px;flex-direction:column}
-.quick-reaction{width:32px;height:32px;border-radius:50%;background:var(--glass-bg);border:1px solid var(--glass-border);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s var(--ease);font-size:15px}
-.quick-reaction:hover{transform:scale(1.18);background:var(--glass-bg-strong)}
-
 /* Floating reaction emoji that animates upward */
 .float-reaction{position:fixed;z-index:20;font-size:40px;pointer-events:none;animation:floatUp 2.2s var(--ease-out-quart) forwards;text-shadow:0 4px 18px rgba(0,0,0,.6)}
 @keyframes floatUp{
@@ -396,11 +390,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 .hand-info-state.drawing{color:var(--accent-3)}
 .hand-info-state.searching{color:var(--text-mute)}
 .hand-info-state.lifted{color:var(--text-dim)}
+.hand-info-state.control{color:var(--accent)}
 
 /* Hand cursor on the canvas stage — circle that follows the index fingertip */
 .hand-cursor{position:fixed;width:36px;height:36px;border-radius:50%;border:2px solid var(--accent-2);background:rgba(255,122,182,.12);pointer-events:none;z-index:11;transform:translate(-50%,-50%);opacity:0;transition:opacity .15s,background .15s,border-color .15s,width .15s,height .15s}
 .hand-cursor.visible{opacity:1}
 .hand-cursor.drawing{background:rgba(122,240,193,.18);border-color:var(--accent-3);width:44px;height:44px}
+.hand-cursor.control-gesture{border-color:var(--accent);background:rgba(124,185,255,0.15)}
 
 /* Audio toggle row in profile modal */
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-top:1px solid var(--glass-border)}
@@ -418,8 +414,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   .opp-ghost{width:160px;height:160px;right:14px;bottom:14px}
   .match-chat{width:240px}
   .reveal-canvases{grid-template-columns:1fr;gap:14px;max-height:none}
-  .quick-reactions{right:14px;padding:6px}
-  .quick-reaction{width:28px;height:28px;font-size:13px}
 }
 @media (max-width:640px){
   .menu-actions{grid-template-columns:1fr}
@@ -427,7 +421,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
   .opp-ghost{width:120px;height:120px;right:10px;bottom:10px;border-radius:14px}
   .match-chat{width:200px;max-height:240px;left:10px;bottom:10px}
   .match-chat.collapsed{max-height:40px}
-  .quick-reactions{top:auto;bottom:240px;right:10px;transform:none;flex-direction:row;border-radius:100px}
   .vs-block{gap:14px}
   .vs-player{max-width:none}
   .vs-avatar{width:56px;height:56px;font-size:20px}
@@ -444,6 +437,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
 
 /* ---- Eraser tool ---- */
 .tool-btn-icon.tool-eraser.active{background:rgba(255,107,107,.18);border-color:rgba(255,107,107,.5);color:var(--warn)}
+/* ---- Fill tool ---- */
+.tool-btn-icon.tool-fill.active{background:rgba(122,240,193,.18);border-color:rgba(122,240,193,.5);color:var(--accent-3)}
 
 /* ---- AI Judge reveal badge ---- */
 .reveal-ai-judge{display:flex;align-items:center;gap:10px;padding:10px 18px;border-radius:100px;background:rgba(138,180,255,.07);border:1px solid rgba(138,180,255,.18);font-size:13px;color:var(--text-mute);transition:all .5s var(--ease)}
@@ -468,28 +463,36 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;background-ima
  * NEXT-GEN VISUAL REDESIGN — "Ink & Chrome" System
  * ============================================================ */
 
-/* ── Extended Design Tokens ── */
+/* ── Premium Design Tokens v2 ── */
 :root {
-  --bg-0: #03050d;
-  --bg-1: #080c1c;
-  --bg-2: #101628;
-  --accent: #7ab8ff;
-  --accent-2: #ff72ba;
-  --accent-3: #6de8bc;
+  --bg-0: #020208;
+  --bg-1: #070b18;
+  --bg-2: #0d1220;
+  --accent: #7cb9ff;
+  --accent-2: #ff6eb5;
+  --accent-3: #5de8b8;
   --gold: #ffc844;
   --warn: #ff5c5c;
-  --p1: #7ab8ff;
-  --p2: #ff72ba;
-  --glass-bg: rgba(255,255,255,0.04);
-  --glass-bg-strong: rgba(255,255,255,0.075);
-  --glass-border: rgba(255,255,255,0.09);
-  --glass-shadow: 0 8px 32px rgba(0,0,0,0.55),0 2px 8px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.05);
+  --p1: #7cb9ff;
+  --p2: #ff6eb5;
+  --glass-bg: rgba(255,255,255,0.058);
+  --glass-bg-strong: rgba(255,255,255,0.095);
+  --glass-border: rgba(255,255,255,0.11);
+  --glass-border-strong: rgba(255,255,255,0.19);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.07);
   --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
   --ease-soft: cubic-bezier(0.25,0.46,0.45,0.94);
-  --glow-blue: 0 0 24px rgba(122,184,255,0.4),0 0 60px rgba(122,184,255,0.15);
-  --glow-pink: 0 0 24px rgba(255,114,186,0.4),0 0 60px rgba(255,114,186,0.15);
-  --glow-gold: 0 0 24px rgba(255,200,68,0.4),0 0 60px rgba(255,200,68,0.15);
+  --ease-out: cubic-bezier(0.22,1,0.36,1);
+  --glow-blue: 0 0 20px rgba(124,185,255,0.4), 0 0 50px rgba(124,185,255,0.16);
+  --glow-pink: 0 0 20px rgba(255,110,181,0.4), 0 0 50px rgba(255,110,181,0.16);
+  --glow-gold: 0 0 20px rgba(255,200,68,0.42), 0 0 50px rgba(255,200,68,0.16);
   --canvas-paper: #f7f4ed;
+  --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px;
+  --z-base: 1; --z-canvas: 5; --z-hud: 10; --z-toolbar: 12;
+  --z-overlay: 30; --z-modal: 50; --z-toast: 60; --z-burst: 80;
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
 /* ── Richer body atmosphere ── */
@@ -935,6 +938,11 @@ body::after {
   color: var(--accent);
   box-shadow: 0 0 12px rgba(122,184,255,0.25);
 }
+.tool-btn-icon.tool-fill.active {
+  background: rgba(122,240,193,0.18);
+  border-color: rgba(122,240,193,0.48);
+  color: var(--accent-3);
+}
 .tool-btn-icon.tool-eraser.active {
   background: rgba(255,92,92,0.18);
   border-color: rgba(255,92,92,0.48);
@@ -1094,6 +1102,57 @@ body::after {
 .vs-name { font-size: 16px; font-weight: 700; }
 .vs-ready.ready { color: var(--accent-3); }
 
+/* ── CAMERA PIP ── */
+.camera-pip {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: 200px;
+  height: 200px;
+  border-radius: 18px;
+  overflow: hidden;
+  z-index: 12;
+  background: #06080f;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 36px rgba(0,0,0,.5);
+}
+.camera-pip canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform: scaleX(-1);
+}
+.camera-pip-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 100px;
+  background: rgba(6,8,15,.65);
+  backdrop-filter: blur(8px);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 1;
+}
+.pip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  animation: pulse-dot 1.6s infinite;
+}
+@media (max-width: 600px) {
+  .camera-pip { width: 120px; height: 120px; right: 10px; bottom: 10px; border-radius: 14px; }
+}
+
 /* ── OPPONENT GHOST ── */
 .opp-ghost {
   border-radius: 20px;
@@ -1116,22 +1175,6 @@ body::after {
   border-radius: 18px;
 }
 .chat-input:focus { border-color: var(--accent); }
-
-/* ── QUICK REACTIONS ── */
-.quick-reactions {
-  background: rgba(3,5,13,0.78);
-  border: 1px solid rgba(255,255,255,0.10);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border-radius: 100px;
-  padding: 10px 8px;
-}
-.quick-reaction {
-  background: transparent;
-  border: none;
-  transition: transform .18s var(--ease-spring);
-}
-.quick-reaction:hover { transform: scale(1.28); background: rgba(255,255,255,0.08); }
 
 /* ── REVEAL SCREEN — Gallery Style ── */
 #screen-reveal .screen-content {
@@ -1411,6 +1454,117 @@ body::after {
   border-color: var(--accent-3);
   box-shadow: 0 0 16px rgba(109,232,188,0.4);
 }
+.hand-cursor.control-gesture {
+  border-color: var(--accent);
+  background: rgba(124,185,255,0.15);
+  box-shadow: 0 0 14px rgba(124,185,255,0.35);
+}
+.hand-info-state.control {
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(124,185,255,0.5);
+}
+
+/* ── PROMPT CONSOLIDATION ── */
+.match-prompt-label { display: none !important; }
+.match-hud-prompt { font-size: 12px !important; color: rgba(255,255,255,0.35) !important; letter-spacing: 0.08em !important; }
+
+/* ── HUD LEFT GROUP (round + mode badge) ── */
+.match-hud-left { display: flex; align-items: center; gap: 8px; }
+
+/* ── HAND PANEL REPOSITIONED ── */
+.hand-info {
+  top: auto !important;
+  bottom: 254px;
+  left: auto !important;
+  right: 18px;
+  transform: none !important;
+  width: 200px;
+  border-radius: 16px !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+.hand-info-header { display: flex; align-items: center; justify-content: space-between; }
+.hand-info-toggle {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-mute); font-size: 11px; cursor: pointer;
+  pointer-events: auto; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.hand-gesture-guide {
+  display: flex; flex-direction: column; gap: 3px;
+  max-height: 200px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  opacity: 1; overflow: hidden;
+}
+.hand-gesture-guide.collapsed { max-height: 0 !important; opacity: 0 !important; }
+.hand-gesture-row {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-mute); padding: 1px 0;
+}
+.hand-gesture-row span:first-child { color: var(--text-dim); }
+.hand-gesture-row.active { color: var(--accent) !important; background: rgba(124,185,255,0.12); border-radius: 4px; padding: 2px 4px; }
+.hand-gesture-row.active span:first-child { color: var(--accent) !important; }
+
+/* ── CANVAS: hide ghost prompt entirely (word shown during countdown instead) ── */
+.canvas-ghost-prompt { display: none !important; }
+
+/* ── TIMER: always centered via grid ── */
+.match-hud-top {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 18px 22px;
+}
+.match-hud-left { display: flex; align-items: center; gap: 8px; justify-content: flex-start; }
+.match-score { display: flex !important; align-items: center; gap: 6px; justify-content: flex-end; visibility: hidden; }
+.match-score.score-visible { visibility: visible; }
+
+/* ── CURSOR AURA ── */
+.hand-cursor.drawing {
+  border-color: var(--cursor-ink, var(--accent-3)) !important;
+  background: color-mix(in srgb, var(--cursor-ink, var(--accent-3)) 18%, transparent) !important;
+  box-shadow: 0 0 14px var(--cursor-ink, var(--accent-3)), 0 0 4px var(--cursor-ink, var(--accent-3)) !important;
+}
+
+/* ── PARTICLE TRAIL ── */
+.hand-trail-dot {
+  position: fixed; width: 7px; height: 7px; border-radius: 50%;
+  pointer-events: none; z-index: 10;
+  transform: translate(-50%,-50%);
+  animation: trailFade 0.5s ease-out forwards;
+}
+@keyframes trailFade {
+  from { opacity: 0.65; transform: translate(-50%,-50%) scale(1); }
+  to   { opacity: 0;    transform: translate(-50%,-50%) scale(0.15); }
+}
+
+/* ── RADIAL MENU ── */
+#radial-menu {
+  position: fixed; z-index: 18; pointer-events: none;
+  transform: translate(-50%,-50%);
+  opacity: 0; transition: opacity 0.2s;
+}
+#radial-menu.visible { opacity: 1; }
+.radial-svg { filter: drop-shadow(0 0 24px rgba(0,0,0,0.7)); overflow: visible; }
+.radial-sector {
+  fill: rgba(3,5,13,0.82);
+  stroke: rgba(255,255,255,0.12); stroke-width: 1;
+  transition: fill 0.15s, stroke 0.15s;
+}
+.radial-sector.active { fill: rgba(124,185,255,0.28); stroke: rgba(124,185,255,0.7); }
+.radial-center { fill: rgba(3,5,13,0.92); stroke: rgba(255,255,255,0.2); stroke-width: 1; }
+.radial-label {
+  fill: rgba(255,255,255,0.75); font-size: 11px;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em;
+  dominant-baseline: middle;
+}
+
+/* ── CAMERA PIP HEIGHT ── */
+.camera-pip { height: 220px !important; }
+.camera-pip canvas { height: 100% !important; }
 
 /* ── TOAST NOTIFICATIONS ── */
 .toast {
@@ -1445,7 +1599,6 @@ body::after {
 /* ── MATCH HUD dark glass override ── */
 #screen-match .match-hud-top .glass,
 #screen-match .match-toolbar.glass,
-#screen-match .quick-reactions.glass,
 #screen-match .match-chat.glass {
   background: rgba(3,5,13,0.76);
   border-color: rgba(255,255,255,0.10);
@@ -1614,7 +1767,6 @@ body::after {
   .opp-ghost { width: 158px; height: 158px; right: 12px; bottom: 12px; border-radius: 16px; }
   .match-chat { width: 238px; }
   .reveal-canvases { grid-template-columns: 1fr; gap: 12px; max-height: none; }
-  .quick-reactions { right: 12px; }
 }
 @media (max-width:640px) {
   .menu-actions { grid-template-columns: 1fr; }
@@ -1622,7 +1774,6 @@ body::after {
   .opp-ghost { width: 118px; height: 118px; right: 10px; bottom: 10px; border-radius: 14px; }
   .match-chat { width: 198px; max-height: 238px; left: 10px; bottom: 10px; }
   .match-chat.collapsed { max-height: 42px; }
-  .quick-reactions { top: auto; bottom: 245px; right: 10px; transform: none; flex-direction: row; border-radius: 100px; }
   .vs-block { gap: 12px; }
   .vs-avatar { width: 58px; height: 58px; font-size: 22px; }
   .vs-divider { font-size: 30px; }
@@ -1799,9 +1950,9 @@ body::after {
 }
 .match-score-pill.scoring { animation: scorePop 0.6s var(--ease-spring) forwards; }
 
-/* ── Guide path — slightly more visible ── */
+/* ── Guide path — clearly visible dashed outline ── */
 #drawing-guide-path {
-  stroke: rgba(60,40,20,0.18) !important;
+  stroke: rgba(60,40,20,0.28) !important;
   stroke-width: 2.5 !important;
 }
 
@@ -1832,6 +1983,851 @@ body::after {
 .tool-btn-icon[data-tip]:hover::after {
   opacity: 1;
   transform: translateY(-50%) translateX(0);
+}
+
+/* ============================================================
+ * ANIMATED LIQUID FILL + COLORING BOOK MODE
+ * ============================================================ */
+
+/* ── Coverage HUD (live ring counter during coloring book) ── */
+.coverage-hud {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  z-index: 13;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px 10px 14px;
+  border-radius: 100px;
+  background: rgba(3,5,13,0.82);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 10px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s var(--ease-out-quart), visibility 0.35s, transform 0.35s var(--ease-out-quart);
+  pointer-events: none;
+}
+.coverage-hud.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+/* Coverage SVG ring */
+.coverage-ring {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+.coverage-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.coverage-ring-bg {
+  fill: none;
+  stroke: rgba(255,255,255,0.09);
+  stroke-width: 3.5;
+}
+.coverage-ring-fill {
+  fill: none;
+  stroke: var(--accent-3);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  /* circumference of r=15: 2*π*15 ≈ 94.25 */
+  stroke-dasharray: 94.25;
+  stroke-dashoffset: 94.25;
+  transition: stroke-dashoffset 0.6s var(--ease-out-quart), stroke 0.4s ease;
+  filter: drop-shadow(0 0 5px rgba(109,232,188,0.7));
+}
+.coverage-ring-fill.warn  { stroke: var(--gold);  filter: drop-shadow(0 0 5px rgba(255,200,68,0.7)); }
+.coverage-ring-fill.great { stroke: var(--accent); filter: drop-shadow(0 0 6px rgba(122,184,255,0.8)); }
+.coverage-ring-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8.5px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent-3);
+  transition: color 0.4s ease;
+}
+.coverage-ring-pct.warn  { color: var(--gold); }
+.coverage-ring-pct.great { color: var(--accent); }
+.coverage-hud-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.coverage-hud-eyebrow {
+  font-size: 8px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+  font-weight: 700;
+}
+.coverage-hud-grade {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--accent-3);
+  line-height: 1;
+  transition: color 0.4s ease;
+  white-space: nowrap;
+}
+.coverage-hud-grade.warn  { color: var(--gold); }
+.coverage-hud-grade.great { color: var(--accent); }
+
+/* ── Mode pill variant for Coloring Book ── */
+.match-mode-pill.coloring-book {
+  background: rgba(109,232,188,0.10);
+  border-color: rgba(109,232,188,0.28);
+  color: var(--accent-3);
+  box-shadow: 0 0 14px rgba(109,232,188,0.18);
+}
+
+/* ── Menu icon tint for Coloring Book ── */
+.menu-icon-color-book {
+  background: linear-gradient(135deg, rgba(109,232,188,0.16), rgba(122,184,255,0.08));
+  border-color: rgba(109,232,188,0.22);
+}
+.menu-btn:hover .menu-icon-color-book {
+  box-shadow: 0 0 18px rgba(109,232,188,0.35);
+  border-color: rgba(109,232,188,0.46);
+}
+
+/* ── Fill click ripple ── */
+@keyframes fillRipple {
+  0%   { transform: translate(-50%,-50%) scale(0); opacity: 0.85; }
+  60%  { opacity: 0.45; }
+  100% { transform: translate(-50%,-50%) scale(4.5); opacity: 0; }
+}
+.fill-ripple {
+  position: fixed;
+  pointer-events: none;
+  z-index: 11;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  animation: fillRipple 0.52s var(--ease-out-quart) forwards;
+}
+
+/* ── Coloring Book result block ── */
+.cb-result-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+.cb-result-ring {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 4px;
+}
+.cb-result-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.cb-result-ring-bg  { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 5; }
+.cb-result-ring-arc {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 263.9; /* circumference r=42 */
+  transition: stroke-dashoffset 1.1s var(--ease-out-quart);
+}
+.cb-result-pct-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.cb-result-pct-num {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-style: italic;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent-3) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.cb-result-pct-label {
+  font-size: 7.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  font-weight: 700;
+}
+.cb-result-grade {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 20px;
+  color: var(--accent-3);
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+ * PREMIUM REDESIGN — Final consolidated override pass
+ *
+ * JS-managed state classes (must all remain styled):
+ *   Screens:       .screen.active
+ *   Modals:        .modal-overlay.show
+ *   Drawing guide: .drawing-guide-overlay.visible / .fading
+ *   Ghost prompt:  .canvas-ghost-prompt.visible / .fading
+ *   Hand cursor:   .hand-cursor.visible / .drawing
+ *   Hand info:     #hand-info.visible
+ *   Hand btn:      .tool-hand.active / .loading
+ *   Toolbar:       .match-toolbar.is-drawing
+ *   Tool btns:     .tool-btn-icon.active (eraser/fill/hand)
+ *   Timer bar:     .timer-progress-bar.active / .warning / .critical
+ *   Canvas frame:  .drawing-frame.timer-warning / .timer-critical / .round-start
+ *   Match timer:   .match-timer.urgent
+ *   Countdown:     .countdown-num.go, .countdown-overlay.show, .countdown-overlay.burst
+ *   Mode pill:     .match-mode-pill.mp / .coloring-book
+ *   Opp ghost:     .opp-ghost.show
+ *   Chat:          .match-chat.collapsed, .chat-unread-pill.show
+ *   Lobby ready:   .vs-ready.ready
+ *   Onboard dots:  .onboard-dot.active
+ *   Demo art:      .onboard-demo-art.chosen / .winner
+ *   Reveal art:    .reveal-art.chosen / .winner / .locked
+ *   Vote badges:   .reveal-art-vote-badge.you-voted / .they-voted / .both-voted
+ *   AI judge:      .reveal-ai-judge.fired
+ *   Reveal timer:  #reveal-timer.urgent
+ *   Result card:   .result-card.victory-card
+ *   Coverage ring: .coverage-ring-fill.warn / .great
+ *   Toggle pills:  .toggle-pill.on
+ *   Score pill:    .match-score-pill.scoring
+ *   Disconnect:    .disconnect-overlay.show
+ *   Level burst:   .levelup-burst.show
+ *   Timer ring:    .match-timer-wrap uses --timer-frac, --ring-color CSS vars (set by JS)
+ * ============================================================ */
+
+/* ── Body: richer deep-space aurora ── */
+body {
+  background:
+    radial-gradient(ellipse 130% 90% at 6% 2%,  rgba(65,30,195,0.52) 0%, transparent 52%),
+    radial-gradient(ellipse 90%  70% at 96% 98%, rgba(195,40,125,0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 70%  50% at 52% 44%, rgba(25,105,255,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 40%  28% at 72% 18%, rgba(95,215,195,0.06) 0%, transparent 50%),
+    linear-gradient(176deg, var(--bg-1) 0%, var(--bg-0) 100%);
+}
+body::after { opacity: 0.45; mix-blend-mode: soft-light; }
+
+/* ── Glass — higher contrast, real depth ── */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(26px) saturate(1.7);
+  -webkit-backdrop-filter: blur(26px) saturate(1.7);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--r-md);
+}
+.glass-strong {
+  background: var(--glass-bg-strong);
+  border: 1px solid rgba(255,255,255,0.13);
+  backdrop-filter: blur(36px) saturate(1.9);
+  -webkit-backdrop-filter: blur(36px) saturate(1.9);
+  box-shadow:
+    0 14px 52px rgba(0,0,0,0.62),
+    0 4px 14px rgba(0,0,0,0.38),
+    inset 0 1px 0 rgba(255,255,255,0.09),
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+  border-radius: var(--r-lg);
+}
+
+/* ── Typography: single source of truth ── */
+.mono { font-family: var(--font-mono); letter-spacing: 0.05em; font-feature-settings: 'tnum' 1; }
+.match-timer, #reveal-timer { font-family: var(--font-mono); font-feature-settings: 'tnum' 1; }
+
+/* All eyebrow labels unified */
+.result-eyebrow, .reveal-eyebrow, .lobby-eyebrow, .onboard-progress + *,
+.tool-group-label, .coverage-hud-eyebrow, .hand-info-eyebrow,
+.countdown-context-eyebrow, .opp-ghost-label, .camera-pip-label {
+  letter-spacing: 0.14em;
+}
+
+/* ── Buttons: unified interaction model ── */
+.btn {
+  font-family: var(--font-body);
+  border-radius: var(--r-sm);
+  transition: transform 0.22s var(--ease-spring), box-shadow 0.22s var(--ease-spring), background 0.22s, border-color 0.22s;
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.012);
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+}
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.984);
+  transition-duration: 0.08s;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.btn-primary {
+  background: linear-gradient(138deg, rgba(124,185,255,0.22) 0%, rgba(255,110,181,0.18) 100%);
+  border-color: rgba(124,185,255,0.4);
+  box-shadow: 0 6px 24px rgba(124,185,255,0.16), inset 0 1px 0 rgba(255,255,255,0.13);
+}
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(138deg, rgba(124,185,255,0.33) 0%, rgba(255,110,181,0.26) 100%);
+  border-color: rgba(124,185,255,0.58);
+  box-shadow: 0 12px 36px rgba(124,185,255,0.32), 0 0 0 1px rgba(124,185,255,0.25), inset 0 1px 0 rgba(255,255,255,0.17);
+}
+.btn-large { padding: 17px 32px; font-size: 15px; border-radius: var(--r-md); }
+
+/* ── Screen transitions ── */
+.screen { transition: opacity 0.42s var(--ease-out), visibility 0.42s; }
+
+/* ── SPLASH ── */
+#screen-splash {
+  background:
+    radial-gradient(ellipse 150% 110% at 50% 38%, rgba(75,38,215,0.6) 0%, transparent 55%),
+    radial-gradient(ellipse 80%  58% at 18% 82%, rgba(195,48,135,0.3) 0%, transparent 50%),
+    var(--bg-0);
+  overflow: hidden;
+}
+#screen-splash::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%, rgba(124,185,255,0.04) 15%,
+    transparent 30%, rgba(255,110,181,0.04) 45%,
+    transparent 60%, rgba(93,232,184,0.03) 75%,
+    transparent 90%
+  );
+  animation: splashSpin 40s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes splashSpin { to { transform: rotate(360deg); } }
+
+.splash-logo {
+  font-size: clamp(72px, 13vw, 152px);
+  letter-spacing: -0.03em;
+  position: relative;
+  z-index: 2;
+  line-height: 1;
+}
+.splash-logo em {
+  display: block;
+  font-style: italic;
+  background: linear-gradient(135deg, var(--accent) 0%, #b8d8ff 45%, var(--accent-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 40px rgba(124,185,255,0.35));
+}
+.splash-orb {
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(80,42,220,0.22) 0%, rgba(195,48,135,0.12) 40%, transparent 70%);
+  animation: orbPulse 5s ease-in-out infinite;
+}
+.splash-sub {
+  font-size: 11px;
+  letter-spacing: 0.52em;
+  color: rgba(255,255,255,0.3);
+  text-transform: uppercase;
+  margin-top: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── MAIN MENU ── */
+#screen-menu .screen-content {
+  gap: 18px;
+  max-width: 790px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 22px 28px;
+}
+.brand { font-size: 11px; letter-spacing: 0.44em; gap: 12px; }
+.brand-mark {
+  width: 28px; height: 28px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: var(--glow-blue);
+}
+
+/* Hero: single-direction gradient with subtle shimmer */
+.hero-title {
+  font-size: clamp(52px, 10.5vw, 120px);
+  letter-spacing: -0.03em;
+  line-height: 0.92;
+  margin-bottom: 14px;
+}
+.hero-title em {
+  font-style: italic;
+  background: linear-gradient(155deg, #a8d4ff 0%, var(--accent) 40%, #5aa8ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(124,185,255,0.3));
+  background-size: 200% 100%;
+  animation: gradientPan 6s ease-in-out infinite alternate;
+}
+@keyframes gradientPan {
+  0%   { background-position: 0% 50%;   }
+  100% { background-position: 100% 50%; }
+}
+.hero-sub {
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  color: rgba(255,255,255,0.55);
+  max-width: 450px;
+  line-height: 1.55;
+}
+
+/* Menu cards: stagger entrance + accent strip */
+.menu-actions {
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  gap: 11px;
+  max-width: 790px;
+}
+.menu-btn {
+  padding: 20px 22px;
+  gap: 18px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  transition: transform 0.26s var(--ease-spring), box-shadow 0.26s var(--ease-spring), background 0.22s, border-color 0.22s;
+  backdrop-filter: blur(26px) saturate(1.6);
+  -webkit-backdrop-filter: blur(26px) saturate(1.6);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: cardIn 0.55s var(--ease-spring) forwards;
+}
+.menu-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Card entrance stagger */
+.menu-btn:nth-child(1) { animation-delay: 0.05s; }
+.menu-btn:nth-child(2) { animation-delay: 0.13s; }
+.menu-btn:nth-child(3) { animation-delay: 0.21s; }
+.menu-btn:nth-child(4) { animation-delay: 0.29s; }
+.menu-btn:nth-child(5) { animation-delay: 0.37s; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* Colored left accent strip on each card */
+.menu-btn::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 20%; bottom: 20%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.menu-btn.primary::before         { background: var(--accent);   opacity: 0.7; }
+.menu-btn[data-action="coloring-book"]::before { background: var(--accent-3); opacity: 0.6; }
+.menu-btn[data-action="multiplayer-host"]::before { background: var(--accent-2); opacity: 0.6; }
+.menu-btn[data-action="multiplayer-join"]::before { background: var(--accent-3); opacity: 0.6; }
+.menu-btn[data-action="quickplay"]::before { background: var(--gold); opacity: 0.65; }
+.menu-btn:hover::before { opacity: 1; top: 15%; bottom: 15%; transition: opacity 0.2s, top 0.2s, bottom 0.2s; }
+
+.menu-btn:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.005);
+  background: var(--glass-bg-strong);
+  border-color: rgba(255,255,255,0.18);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.09);
+}
+.menu-btn:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.998);
+}
+.menu-btn.primary {
+  background: linear-gradient(140deg, rgba(124,185,255,0.12), rgba(255,110,181,0.08));
+  border-color: rgba(124,185,255,0.28);
+}
+.menu-btn.primary:hover:not(:disabled) {
+  background: linear-gradient(140deg, rgba(124,185,255,0.20), rgba(255,110,181,0.14));
+  border-color: rgba(124,185,255,0.44);
+  box-shadow: 0 18px 48px rgba(0,0,0,0.48), 0 0 32px rgba(124,185,255,0.14), inset 0 1px 0 rgba(255,255,255,0.09);
+}
+.menu-btn-icon {
+  width: 54px; height: 54px;
+  border-radius: var(--r-md);
+  transition: transform 0.26s var(--ease-spring), box-shadow 0.26s;
+}
+.menu-btn:hover .menu-btn-icon { transform: scale(1.08) rotate(-3deg); }
+.menu-btn:hover .menu-icon-practice { box-shadow: 0 0 18px rgba(124,185,255,0.38); border-color: rgba(124,185,255,0.42); }
+.menu-btn:hover .menu-icon-host     { box-shadow: 0 0 18px rgba(255,110,181,0.38); border-color: rgba(255,110,181,0.42); }
+.menu-btn:hover .menu-icon-join     { box-shadow: 0 0 18px rgba(93,232,184,0.38);  border-color: rgba(93,232,184,0.42);  }
+.menu-btn:hover .menu-icon-quick    { box-shadow: 0 0 18px rgba(255,200,68,0.38);  border-color: rgba(255,200,68,0.42);  }
+.menu-btn:hover .menu-icon-color-book { box-shadow: 0 0 18px rgba(93,232,184,0.38); border-color: rgba(93,232,184,0.42); }
+.menu-btn-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; }
+.menu-btn-sub   { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 3px; line-height: 1.45; }
+
+/* Daily challenge: gold treatment */
+.daily-challenge {
+  max-width: 790px;
+  padding: 14px 22px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, rgba(255,200,68,0.09) 0%, rgba(255,110,181,0.05) 100%);
+  border: 1px solid rgba(255,200,68,0.22);
+  box-shadow: 0 0 28px rgba(255,200,68,0.08), inset 0 1px 0 rgba(255,200,68,0.12);
+}
+.menu-footer .btn-ghost {
+  font-size: 12px;
+  padding: 9px 16px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  min-height: 44px;
+  transition: all 0.22s var(--ease-spring);
+}
+.menu-footer .btn-ghost:hover:not(:disabled) {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-1px);
+}
+
+/* Profile card */
+.profile-card {
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  transition: all 0.24s var(--ease-spring);
+}
+.profile-card:hover {
+  background: var(--glass-bg-strong);
+  border-color: rgba(255,255,255,0.18);
+  transform: translateY(-1px);
+}
+.avatar { box-shadow: var(--glow-blue), inset 0 1px 0 rgba(255,255,255,0.32); }
+
+/* ── LOBBY SCREENS ── */
+.lobby-card {
+  padding: 42px 38px;
+  border-radius: var(--r-xl);
+  box-shadow: 0 22px 64px rgba(0,0,0,0.58), 0 4px 14px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.lobby-eyebrow { font-size: 9px; letter-spacing: 0.4em; color: rgba(255,255,255,0.3); margin-bottom: 14px; }
+.lobby-title { font-size: 38px; letter-spacing: -0.02em; }
+.room-code {
+  font-size: 26px; font-weight: 700; letter-spacing: 0.22em;
+  padding: 16px 28px; border-radius: var(--r-md);
+  background: rgba(2,2,8,0.5);
+  border: 1px solid rgba(124,185,255,0.28);
+  color: var(--accent);
+  box-shadow: var(--glow-blue), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.vs-avatar.p1 { box-shadow: var(--glow-blue), 0 10px 28px rgba(0,0,0,0.42), inset 0 2px 0 rgba(255,255,255,0.26); }
+.vs-avatar.p2 { box-shadow: var(--glow-pink), 0 10px 28px rgba(0,0,0,0.42), inset 0 2px 0 rgba(255,255,255,0.26); }
+
+/* ── MATCH SCREEN ── */
+#screen-match { background: #14100a; }
+#canvas-main  { background: var(--canvas-paper); }
+/* Cap HUD blur during match — GPU is busy */
+#screen-match .glass,
+#screen-match .glass-strong {
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  background: rgba(2,2,8,0.72);
+  border-color: rgba(255,255,255,0.14);
+}
+.match-hud-top { padding: 15px 18px; }
+.match-round { font-size: 11px; letter-spacing: 0.28em; padding: 9px 16px; border-radius: 100px; }
+.match-round b { color: var(--accent); font-size: 13px; }
+
+/* Timer ring (depleting arc via CSS custom property --timer-frac set by JS) */
+.match-timer-wrap { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.match-timer-wrap::before {
+  content: '';
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% + 8px);
+  height: calc(100% - 28px); /* exclude the prompt text */
+  border-radius: 100px;
+  background: conic-gradient(
+    var(--ring-color, rgba(124,185,255,0.55)) calc(var(--timer-frac, 1) * 360deg),
+    rgba(255,255,255,0.06) 0deg
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+  z-index: -1;
+}
+#screen-match .match-timer-wrap::before { opacity: 1; }
+
+.match-timer {
+  font-size: 24px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 9px 22px; border-radius: 100px; min-width: 100px;
+  transition: color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.match-timer.urgent {
+  color: var(--warn);
+  background: rgba(255,92,92,0.18);
+  border-color: rgba(255,92,92,0.48);
+  box-shadow: 0 0 22px rgba(255,92,92,0.35);
+  animation: heartbeat 0.85s cubic-bezier(.65,0,.35,1) infinite;
+}
+
+/* Match HUD prompt text — single definition */
+.match-hud-prompt {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 700;
+  font-style: normal;
+  color: rgba(255,255,255,0.44);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-top: 3px;
+}
+.match-mode-pill { font-size: 9px; letter-spacing: 0.36em; padding: 9px 16px; border-radius: 100px; }
+
+/* Toolbar */
+.match-toolbar {
+  left: 16px; padding: 16px 13px; border-radius: var(--r-lg); gap: 16px;
+  background: rgba(2,2,8,0.80);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.62), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 0 0 1px rgba(255,255,255,0.04);
+  transition: opacity 0.25s, transform 0.25s var(--ease-soft);
+}
+.match-toolbar.is-drawing { opacity: 0.05; transform: translateY(-50%) translateX(-82%); }
+.tool-btn-icon {
+  width: 36px; height: 36px; border-radius: 11px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.48);
+  transition: all 0.2s var(--ease-spring);
+  min-height: 36px; min-width: 36px;
+}
+.tool-btn-icon:hover { background: rgba(255,255,255,0.10); color: var(--text); transform: scale(1.08); border-color: rgba(255,255,255,0.18); }
+.tool-btn-icon:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tool-btn-icon.active { background: rgba(124,185,255,0.22); border-color: rgba(124,185,255,0.5); color: var(--accent); box-shadow: 0 0 12px rgba(124,185,255,0.28); }
+.tool-btn-icon.tool-fill.active   { background: rgba(93,232,184,0.20);  border-color: rgba(93,232,184,0.5);  color: var(--accent-3); box-shadow: 0 0 12px rgba(93,232,184,0.28); }
+.tool-btn-icon.tool-eraser.active { background: rgba(255,92,92,0.20);   border-color: rgba(255,92,92,0.5);   color: var(--warn);    box-shadow: 0 0 12px rgba(255,92,92,0.28);  }
+.tool-btn-icon.tool-hand.active   { background: linear-gradient(135deg, rgba(255,110,181,0.20), rgba(124,185,255,0.12)); border-color: rgba(255,110,181,0.44); color: var(--accent-2); box-shadow: 0 0 12px rgba(255,110,181,0.28); }
+
+/* Bottom prompt on canvas */
+.match-prompt-label-word {
+  font-size: 15px;
+  color: rgba(30,20,10,0.44);
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(255,255,255,0.65);
+  letter-spacing: 0.12em;
+}
+
+/* ── COUNTDOWN — cinematic ── */
+.countdown-overlay {
+  background: rgba(2,2,8,0.84);
+  backdrop-filter: blur(30px) saturate(1.5);
+  -webkit-backdrop-filter: blur(30px) saturate(1.5);
+  flex-direction: column;
+}
+.countdown-overlay.burst::before {
+  animation: countdownBurst 0.92s var(--ease-out) forwards;
+}
+@keyframes countdownBurst {
+  0%   { transform: scale(0.4); opacity: 0; }
+  40%  { opacity: 0.8; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.countdown-num {
+  font-family: var(--font-display);
+  font-size: clamp(170px, 27vw, 330px);
+  line-height: 0.88;
+  font-style: italic;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent-3) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: countPop 0.92s var(--ease-out-quart);
+  filter: drop-shadow(0 0 45px rgba(124,185,255,0.32));
+}
+.countdown-num.go {
+  font-size: clamp(80px, 14vw, 162px);
+  background: linear-gradient(135deg, var(--accent-3), var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 32px rgba(93,232,184,0.45));
+}
+.countdown-context-prompt {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(28px, 5vw, 54px);
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.9);
+}
+
+/* ── REVEAL SCREEN ── */
+.reveal-art {
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(255,255,255,0.09);
+  background: var(--canvas-paper);
+  transition: transform 0.38s var(--ease-spring), box-shadow 0.38s;
+}
+.reveal-art:not(.locked):hover { transform: translateY(-5px) scale(1.006); box-shadow: 0 22px 52px rgba(0,0,0,0.52); }
+.reveal-art.chosen { box-shadow: 0 0 0 2.5px var(--accent), 0 16px 48px rgba(124,185,255,0.32); transform: translateY(-5px) scale(1.006); }
+.reveal-art.winner { box-shadow: 0 0 0 2.5px var(--gold), 0 20px 56px rgba(255,200,68,0.32); }
+.reveal-art.winner::before { background: conic-gradient(from 0deg, transparent 70%, rgba(255,200,68,0.28) 80%, transparent 90%); }
+.reveal-art-label { padding: 12px 16px; background: rgba(2,2,8,0.82); backdrop-filter: blur(14px); border-top: 1px solid rgba(255,255,255,0.08); }
+.reveal-vote-prompt { font-family: var(--font-display); font-style: italic; font-size: 20px; }
+.reveal-ai-judge { border-radius: 100px; transition: all 0.5s var(--ease-out); }
+.reveal-ai-judge.fired { box-shadow: var(--glow-blue); }
+#reveal-timer { font-family: var(--font-mono); font-feature-settings: 'tnum' 1; border-radius: 100px; }
+#reveal-timer.urgent { color: var(--warn); background: rgba(255,92,92,0.16); border-color: rgba(255,92,92,0.48); animation: heartbeat 0.85s cubic-bezier(.65,0,.35,1) infinite; }
+
+/* ── RESULT SCREEN ── */
+#screen-result .screen-content { gap: 0; align-items: center; justify-content: center; }
+.result-card {
+  width: min(590px, 95%);
+  padding: 54px 44px 44px;
+  border-radius: var(--r-xl);
+  position: relative;
+  overflow: hidden;
+}
+.result-card::before {
+  content: '';
+  position: absolute; top: 0; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124,185,255,0.55), rgba(255,110,181,0.55), transparent);
+}
+.result-eyebrow { font-size: 9px; letter-spacing: 0.44em; color: rgba(255,255,255,0.3); margin-bottom: 13px; }
+.result-headline { font-family: var(--font-display); font-size: clamp(50px, 8.5vw, 72px); letter-spacing: -0.03em; line-height: 1; margin-bottom: 14px; }
+.result-headline.victory {
+  background: linear-gradient(135deg, var(--gold) 0%, #fff9d0 42%, var(--gold) 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 36px rgba(255,200,68,0.52));
+}
+.result-headline.draw { color: var(--accent-3); }
+.result-headline.defeat { color: rgba(255,255,255,0.45); }
+.result-card.victory-card { animation: victoryBreathe 3s ease-in-out infinite; }
+@keyframes victoryBreathe {
+  0%,100% { box-shadow: var(--glass-shadow), 0 0 0 1px rgba(255,200,68,0.2), 0 0 40px rgba(255,200,68,0.08); }
+  50%      { box-shadow: var(--glass-shadow), 0 0 0 1px rgba(255,200,68,0.4), 0 0 70px rgba(255,200,68,0.18); }
+}
+.reward-chip {
+  padding: 12px 18px; border-radius: var(--r-md);
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  transition: transform 0.22s var(--ease-spring), border-color 0.22s;
+}
+.reward-chip:hover { transform: translateY(-2px); border-color: rgba(124,185,255,0.3); }
+.reward-chip-label { font-size: 9px; letter-spacing: 0.22em; }
+.reward-chip-value { font-size: 17px; font-weight: 800; }
+
+/* ── MODALS ── */
+.modal-overlay { background: rgba(0,0,0,0.74); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.modal {
+  border-radius: var(--r-xl);
+  transform: translateY(24px) scale(0.96);
+  transition: transform 0.38s var(--ease-spring);
+}
+.modal-overlay.show .modal { transform: translateY(0) scale(1); }
+.modal-header { padding: 22px 28px; border-bottom: 1px solid var(--glass-border); }
+.modal-title { font-family: var(--font-display); font-size: 27px; }
+.modal-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.disconnect-card { border-radius: var(--r-xl); }
+
+/* ── MISC COMPONENTS ── */
+.input {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  font-family: var(--font-body);
+  transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
+}
+.input:focus {
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 4px rgba(124,185,255,0.12), 0 0 22px rgba(124,185,255,0.12);
+}
+.toggle-pill { transition: all 0.22s var(--ease-spring); border-radius: 100px; font-size: 11px; }
+.toggle-pill.on {
+  background: var(--accent); border-color: var(--accent); color: var(--bg-0);
+  box-shadow: 0 0 16px rgba(124,185,255,0.42);
+}
+.spinner { border-top-color: var(--accent); }
+.opp-ghost {
+  background: var(--canvas-paper);
+  border: 1px solid rgba(255,110,181,0.28);
+  box-shadow: var(--glow-pink), 0 16px 44px rgba(0,0,0,0.52);
+  border-radius: var(--r-lg);
+}
+.match-chat {
+  background: rgba(2,2,8,0.80);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-radius: var(--r-lg);
+}
+.ach-item.unlocked { background: linear-gradient(135deg, rgba(93,232,184,0.12), rgba(124,185,255,0.08)); border-color: rgba(93,232,184,0.32); }
+.levelup-burst.show { opacity: 1; visibility: visible; }
+.levelup-num { color: var(--gold); text-shadow: 0 0 60px rgba(255,200,68,0.82); }
+
+/* ── ACH TOAST ── */
+.ach-toast {
+  background: linear-gradient(135deg, rgba(93,232,184,0.18), rgba(124,185,255,0.12));
+  border: 1px solid rgba(93,232,184,0.42);
+  border-radius: var(--r-md);
+}
+
+/* ── COVERAGE HUD ── */
+.coverage-hud {
+  background: rgba(2,2,8,0.84);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  body { animation: none; }
+  .menu-btn { opacity: 1; animation: none; }
+  .splash-logo, .splash-sub { animation: none; opacity: 1; transform: none; }
+  .result-card.victory-card { animation: none; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .match-toolbar { left: 10px; padding: 11px 9px; gap: 12px; }
+  .tool-btn-icon { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
+  .opp-ghost { width: 158px; height: 158px; right: 12px; bottom: 12px; }
+  .match-chat { width: 238px; }
+  .reveal-canvases { grid-template-columns: 1fr; gap: 13px; max-height: none; }
+}
+@media (max-width: 640px) {
+  .menu-actions { grid-template-columns: 1fr; }
+  .result-headline { font-size: 46px; }
+  .opp-ghost { width: 118px; height: 118px; right: 10px; bottom: 10px; border-radius: var(--r-md); }
+  .match-chat { width: 198px; max-height: 240px; left: 10px; bottom: 10px; }
+  .match-chat.collapsed { max-height: 42px; }
+  .vs-block { gap: 12px; }
+  .vs-avatar { width: 58px; height: 58px; font-size: 22px; }
+  .vs-divider { font-size: 30px; }
+  .room-code { font-size: 19px; padding: 13px 20px; min-width: 155px; }
+  .lobby-card { padding: 30px 24px; }
+  #screen-menu .screen-content { padding: 18px 20px; }
+  .hero-title { font-size: clamp(44px, 12vw, 80px); }
+}
+/* Landscape / short viewport */
+@media (max-height: 620px) {
+  .hero { padding: 8px 0 4px; }
+  .hero-title { font-size: clamp(36px, 9vw, 64px); }
+  .lobby-card { padding: 24px 28px; }
+  .result-card { padding: 36px 36px 30px; }
 }
 </style>
 </head>
@@ -1903,6 +2899,13 @@ body::after {
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
         </div>
         <div class="menu-btn-text"><div class="menu-btn-title">Practice Round</div><div class="menu-btn-sub">Warm up against the blank canvas</div></div>
+      </button>
+      <button class="menu-btn glass" data-action="coloring-book">
+        <div class="menu-btn-icon menu-icon-color-book">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent-3)"><path d="M20.5 16.5a2 2 0 1 1-4 0c0-1.1 2-4 2-4s2 2.9 2 4z"/><path d="M16.5 11.5L5 3l-2 2 8.5 11.5"/><path d="M11.5 8.5l5 5"/><line x1="2" y1="22" x2="22" y2="22"/></svg>
+        </div>
+        <div class="menu-btn-text"><div class="menu-btn-title">Coloring Book</div><div class="menu-btn-sub">Fill the outline — liquid color, every region</div></div>
+        <div class="menu-btn-pill">NEW</div>
       </button>
       <button class="menu-btn glass" data-action="multiplayer-host">
         <div class="menu-btn-icon menu-icon-host">
@@ -2038,6 +3041,21 @@ body::after {
   <!-- Timer edge progress bar — shrinks left-to-right as round time drains -->
   <div class="timer-progress-bar" id="timer-progress-bar"></div>
 
+  <!-- Coloring Book coverage HUD — live ring counter showing fill % -->
+  <div class="coverage-hud" id="coverage-hud">
+    <div class="coverage-ring">
+      <svg viewBox="0 0 38 38">
+        <circle class="coverage-ring-bg" cx="19" cy="19" r="15"/>
+        <circle class="coverage-ring-fill" id="coverage-ring-fill" cx="19" cy="19" r="15"/>
+      </svg>
+      <div class="coverage-ring-pct" id="coverage-ring-pct">0%</div>
+    </div>
+    <div class="coverage-hud-text">
+      <div class="coverage-hud-eyebrow">Coverage</div>
+      <div class="coverage-hud-grade" id="coverage-hud-grade">Start filling!</div>
+    </div>
+  </div>
+
   <div class="canvas-stage">
     <video id="video" playsinline autoplay muted></video>
     <canvas id="canvas-main"></canvas>
@@ -2060,15 +3078,25 @@ body::after {
   <!-- Hand-mode floating cursor (positioned via JS) -->
   <div class="hand-cursor" id="hand-cursor"></div>
 
-  <!-- Hand-mode status panel (above the prompt banner) -->
+  <!-- Hand-mode status panel — repositioned to bottom-right above camera pip -->
   <div class="hand-info glass" id="hand-info">
-    <div>
-      <div class="hand-info-eyebrow">Hand Mode</div>
-      <div class="hand-info-state searching" id="hand-info-state">Show your hand</div>
+    <div class="hand-info-header">
+      <div>
+        <div class="hand-info-eyebrow">Hand Mode</div>
+        <div class="hand-info-state searching" id="hand-info-state">Show your hand</div>
+      </div>
+      <button class="hand-info-toggle" id="hand-info-toggle" title="Toggle gesture guide">?</button>
     </div>
-    <div style="color:var(--text-mute);font-size:11px;line-height:1.3;border-left:1px solid var(--glass-border);padding-left:14px">
-      <div>☝️ Index point = draw</div>
-      <div>✋ Open hand = lift</div>
+    <div class="hand-gesture-guide" id="hand-gesture-guide">
+      <div class="hand-gesture-row" data-gesture="draw"><span>☝️</span><span>Draw</span></div>
+      <div class="hand-gesture-row" data-gesture="two-finger"><span>✌️</span><span>Next color</span></div>
+      <div class="hand-gesture-row" data-gesture="pinch"><span>Pinch+rotate</span><span>Color/Undo</span></div>
+      <div class="hand-gesture-row" data-gesture="three-finger"><span>3-finger</span><span>Size +</span></div>
+      <div class="hand-gesture-row" data-gesture="pinky"><span>🤙 Pinky</span><span>Size −</span></div>
+      <div class="hand-gesture-row" data-gesture="thumb"><span>👍</span><span>Eraser</span></div>
+      <div class="hand-gesture-row" data-gesture="rock-on"><span>🤘</span><span>Fill</span></div>
+      <div class="hand-gesture-row" data-gesture="palm"><span>🖐 Hold 1s</span><span>Menu</span></div>
+      <div class="hand-gesture-row" data-gesture="fist"><span>✊ Hold 1.5s</span><span>Clear</span></div>
     </div>
   </div>
 
@@ -2078,18 +3106,26 @@ body::after {
     <canvas id="canvas-opp-ghost"></canvas>
   </div>
 
+  <!-- Camera PIP — shown when hand tracking is active -->
+  <div class="camera-pip glass" id="camera-pip" style="display:none">
+    <div class="camera-pip-label"><span class="pip-dot"></span><span>Camera Active</span></div>
+    <canvas id="canvas-pip"></canvas>
+  </div>
+
   <div class="match-hud-top">
-    <div class="match-round glass"><span>Round</span><b id="match-round-num">1</b><span>of <span id="match-total-rounds">1</span></span></div>
+    <div class="match-hud-left">
+      <div class="match-round glass"><span>Round</span><b id="match-round-num">1</b><span>of <span id="match-total-rounds">1</span></span></div>
+      <div class="match-mode-pill glass" id="match-mode-pill">PRACTICE</div>
+    </div>
     <div class="match-timer-wrap">
       <div class="match-timer glass" id="match-timer">60</div>
       <div class="match-hud-prompt" id="match-hud-prompt"></div>
     </div>
-    <div class="match-score glass" id="match-score" style="display:none">
+    <div class="match-score glass" id="match-score">
       <span class="match-score-pill p1" id="score-p1">0</span>
       <span class="match-score-sep">·</span>
       <span class="match-score-pill p2" id="score-p2">0</span>
     </div>
-    <div class="match-mode-pill glass" id="match-mode-pill">PRACTICE</div>
   </div>
   <span id="match-prompt-ref-emoji" style="display:none"></span>
   <div class="match-prompt-label">
@@ -2108,6 +3144,9 @@ body::after {
       <button class="tool-btn-icon tool-eraser" id="tool-eraser" title="Eraser (E)" data-tip="Eraser [E]">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H7L3 16l9-9 8 8-2 2"/><path d="M6 17.5l5-5"/></svg>
       </button>
+      <button class="tool-btn-icon tool-fill" id="tool-fill" title="Fill (F)" data-tip="Fill [F]">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 11.5L5 3l-2 2 8.5 11.5"/><path d="M11.5 8.5l5 5"/><path d="M20.5 16.5a2 2 0 1 1-4 0c0-1.1 2-4 2-4s2 2.9 2 4z"/></svg>
+      </button>
       <button class="tool-btn-icon tool-hand" id="tool-hand" title="Hand tracking mode (camera)" data-tip="Hand Mode">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
       </button>
@@ -2123,14 +3162,6 @@ body::after {
     </div>
   </div>
 
-  <!-- Quick emoji reactions (multiplayer only) -->
-  <div class="quick-reactions glass" id="quick-reactions" style="display:none">
-    <div class="quick-reaction" data-emoji="🔥" title="Fire">🔥</div>
-    <div class="quick-reaction" data-emoji="😂" title="LOL">😂</div>
-    <div class="quick-reaction" data-emoji="🎨" title="Art">🎨</div>
-    <div class="quick-reaction" data-emoji="👏" title="Applause">👏</div>
-    <div class="quick-reaction" data-emoji="🤔" title="Hmm">🤔</div>
-  </div>
 
   <!-- Chat (multiplayer only) -->
   <div class="match-chat glass collapsed" id="match-chat" style="display:none">
@@ -2260,7 +3291,8 @@ body::after {
       <p style="margin-bottom:14px"><b style="color:var(--text)">🗳️ Mutual judgment.</b> When time's up, both players vote on the better artwork. Votes reveal at once. Agreement crowns a winner — disagreement is a "Judge's Tie."</p>
       <p style="margin-bottom:14px"><b style="color:var(--text)">🏆 Best of three.</b> First to two round wins takes the match, the XP, and any achievements unlocked along the way.</p>
       <p style="margin-bottom:14px"><b style="color:var(--text)">✋ Hand mode.</b> Tap the hand icon in the toolbar to draw mid-air with your finger via the camera. Point your index finger to draw, open your palm to lift the brush. Win a match this way for an extra achievement.</p>
-      <p><b style="color:var(--text)">🎨 Practice Round.</b> Draw any prompt solo for sixty seconds — for warming up your brush.</p>
+      <p style="margin-bottom:14px"><b style="color:var(--text)">🎨 Practice Round.</b> Draw any prompt solo for sixty seconds — for warming up your brush.</p>
+      <p><b style="color:var(--text)">🪣 Coloring Book.</b> A prompt outline appears on your canvas. Use the paint-bucket tool to flood-fill each region with color. The coverage meter tracks how much of the outline you've filled — hit 80%+ for the <em>Color Master</em> achievement.</p>
     </div>
   </div>
 </div>
@@ -2308,10 +3340,44 @@ body::after {
 <div class="countdown-overlay" id="countdown-overlay">
   <div class="countdown-num" id="countdown-num">3</div>
   <div class="countdown-context-wrap" id="countdown-context-wrap">
-    <div class="countdown-context-eyebrow">Draw this</div>
+    <div class="countdown-context-eyebrow" id="countdown-context-eyebrow">Draw this</div>
     <div class="countdown-context-prompt" id="countdown-context-prompt"></div>
   </div>
 </div>
+<!-- Hand mode: radial gesture menu -->
+<div id="radial-menu" style="display:none" aria-hidden="true">
+  <svg class="radial-svg" width="240" height="240" viewBox="-120 -120 240 240">
+    <path class="radial-sector" data-action="undo"  d="M0,0 L0,-120 A120,120,0,0,1,120,0 Z"/>
+    <path class="radial-sector" data-action="clear" d="M0,0 L120,0 A120,120,0,0,1,0,120 Z"/>
+    <path class="radial-sector" data-action="exit"  d="M0,0 L0,120 A120,120,0,0,1,-120,0 Z"/>
+    <path class="radial-sector" data-action="fill"  d="M0,0 L-120,0 A120,120,0,0,1,0,-120 Z"/>
+    <circle r="38" class="radial-center"/>
+    <text y="-70" class="radial-label" text-anchor="middle">↩ Undo</text>
+    <text x="68"  class="radial-label" text-anchor="start">🗑 Clear</text>
+    <text y="78"  class="radial-label" text-anchor="middle">← Exit</text>
+    <text x="-68" class="radial-label" text-anchor="end">🪣 Fill</text>
+  </svg>
+</div>
+
+<!-- Hand mode: progress ring for held gestures -->
+<div id="gesture-progress-ring" style="display:none; position:fixed; pointer-events:none; z-index:16; transform:translate(-50%,-50%);">
+  <svg width="70" height="70" viewBox="-35 -35 70 70">
+    <circle r="28" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="3"/>
+    <circle id="prog-ring-arc" r="28" fill="none" stroke="rgba(255,92,92,0.85)"
+            stroke-width="3" stroke-linecap="round" stroke-dasharray="175.9"
+            stroke-dashoffset="175.9" transform="rotate(-90)"/>
+    <text id="prog-ring-label" text-anchor="middle" dominant-baseline="middle"
+          fill="rgba(255,255,255,0.9)" font-size="9" font-family="JetBrains Mono"
+          letter-spacing="0.12em"></text>
+  </svg>
+</div>
+
+<!-- Hand mode: AI gesture hint bar -->
+<div id="gesture-assist" style="display:none; position:fixed; bottom:18px; left:50%; transform:translateX(-50%); z-index:12; pointer-events:none; padding:10px 20px; border-radius:100px; font-size:11px; text-align:center; background:rgba(3,5,13,0.88); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(16px);">
+  <span style="color:rgba(255,255,255,0.45)">💡 Try: </span>
+  <span style="color:rgba(255,255,255,0.85)">☝️ draw &nbsp;·&nbsp; ✌️ color &nbsp;·&nbsp; 🖐 stop</span>
+</div>
+
 <div class="ach-toast-stack" id="ach-toast-stack"></div>
 <div class="toast-stack" id="toast-stack"></div>
 <div class="levelup-burst" id="levelup-burst">
@@ -2433,29 +3499,509 @@ function getPromptEmoji(p){ return PROMPT_EMOJI[p] || '🎨'; }
 const CANVAS_BG = '#f8f5ef'; // warm off-white paper — must match #canvas-main CSS and eraser color
 
 const PROMPT_GUIDES = {
-  'camera':              'M160,180 L160,340 L340,340 L340,180 L290,180 L278,155 L222,155 L210,180 Z M250,260 A42,42 0 1,0 250.1,260Z M320,198 A8,8 0 1,0 320.1,198Z',
-  'rocket ship':         'M250,55 C235,90 215,160 213,230 L200,270 L220,278 L220,305 Q235,325 250,325 Q265,325 280,305 L280,278 L300,270 L287,230 C285,160 265,90 250,55Z M200,270 Q182,278 178,298 Q200,292 220,305 M300,270 Q318,278 322,298 Q300,292 280,305 M230,190 A22,22 0 1,0 230.1,190Z',
-  'bicycle':             'M155,305 A75,75 0 1,0 155.1,305Z M345,305 A75,75 0 1,0 345.1,305Z M155,305 L250,175 L345,305 M250,175 L305,305 M250,175 L250,135 M228,135 L272,135 L265,155 M235,155 L265,155',
-  'umbrella':            'M250,75 Q345,78 375,205 L375,215 Q250,215 125,215 L125,205 Q155,78 250,75Z M250,215 L250,365 Q250,395 282,395 Q314,395 314,365 L314,335',
-  'lighthouse':          'M218,345 L228,150 L250,118 L272,150 L282,345 Z M210,345 L290,345 M207,362 L293,362 M232,200 L268,200 M235,240 L265,240 M238,170 A22,16 0 1,0 238.1,170',
-  'teapot':              'M175,205 Q165,205 160,238 Q155,268 166,288 Q186,328 250,328 Q314,328 334,288 Q345,268 340,238 Q335,205 325,205 Z M175,205 Q250,172 325,205 M325,235 Q357,220 362,248 Q367,272 346,277',
-  'ice cream cone':      'M195,272 L250,408 L305,272 Z M250,272 A62,62 0 1,0 250.1,272Z',
-  'suitcase':            'M188,172 L188,362 L312,362 L312,172 Z M210,172 L210,148 L290,148 L290,172 M188,252 L312,252 M238,172 L262,172',
-  'clock tower':         'M208,362 L208,198 L292,198 L292,362 Z M250,198 A52,52 0 1,0 250.1,198Z M212,362 L288,362 M250,152 L250,130',
-  'grand piano':         'M158,205 L158,322 Q158,342 178,342 L362,320 L362,198 Z M158,205 Q198,152 282,162 Q342,172 362,205 M198,342 L198,362 M322,326 L322,346',
-  'vinyl record':        'M250,250 A130,130 0 1,0 250.1,250Z M250,250 A90,90 0 1,0 250.1,250Z M250,250 A22,22 0 1,0 250.1,250Z',
-  'typewriter':          'M148,198 L148,342 L352,342 L352,198 Z M168,222 L332,222 M172,245 L194,245 M214,245 L236,245 M256,245 L278,245 M298,245 L320,245 M172,270 L194,270 M214,270 L236,270 M256,270 L278,270 M298,270 L320,270 M182,295 L318,295 L318,316 L182,316 Z',
-  'wizard hat':          'M250,80 L145,368 L355,368 Z M145,368 Q250,345 355,368 M250,80 L250,62',
-  'butterfly':           'M250,248 C228,215 155,155 125,188 C95,221 128,285 202,272 C222,268 240,260 250,248Z M250,248 C272,215 345,155 375,188 C405,221 372,285 298,272 C278,268 260,260 250,248Z M250,248 L250,318 M238,266 C226,284 214,296 202,308 M262,266 C274,284 286,296 298,308',
-  'penguin':             'M250,98 A52,52 0 1,0 250.1,98Z M208,162 Q175,205 182,285 Q188,345 250,355 Q312,345 318,285 Q325,205 292,162 Z M222,222 A9,9 0 1,0 222.1,222Z M278,222 A9,9 0 1,0 278.1,222Z M244,258 L256,258 M222,172 L182,202 Q172,222 182,238 M278,172 L318,202 Q328,222 318,238 M228,348 L216,378 M272,348 L284,378',
-  'snail':               'M200,282 Q178,240 200,208 Q242,168 295,188 Q345,208 345,262 Q345,325 282,335 Q240,340 208,312 M200,282 Q148,282 136,314 Q124,346 156,356 L325,356',
-  'crab':                'M250,252 A62,62 0 1,0 250.1,252Z M188,230 L148,198 M188,252 L138,252 M188,272 L148,305 M312,230 L352,198 M312,252 L362,252 M312,272 L352,305 M218,314 L208,355 M250,318 L250,362 M282,314 L292,355',
-  'jellyfish':           'M168,202 Q200,138 250,128 Q300,138 332,202 Q342,242 312,272 Q282,302 250,302 Q218,302 188,272 Q158,242 168,202Z M208,302 Q198,342 192,384 M228,308 Q222,348 218,388 M250,310 L250,392 M272,308 Q278,348 282,388 M292,302 Q302,342 308,384',
-  'owl':                 'M250,162 A82,72 0 1,0 250.1,162Z M218,162 A26,32 0 1,0 218.1,162Z M282,162 A26,32 0 1,0 282.1,162Z M238,138 Q250,122 262,138 M250,228 L240,265 L260,265 Z M240,265 L208,285 M260,265 L292,285',
-  'dancing banana':      'M198,118 Q178,158 200,242 Q222,325 252,365 Q282,325 302,242 Q322,158 302,118 Q282,78 252,88 Q222,78 198,118Z M198,118 L172,98 Q162,88 168,78 Q188,98 198,118 M302,118 L328,98 Q338,88 332,78 Q312,98 302,118 M218,200 L175,212 M282,200 L325,212',
-  'frog with a crown':   'M250,375 A102,82 0 1,0 250.1,375Z M178,312 A32,32 0 1,0 178.1,312Z M322,312 A32,32 0 1,0 322.1,312Z M218,218 A16,16 0 1,0 218.1,218Z M282,218 A16,16 0 1,0 282.1,218Z M218,198 L208,138 L240,164 L250,128 L260,164 L292,138 L282,198',
-  'mermaid':             'M250,118 A52,52 0 1,0 250.1,118Z M218,172 Q188,215 195,285 Q202,335 222,362 M282,172 Q312,215 305,285 Q298,335 278,362 M198,362 Q222,395 250,388 Q278,395 302,362 Q272,352 250,358 Q228,352 198,362Z M230,172 L270,172',
-  'ghost holding flowers':'M178,202 Q178,138 250,128 Q322,138 322,202 L322,355 Q302,375 282,355 Q262,375 250,355 Q238,375 218,355 Q198,375 178,355 Z M222,202 A10,10 0 1,0 222.1,202Z M278,202 A10,10 0 1,0 278.1,202Z M148,255 Q128,232 138,202 Q158,182 174,202 L174,255 M142,202 Q138,175 154,164 Q158,185 148,202 M142,185 L118,174',
+  'camera':
+    'M148,172 L148,342 L352,342 L352,172 L312,172 L298,144 L202,144 L188,172 Z ' +
+    'M250,260 A64,64 0 1,0 250.1,260 Z ' +
+    'M250,260 A38,38 0 1,0 250.1,260 Z ' +
+    'M165,182 L220,182 L220,210 L165,210 Z ' +
+    'M318,186 A16,12 0 1,0 318.1,186 Z',
+
+  'rocket ship':
+    'M250,52 C237,86 215,158 212,230 L212,305 Q230,326 250,326 Q270,326 288,305 L288,230 C285,158 263,86 250,52 Z ' +
+    'M250,182 A28,28 0 1,0 250.1,182 Z ' +
+    'M212,230 Q190,246 175,302 Q198,294 212,305 Z ' +
+    'M288,230 Q310,246 325,302 Q302,294 288,305 Z ' +
+    'M232,305 L226,342 Q250,356 274,342 L268,305 Z',
+
+  'lighthouse':
+    'M222,350 L230,148 L250,115 L270,148 L278,350 Z ' +
+    'M226,148 L226,122 Q250,100 274,122 L274,148 Z ' +
+    'M206,350 L294,350 L294,366 L206,366 Z ' +
+    'M196,366 L304,366 L304,382 L196,382 Z ' +
+    'M234,202 L266,202 L266,220 L234,220 Z ' +
+    'M236,246 L264,246 L264,262 L236,262 Z',
+
+  'teapot':
+    'M172,212 Q160,212 154,244 Q148,278 160,298 Q182,340 250,340 Q318,340 340,298 Q352,278 346,244 Q340,212 328,212 Q250,172 172,212 Z ' +
+    'M218,172 L218,158 Q250,140 282,158 L282,172 Z ' +
+    'M243,140 L257,140 L257,125 Q250,114 243,125 Z ' +
+    'M328,234 Q364,215 372,248 Q380,280 352,288 L340,274 Q352,268 354,248 Q348,224 328,248 Z ' +
+    'M172,230 Q135,230 131,262 Q127,296 162,302 L170,286 Q148,282 150,262 Q152,244 172,246 Z',
+
+  'bicycle':
+    'M150,308 A74,74 0 1,0 150.1,308 Z ' +
+    'M150,308 A44,44 0 1,0 150.1,308 Z ' +
+    'M350,308 A74,74 0 1,0 350.1,308 Z ' +
+    'M350,308 A44,44 0 1,0 350.1,308 Z ' +
+    'M250,168 L350,308 L250,308 L250,168 Z ' +
+    'M150,308 L250,308 L250,228 L150,308 Z ' +
+    'M228,148 L272,148 L268,168 L232,168 Z',
+
+  'umbrella':
+    'M250,80 Q182,82 148,145 Q120,192 125,218 L188,218 Q178,175 202,138 Q222,105 250,92 Z ' +
+    'M250,80 Q318,82 352,145 Q380,192 375,218 L312,218 Q322,175 298,138 Q278,105 250,92 Z ' +
+    'M188,218 L312,218 Q284,162 250,92 Q216,162 188,218 Z ' +
+    'M250,218 L250,358 Q250,385 274,392 Q298,400 300,375 L292,373 Q292,392 274,384 Q260,378 260,362 L260,218 Z',
+
+  'ice cream cone':
+    'M186,278 L250,425 L314,278 Z ' +
+    'M209,278 L250,408 L291,278 Z ' +
+    'M250,278 A70,70 0 1,0 250.1,278 Z ' +
+    'M250,250 A36,36 0 1,0 250.1,250 Z',
+
+  'suitcase':
+    'M185,172 L185,255 L315,255 L315,172 Z ' +
+    'M185,255 L185,372 L315,372 L315,255 Z ' +
+    'M215,172 L215,146 Q250,128 285,146 L285,172 L272,172 L272,152 Q250,140 228,152 L228,172 Z ' +
+    'M238,247 L262,247 L262,263 L238,263 Z ' +
+    'M198,185 L244,185 L244,249 L198,249 Z ' +
+    'M256,185 L302,185 L302,249 L256,249 Z',
+
+  'clock tower':
+    'M215,375 L215,222 L285,222 L285,375 Z ' +
+    'M228,222 L250,148 L272,222 Z ' +
+    'M250,268 A46,46 0 1,0 250.1,268 Z ' +
+    'M250,268 A28,28 0 1,0 250.1,268 Z ' +
+    'M228,162 L272,162 L272,195 L228,195 Z ' +
+    'M200,375 L300,375 L300,390 L200,390 Z',
+
+  'grand piano':
+    'M148,195 Q188,140 285,150 Q350,162 372,195 Z ' +
+    'M148,195 L148,328 Q148,348 168,348 L372,325 L372,195 Z ' +
+    'M168,288 L168,328 Q168,342 188,342 L358,322 L358,288 Z ' +
+    'M162,348 L162,392 L182,392 L182,348 Z ' +
+    'M350,328 L350,375 L368,375 L368,328 Z ' +
+    'M212,392 L288,392 L288,405 L212,405 Z',
+
+  'vinyl record':
+    'M250,250 A132,132 0 1,0 250.1,250 Z ' +
+    'M250,250 A100,100 0 1,0 250.1,250 Z ' +
+    'M250,250 A68,68 0 1,0 250.1,250 Z ' +
+    'M250,250 A38,38 0 1,0 250.1,250 Z ' +
+    'M250,250 A12,12 0 1,0 250.1,250 Z',
+
+  'typewriter':
+    'M140,198 L140,355 L360,355 L360,198 Z ' +
+    'M158,175 Q250,158 342,175 L342,198 L158,198 Z ' +
+    'M175,198 L175,215 L325,215 L325,198 Z ' +
+    'M162,252 L162,348 L338,348 L338,252 Z ' +
+    'M196,338 L304,338 L304,352 L196,352 Z',
+
+  'wizard hat':
+    'M250,72 L138,380 L362,380 Z ' +
+    'M118,380 Q250,356 382,380 L382,400 Q250,378 118,400 Z ' +
+    'M215,295 L285,295 L285,315 L215,315 Z ' +
+    'M250,145 L255,165 L275,162 L261,176 L268,196 L250,184 L232,196 L239,176 L225,162 L245,165 Z',
+
+  'butterfly':
+    'M250,248 C228,215 158,155 126,188 C94,222 128,288 202,274 C222,268 242,260 250,248 Z ' +
+    'M250,248 C272,215 342,155 374,188 C406,222 372,288 298,274 C278,268 258,260 250,248 Z ' +
+    'M250,268 C238,282 205,308 178,318 C152,328 148,348 168,356 C192,366 232,350 250,280 Z ' +
+    'M250,268 C262,282 295,308 322,318 C348,328 352,348 332,356 C308,366 268,350 250,280 Z ' +
+    'M248,225 Q240,252 248,318 Q250,326 252,318 Q260,252 252,225 Z',
+
+  'penguin':
+    'M208,165 Q175,208 182,292 Q188,352 250,362 Q312,352 318,292 Q325,208 292,165 Z ' +
+    'M250,108 A52,52 0 1,0 250.1,108 Z ' +
+    'M224,222 Q224,328 250,342 Q276,328 276,222 Q250,205 224,222 Z ' +
+    'M208,178 Q168,212 172,268 Q178,292 194,284 L208,228 Z ' +
+    'M292,178 Q332,212 328,268 Q322,292 306,284 L292,228 Z ' +
+    'M238,140 L262,140 L256,160 L244,160 Z',
+
+  'snail':
+    'M268,222 A88,78 0 1,0 268.1,222 Z ' +
+    'M268,222 A52,46 0 1,0 268.1,222 Z ' +
+    'M268,222 A18,16 0 1,0 268.1,222 Z ' +
+    'M180,300 Q155,290 144,316 Q132,345 158,358 L318,358 L318,335 Q292,320 268,316 Q228,322 180,300 Z ' +
+    'M168,205 A10,10 0 1,0 168.1,205 Z',
+
+  'crab':
+    'M250,258 A72,58 0 1,0 250.1,258 Z ' +
+    'M250,258 A44,34 0 1,0 250.1,258 Z ' +
+    'M178,238 Q152,212 135,238 Q120,268 145,292 Q170,318 198,286 Q206,262 178,238 Z ' +
+    'M322,238 Q348,212 365,238 Q380,268 355,292 Q330,318 302,286 Q294,262 322,238 Z ' +
+    'M175,265 Q148,250 134,268 Q122,288 148,296 L162,280 Q145,276 152,265 Q160,255 178,268 Z ' +
+    'M325,265 Q352,250 366,268 Q378,288 352,296 L338,280 Q355,276 348,265 Q340,255 322,268 Z',
+
+  'jellyfish':
+    'M168,205 Q200,135 250,125 Q300,135 332,205 Q346,248 315,280 Q284,312 250,312 Q216,312 185,280 Q154,248 168,205 Z ' +
+    'M195,205 Q220,162 250,155 Q280,162 305,205 Q318,238 298,262 Q274,288 250,288 Q226,288 202,262 Q182,238 195,205 Z ' +
+    'M208,312 Q196,352 190,392 Q205,400 220,392 Q224,352 230,312 Z ' +
+    'M292,312 Q304,352 310,392 Q295,400 280,392 Q276,352 270,312 Z ' +
+    'M245,312 L245,398 Q250,406 255,398 L255,312 Z',
+
+  'owl':
+    'M250,222 A90,82 0 1,0 250.1,222 Z ' +
+    'M216,190 A28,30 0 1,0 216.1,190 Z ' +
+    'M284,190 A28,30 0 1,0 284.1,190 Z ' +
+    'M250,268 A46,42 0 1,0 250.1,268 Z ' +
+    'M238,225 L250,245 L262,225 Q250,212 238,225 Z ' +
+    'M215,148 L205,118 L228,142 Z ' +
+    'M285,148 L295,118 L272,142 Z',
+
+  'dancing banana':
+    'M198,118 Q178,158 200,242 Q222,325 252,365 Q282,325 302,242 Q322,158 302,118 Q282,78 252,88 Q222,78 198,118 Z ' +
+    'M198,118 Q178,102 165,82 Q155,65 162,72 Q172,88 188,105 Q192,112 198,118 Z ' +
+    'M302,118 Q322,102 335,82 Q345,65 338,72 Q328,88 312,105 Q308,112 302,118 Z ' +
+    'M230,168 A11,11 0 1,0 230.1,168 Z ' +
+    'M270,168 A11,11 0 1,0 270.1,168 Z',
+
+  'frog with a crown':
+    'M250,378 A102,82 0 1,0 250.1,378 Z ' +
+    'M178,315 A32,32 0 1,0 178.1,315 Z ' +
+    'M322,315 A32,32 0 1,0 322.1,315 Z ' +
+    'M178,315 A15,15 0 1,0 178.1,315 Z ' +
+    'M322,315 A15,15 0 1,0 322.1,315 Z ' +
+    'M218,198 L208,138 L240,164 L250,128 L260,164 L292,138 L282,198 Z',
+
+  'mermaid':
+    'M250,118 A50,50 0 1,0 250.1,118 Z ' +
+    'M215,170 Q185,215 192,290 L222,362 L278,362 Q308,290 285,170 Z ' +
+    'M222,362 Q195,385 185,418 Q178,440 195,448 Q225,458 250,442 Q275,458 305,448 Q322,440 315,418 Q305,385 278,362 Z ' +
+    'M195,448 Q180,465 168,478 Q188,468 218,462 Q232,456 238,448 Z ' +
+    'M305,448 Q320,465 332,478 Q312,468 282,462 Q268,456 262,448 Z',
+
+  'ghost holding flowers':
+    'M178,205 Q178,138 250,128 Q322,138 322,205 L322,360 Q302,382 282,360 Q262,382 250,360 Q238,382 218,360 Q198,382 178,360 Z ' +
+    'M218,205 A15,15 0 1,0 218.1,205 Z ' +
+    'M282,205 A15,15 0 1,0 282.1,205 Z ' +
+    'M155,252 Q132,228 140,200 Q158,180 175,200 L175,252 Q162,244 158,262 Q152,280 165,288 Q178,298 182,278 Z ' +
+    'M345,252 Q368,228 360,200 Q342,180 325,200 L325,252 Q338,244 342,262 Q348,280 335,288 Q322,298 318,278 Z',
+
+  /* ── Animals ── */
+  'flamingo':
+    'M250,105 A20,20 0 1,0 250.1,105 Z ' +
+    'M262,117 Q284,130 276,106 L264,110 Z ' +
+    'M248,124 Q228,158 240,200 Q250,232 252,262 ' +
+    'M202,274 A60,48 0 1,0 202.1,274 Z ' +
+    'M234,320 L220,405 M220,405 L210,412 M220,405 L228,412 ' +
+    'M264,312 Q290,282 286,258',
+
+  'octopus':
+    'M250,195 A85,78 0 1,0 250.1,195 Z ' +
+    'M165,240 Q148,295 168,340 Q182,375 162,405 ' +
+    'M198,255 Q182,310 196,355 Q205,385 188,408 ' +
+    'M225,265 Q218,318 226,362 Q228,390 215,410 ' +
+    'M250,268 Q250,322 252,368 Q252,395 250,415 ' +
+    'M275,265 Q282,318 274,362 Q272,390 285,410 ' +
+    'M302,255 Q318,310 304,355 Q295,385 312,408 ' +
+    'M335,240 Q352,295 332,340 Q318,375 338,405 ' +
+    'M355,218 Q378,268 362,308 Q350,345 365,375',
+
+  'dragon':
+    'M180,265 A90,55 0 1,0 180.1,265 Z ' +
+    'M205,218 Q225,185 250,168 ' +
+    'M250,168 A32,25 0 1,0 250.1,168 Z ' +
+    'M246,145 L250,118 L254,145 ' +
+    'M260,164 A6,6 0 1,0 260.1,164 Z ' +
+    'M255,228 Q295,175 355,155 Q345,215 310,248 Z ' +
+    'M268,288 Q312,305 345,285 Q372,268 388,280 ' +
+    'M200,318 L188,358 L172,368 M228,322 L225,362 L210,372',
+
+  'sloth':
+    'M100,165 L400,165 ' +
+    'M175,282 Q155,225 150,170 ' +
+    'M325,282 Q345,225 350,170 ' +
+    'M215,290 A65,58 0 1,0 215.1,290 Z ' +
+    'M250,235 A35,32 0 1,0 250.1,235 Z ' +
+    'M238,232 Q242,228 246,232 M254,232 Q258,228 262,232 ' +
+    'M348,168 L342,155 M350,168 L346,154 M354,168 L352,154',
+
+  'narwhal':
+    'M248,250 A118,70 0 1,0 248.1,250 Z ' +
+    'M132,225 L380,218 ' +
+    'M340,218 Q345,228 350,218 M310,218 Q315,228 320,218 M280,219 Q285,229 290,219 ' +
+    'M265,182 Q278,158 292,182 ' +
+    'M155,258 Q140,278 158,285 ' +
+    'M362,235 Q385,218 392,228 Q385,248 362,262 Z ' +
+    'M195,238 A8,8 0 1,0 195.1,238 Z',
+
+  'elephant':
+    'M165,295 A102,80 0 1,0 165.1,295 Z ' +
+    'M165,248 A65,60 0 1,0 165.1,248 Z ' +
+    'M110,238 Q78,215 82,268 Q86,318 120,308 Q148,295 148,262 Q148,228 120,222 Z ' +
+    'M128,265 Q95,308 105,348 Q115,382 145,368 ' +
+    'M148,292 Q118,308 122,332 Q126,348 145,342 ' +
+    'M175,235 A9,9 0 1,0 175.1,235 Z ' +
+    'M155,358 L152,408 M185,362 L184,408 M218,362 L218,408 M245,358 L246,408 ' +
+    'M265,308 Q295,295 292,318 Q290,332 278,328',
+
+  'axolotl':
+    'M152,262 A112,62 0 1,0 152.1,262 Z ' +
+    'M165,215 Q148,182 145,158 M168,215 Q150,185 154,162 M172,215 Q157,190 162,168 ' +
+    'M335,215 Q352,182 355,158 M332,215 Q350,185 346,162 M328,215 Q343,190 338,168 ' +
+    'M192,252 A11,11 0 1,0 192.1,252 Z ' +
+    'M308,252 A11,11 0 1,0 308.1,252 Z ' +
+    'M218,278 Q250,298 282,278 ' +
+    'M192,312 Q182,338 178,358 M222,318 Q218,342 215,362 M278,318 Q282,342 285,362 M308,312 Q318,338 322,358 ' +
+    'M362,248 Q405,235 415,262 Q405,288 362,278 Q385,262 362,262',
+
+  'hedgehog':
+    'M168,285 Q168,355 250,362 Q332,355 332,285 ' +
+    'M168,285 Q178,258 188,240 Q198,230 200,218 Q212,240 218,228 Q228,210 230,196 Q242,220 245,205 Q250,188 255,205 Q258,220 270,196 Q272,210 282,228 Q288,240 300,218 Q302,230 312,240 Q322,258 332,285 ' +
+    'M160,308 Q132,308 128,328 Q128,348 158,345 ' +
+    'M132,330 A8,7 0 1,0 132.1,330 Z ' +
+    'M185,285 A9,9 0 1,0 185.1,285 Z ' +
+    'M195,362 L188,382 L205,382 M252,365 L248,385 L265,385',
+
+  'tiger':
+    'M182,295 A90,72 0 1,0 182.1,295 Z ' +
+    'M182,238 A68,62 0 1,0 182.1,238 Z ' +
+    'M160,182 L148,148 L185,172 Z ' +
+    'M238,182 L250,148 L225,172 Z ' +
+    'M168,228 A8,9 0 1,0 168.1,228 Z M210,228 A8,9 0 1,0 210.1,228 Z ' +
+    'M185,248 A7,5 0 1,0 185.1,248 Z ' +
+    'M145,248 L175,252 M145,258 L175,258 M220,252 L250,248 M220,258 L250,258 ' +
+    'M175,198 L178,215 M185,194 L186,212 M198,196 L198,214 ' +
+    'M185,295 Q192,315 188,335 M210,292 Q215,315 212,338 M235,295 Q238,318 236,340 ' +
+    'M268,320 Q298,308 312,325 Q322,340 312,352 Q295,362 285,345 ' +
+    'M188,355 L182,398 M215,358 L215,398 M240,355 L242,398 M262,350 L265,395',
+
+  /* ── Objects ── */
+  'old radio':
+    'M140,192 L140,372 L360,372 L360,192 Z ' +
+    'M172,225 L172,345 M192,225 L192,345 M212,225 L212,345 M232,225 L232,345 M252,225 L252,345 ' +
+    'M310,272 A40,40 0 1,0 310.1,272 Z ' +
+    'M312,225 A14,14 0 1,0 312.1,225 Z ' +
+    'M312,332 A14,14 0 1,0 312.1,332 Z ' +
+    'M248,192 Q235,155 250,140 Q265,125 278,140 Q292,155 278,192 ' +
+    'M150,372 L148,388 M350,372 L352,388',
+
+  'treasure chest':
+    'M125,258 L125,388 L375,388 L375,258 Z ' +
+    'M125,258 Q125,158 250,158 Q375,158 375,258 Z ' +
+    'M125,258 L375,258 ' +
+    'M230,228 L270,228 L270,268 L230,268 Z M242,248 A12,12 0 1,0 242.1,248 Z ' +
+    'M125,308 L375,308 M125,348 L375,348 ' +
+    'M125,175 L148,175 L148,198 L125,198 Z M352,175 L375,175 L375,198 L352,198 Z',
+
+  /* ── Fantasy ── */
+  'haunted castle':
+    'M108,200 L108,368 L192,368 L192,200 Z ' +
+    'M108,200 L108,175 L128,175 L128,200 M148,200 L148,175 L168,175 L168,200 M172,200 L172,175 L192,175 L192,200 ' +
+    'M308,200 L308,368 L392,368 L392,200 Z ' +
+    'M308,200 L308,175 L328,175 L328,200 M348,200 L348,175 L368,175 L368,200 M372,200 L372,175 L392,175 L392,200 ' +
+    'M192,280 L308,280 L308,368 L192,368 Z ' +
+    'M218,368 L218,315 Q250,285 282,315 L282,368 Z ' +
+    'M132,248 L132,275 L162,275 L162,248 Z M332,248 L332,275 L362,275 L362,248 Z ' +
+    'M228,160 Q238,148 250,160 Q262,148 272,160 M205,138 Q212,128 220,138 Q228,128 235,138 M265,135 Q272,125 280,135 Q288,125 295,135',
+
+  'unicorn drinking coffee':
+    'M175,188 A72,65 0 1,0 175.1,188 Z ' +
+    'M148,205 Q118,215 115,240 Q115,268 145,272 Q170,275 180,255 ' +
+    'M195,132 Q205,95 218,78 Q232,62 240,75 Q248,90 238,112 Q228,128 215,135 ' +
+    'M240,142 Q265,125 278,142 Q292,160 288,182 Q285,198 272,195 ' +
+    'M245,148 L255,118 L265,148 ' +
+    'M178,185 A10,10 0 1,0 178.1,185 Z ' +
+    'M112,255 L112,295 L175,295 L175,255 Z M112,270 L175,270 M175,272 Q192,272 192,280 Q192,288 175,288',
+
+  'wizard casting spell':
+    'M250,75 L215,178 L285,178 Z ' +
+    'M198,178 L302,178 L302,192 L198,192 Z ' +
+    'M250,218 A28,28 0 1,0 250.1,218 Z ' +
+    'M215,245 L185,388 L315,388 L285,245 Z ' +
+    'M285,255 Q332,215 365,182 ' +
+    'M365,182 L372,168 M365,182 L375,178 M365,182 L370,195 M365,182 L352,188 M365,182 L358,172 ' +
+    'M215,258 Q188,285 178,315 ' +
+    'M158,162 L162,152 L166,162 L156,156 L168,156 Z M332,138 L336,128 L340,138 L330,132 L342,132 Z',
+
+  'alien spaceship':
+    'M115,265 A135,45 0 1,0 115.1,265 Z ' +
+    'M178,265 Q178,198 250,192 Q322,198 322,265 Z ' +
+    'M175,268 A14,14 0 1,0 175.1,268 Z M218,275 A14,14 0 1,0 218.1,275 Z M250,278 A14,14 0 1,0 250.1,278 Z M282,275 A14,14 0 1,0 282.1,275 Z M325,268 A14,14 0 1,0 325.1,268 Z ' +
+    'M210,308 L175,395 L325,395 L290,308 Z ' +
+    'M145,285 A6,6 0 1,0 145.1,285 Z M355,285 A6,6 0 1,0 355.1,285 Z',
+
+  'genie in a lamp':
+    'M135,328 Q148,285 188,275 Q215,268 240,285 Q258,295 268,285 Q298,268 338,275 Q375,282 372,328 Q362,362 252,368 Q142,362 135,328 Z ' +
+    'M338,285 Q365,262 378,248 Q385,235 372,228 Q358,222 345,238 Q332,252 338,275 ' +
+    'M155,295 Q112,295 108,328 Q108,362 155,358 ' +
+    'M365,228 Q358,198 370,175 Q382,152 372,128 Q362,108 348,122 Q338,135 348,158 Q358,178 348,198 Q338,218 348,235 ' +
+    'M348,122 A25,22 0 1,0 348.1,122 Z ' +
+    'M315,125 Q295,115 288,128 M348,118 Q368,108 372,118 ' +
+    'M252,270 Q248,255 255,242 Q262,255 258,270',
+
+  'dragon riding a bicycle':
+    'M148,318 A75,75 0 1,0 148.1,318 Z M148,318 A35,35 0 1,0 148.1,318 Z ' +
+    'M352,318 A75,75 0 1,0 352.1,318 Z M352,318 A35,35 0 1,0 352.1,318 Z ' +
+    'M148,318 L250,232 L352,318 M250,232 L250,318 L148,318 ' +
+    'M252,232 L295,218 L318,228 ' +
+    'M232,232 L268,232 ' +
+    'M250,208 A32,25 0 1,0 250.1,208 Z ' +
+    'M250,185 A18,16 0 1,0 250.1,185 Z ' +
+    'M262,198 Q288,175 312,185 Q305,205 278,210 Z M238,198 Q212,175 188,185 Q195,205 222,210 Z ' +
+    'M275,222 Q305,225 318,215 Q328,205 322,195',
+
+  'phoenix':
+    'M250,245 A42,36 0 1,0 250.1,245 Z ' +
+    'M250,212 A22,20 0 1,0 250.1,212 Z ' +
+    'M242,195 L238,172 M250,192 L250,168 M258,195 L262,172 ' +
+    'M210,240 Q168,195 130,175 Q148,222 155,255 Q165,288 178,268 Q168,248 195,248 Z ' +
+    'M210,252 Q172,245 142,268 Q158,295 185,280 Z ' +
+    'M290,240 Q332,195 370,175 Q352,222 345,255 Q335,288 322,268 Q332,248 305,248 Z ' +
+    'M290,252 Q328,245 358,268 Q342,295 315,280 Z ' +
+    'M232,280 Q215,322 195,355 Q208,368 225,358 Q238,342 245,318 ' +
+    'M250,282 Q250,335 250,375 Q258,382 262,372 Q265,352 258,318 ' +
+    'M268,280 Q285,322 305,355 Q292,368 275,358 Q262,342 255,318 ' +
+    'M255,202 L272,195 L258,212 Z',
+
+  'floating island':
+    'M148,252 L250,418 L352,252 Z ' +
+    'M140,248 Q165,232 192,248 Q218,232 245,248 Q272,232 298,248 Q325,232 352,248 Q362,248 ' +
+    'M250,248 L250,195 ' +
+    'M250,178 A42,38 0 1,0 250.1,178 Z ' +
+    'M210,335 Q205,360 208,385 M228,352 Q225,375 228,398 M250,358 Q250,382 252,405 M272,352 Q275,375 272,398 M290,335 Q295,360 292,385 ' +
+    'M88,188 Q100,175 115,185 Q125,168 140,178 Q152,162 168,172 Q155,188 140,195 Q125,208 105,202 Q92,205 88,188 Z',
+
+  /* ── Concepts ── */
+  'freedom':
+    'M250,245 A32,24 0 1,0 250.1,245 Z ' +
+    'M250,222 A18,16 0 1,0 250.1,222 Z ' +
+    'M258,214 L278,208 L262,225 Z ' +
+    'M230,245 Q198,215 155,195 Q132,185 108,195 Q115,225 145,238 Q175,248 215,252 Z ' +
+    'M155,195 L128,175 M140,192 L115,172 M165,190 L145,168 ' +
+    'M270,245 Q302,215 345,195 Q368,185 392,195 Q385,225 355,238 Q325,248 285,252 Z ' +
+    'M345,195 L372,175 M360,192 L385,172 M335,190 L355,168 ' +
+    'M238,268 Q228,295 215,308 M250,270 Q250,298 250,312 M262,268 Q272,295 285,308',
+
+  'chaos':
+    'M250,250 Q265,235 270,250 Q275,265 260,270 Q245,275 240,260 Q235,245 248,238 Q262,232 268,245 Q274,258 262,265 Q250,272 244,260 ' +
+    'M250,250 L188,155 M250,250 L308,148 M250,250 L378,205 M250,250 L395,265 M250,250 L362,358 M250,250 L285,395 M250,250 L195,388 M250,250 L122,348 M250,250 L108,255 M250,250 L135,162 ' +
+    'M165,135 L158,118 L175,125 Z M325,122 L332,108 L342,120 Z M388,178 L398,165 L402,182 Z M392,312 L405,305 L402,322 Z M168,385 L155,398 L158,378 Z ' +
+    'M210,195 Q198,178 215,175 M295,182 Q308,165 315,178 M372,245 Q385,228 385,248 M180,342 Q165,355 168,338',
+
+  'silence':
+    'M238,148 A72,72 0 1,0 238.1,148 Z ' +
+    'M295,178 Q312,185 308,198 Q302,212 288,208 ' +
+    'M272,218 Q280,228 285,222 Q290,215 285,208 ' +
+    'M205,215 L200,258 M268,218 L272,258 ' +
+    'M195,258 Q250,242 308,258 ' +
+    'M272,258 Q295,245 315,218 ' +
+    'M315,218 Q322,228 318,235 Q312,242 305,235 M322,222 Q330,232 325,240 ' +
+    'M258,165 A9,9 0 1,0 258.1,165 Z ' +
+    'M248,152 Q262,145 272,152',
+
+  'nostalgia':
+    'M112,198 L112,358 L388,358 L388,198 Z ' +
+    'M128,198 L128,268 L372,268 L372,198 Z ' +
+    'M185,315 A38,38 0 1,0 185.1,315 Z M185,315 A15,15 0 1,0 185.1,315 Z ' +
+    'M315,315 A38,38 0 1,0 315.1,315 Z M315,315 A15,15 0 1,0 315.1,315 Z ' +
+    'M150,338 L150,358 M350,338 L350,358 M150,338 Q250,322 350,338 ' +
+    'M145,218 L355,218 M145,235 L355,235 M145,252 L302,252 ' +
+    'M112,198 L128,198 L128,215 M372,198 L388,198 L388,215 ' +
+    'M318,232 L332,225 L332,245 Z',
+
+  'speed':
+    'M278,95 L218,262 L258,262 L222,405 L332,215 L285,215 L322,95 Z ' +
+    'M105,185 L178,185 M92,205 L165,205 M108,225 L178,225 ' +
+    'M95,248 L162,248 M110,268 L175,268 M98,288 L162,288 ' +
+    'M100,315 L155,315 M112,335 L165,335',
+
+  'infinity':
+    'M250,250 Q235,195 185,195 Q125,195 125,250 Q125,305 185,305 Q235,305 250,250 ' +
+    'Q265,195 315,195 Q375,195 375,250 Q375,305 315,305 Q265,305 250,250',
+
+  'dreams':
+    'M252,118 A88,88 0 1,0 252,268 A58,58 0 1,1 252,118 Z ' +
+    'M342,148 L348,132 L354,148 L338,138 L358,138 Z ' +
+    'M378,205 L382,192 L386,205 L374,198 L390,198 Z ' +
+    'M355,262 L360,248 L365,262 L352,254 L368,254 Z ' +
+    'M308,108 L312,96 L316,108 L304,100 L320,100 Z ' +
+    'M128,178 L148,178 L128,198 L148,198 M158,155 L172,155 L158,170 L172,170 M182,138 L192,138 L182,148 L192,148 ' +
+    'M125,345 Q125,318 148,315 Q155,295 178,298 Q185,278 210,282 Q218,262 245,268 Q272,262 280,282 Q305,278 312,298 Q338,295 345,315 Q368,318 368,345 Z',
+
+  'time passing':
+    'M148,115 L148,138 L352,138 L352,115 Z ' +
+    'M148,382 L148,358 L352,358 L352,382 Z ' +
+    'M148,138 L250,265 L352,138 Z ' +
+    'M148,358 L250,265 L352,358 Z ' +
+    'M175,155 L250,255 L325,155 Z ' +
+    'M222,348 Q250,325 278,348 Q250,352 222,348 Z ' +
+    'M250,265 L250,330 ' +
+    'M148,382 L128,395 L148,395 M352,382 L372,395 L352,395 ' +
+    'M148,115 L128,102 L148,102 M352,115 L372,102 L352,102',
+
+  'loneliness':
+    'M62,348 L438,348 ' +
+    'M250,318 A14,14 0 1,0 250.1,318 Z ' +
+    'M250,332 L250,345 M250,338 L240,345 M250,338 L260,345 M250,345 L244,358 M250,345 L256,358 ' +
+    'M115,178 A62,62 0 1,0 115.1,178 Z M115,178 A40,40 0 1,0 115.1,178 Z ' +
+    'M285,135 A5,5 0 1,0 285.1,135 Z M348,158 A5,5 0 1,0 348.1,158 Z M392,112 A5,5 0 1,0 392.1,112 Z M215,112 A5,5 0 1,0 215.1,112 Z M158,145 A5,5 0 1,0 158.1,145 Z',
+
+  'joy':
+    'M250,135 A38,38 0 1,0 250.1,135 Z ' +
+    'M228,148 Q250,168 272,148 ' +
+    'M238,128 A6,6 0 1,0 238.1,128 Z M262,128 A6,6 0 1,0 262.1,128 Z ' +
+    'M250,172 L250,278 ' +
+    'M250,198 Q218,175 192,152 ' +
+    'M250,198 Q282,175 308,152 ' +
+    'M250,278 Q228,308 208,338 ' +
+    'M250,278 Q272,308 292,338 ' +
+    'M218,372 L212,388 M240,378 L238,395 M262,378 L264,395 M282,372 L288,388 ' +
+    'M165,165 L168,155 L172,165 L162,158 L175,158 Z M335,165 L338,155 L342,165 L332,158 L345,158 Z',
+
+  /* ── Funny ── */
+  'cat using a laptop':
+    'M108,178 L108,318 L258,318 L258,178 Z ' +
+    'M85,318 L85,342 L282,342 L282,318 Z ' +
+    'M122,195 L245,195 M122,212 L245,212 M122,228 L200,228 ' +
+    'M318,295 A52,55 0 1,0 318.1,295 Z ' +
+    'M318,240 A35,32 0 1,0 318.1,240 Z ' +
+    'M300,218 L295,192 L318,212 Z ' +
+    'M336,218 L341,192 L318,212 Z ' +
+    'M305,238 Q310,232 315,238 M321,238 Q326,232 331,238 ' +
+    'M318,248 A5,4 0 1,0 318.1,248 Z ' +
+    'M335,348 Q368,338 375,312 Q382,285 365,272 ' +
+    'M268,328 Q295,322 308,318 Q308,342 285,342',
+
+  'penguin in a tuxedo':
+    'M215,268 A60,92 0 1,0 215.1,268 Z ' +
+    'M225,285 A36,68 0 1,0 225.1,285 Z ' +
+    'M250,178 A42,40 0 1,0 250.1,178 Z ' +
+    'M234,172 A8,8 0 1,0 234.1,172 Z M265,172 A8,8 0 1,0 265.1,172 Z ' +
+    'M242,190 L250,205 L258,190 Z ' +
+    'M192,248 Q162,238 155,275 Q152,308 185,318 L192,295 Z M308,248 Q338,238 345,275 Q348,308 315,318 L308,295 Z ' +
+    'M228,355 Q215,368 200,362 L210,345 Z M272,355 Q285,368 300,362 L290,345 Z ' +
+    'M228,220 L250,232 L272,220 L250,210 Z M228,220 L218,212 L218,228 Z M272,220 L282,212 L282,228 Z ' +
+    'M248,218 A5,5 0 1,0 248.1,218 Z',
+
+  'duck wearing sunglasses':
+    'M195,298 A88,72 0 1,0 195.1,298 Z ' +
+    'M188,228 Q220,205 248,212 ' +
+    'M248,212 A42,38 0 1,0 248.1,212 Z ' +
+    'M280,210 Q318,205 322,218 Q318,232 280,228 Z ' +
+    'M225,205 A22,20 0 1,0 225.1,205 Z M258,205 A22,20 0 1,0 258.1,205 Z ' +
+    'M245,205 L238,205 ' +
+    'M202,205 L185,195 M278,205 L292,195 ' +
+    'M218,295 Q205,268 215,242 Q248,228 268,248 Q285,268 265,295 Z ' +
+    'M278,318 Q302,315 315,298 Q322,282 312,268 ' +
+    'M210,368 Q195,378 182,372 L195,355 Z M258,372 Q245,382 230,378 L242,358 Z',
+
+  'robot doing yoga':
+    'M215,108 L215,158 L285,158 L285,108 Z ' +
+    'M250,108 L250,85 M245,85 L255,85 ' +
+    'M228,125 L242,125 L242,140 L228,140 Z M258,125 L272,125 L272,140 L258,140 Z ' +
+    'M228,148 L272,148 ' +
+    'M205,158 L205,265 L295,265 L295,158 Z ' +
+    'M218,172 L218,238 L282,238 L282,172 Z M232,185 A10,10 0 1,0 232.1,185 Z M268,185 A10,10 0 1,0 268.1,185 Z M235,218 L265,218 ' +
+    'M205,178 L162,145 L148,155 L148,178 L168,168 L205,198 ' +
+    'M295,178 L338,145 L352,155 L352,178 L332,168 L295,198 ' +
+    'M225,265 L225,388 L215,395 L235,395 L235,388 L238,265 ' +
+    'M262,265 L258,302 Q248,318 242,302 ' +
+    'M215,395 L200,408 M235,395 L248,408',
+
+  'dinosaur on a skateboard':
+    'M148,348 A42,42 0 1,0 148.1,348 Z M148,348 A18,18 0 1,0 148.1,348 Z ' +
+    'M352,348 A42,42 0 1,0 352.1,348 Z M352,348 A18,18 0 1,0 352.1,348 Z ' +
+    'M148,306 L352,306 L352,318 L148,318 Z ' +
+    'M200,308 L185,265 Q178,245 192,232 Q208,218 225,232 L245,305 ' +
+    'M290,308 L305,265 Q312,245 298,232 Q282,218 265,232 L245,305 ' +
+    'M185,265 Q180,238 188,215 Q195,195 205,185 Q215,175 225,178 Q232,182 230,195 Q228,208 218,212 ' +
+    'M225,178 A30,28 0 1,0 225.1,178 Z ' +
+    'M238,172 A8,8 0 1,0 238.1,172 Z ' +
+    'M232,185 L250,178 L258,188 ' +
+    'M198,232 Q185,252 188,272 M222,228 Q215,248 218,268 ' +
+    'M185,185 Q172,188 165,195 Q158,205 162,218 M198,185 Q185,182 178,192',
 };
 function getPromptGuide(p) { return PROMPT_GUIDES[p] || null; }
 
@@ -2483,6 +4029,34 @@ const ghostPrompt = {
     setTimeout(() => el.classList.remove('fading'), 500);
   },
 };
+
+/* Finger-tracking particle trail for hand mode cursor */
+function spawnHandTrail(x, y, color) {
+  const el = document.createElement('div');
+  el.className = 'hand-trail-dot';
+  el.style.cssText = `left:${x}px;top:${y}px;background:${color}`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 500);
+}
+
+/* Build progressive hint array for a given prompt */
+function buildPromptHints(prompt) {
+  const words = (prompt || '').trim().split(/\s+/).filter(Boolean);
+  const total = words.reduce((s, w) => s + w.length, 0);
+  const first = words[0] ? words[0][0].toUpperCase() : '?';
+  const last  = words[words.length - 1] ? words[words.length - 1].slice(-1).toUpperCase() : '?';
+  const partial = words.map(w => {
+    if (w.length <= 2) return w.toUpperCase();
+    return `${w[0].toUpperCase()} ${Array(w.length - 2).fill('_').join(' ')} ${w.slice(-1).toUpperCase()}`;
+  }).join('  ·  ');
+  return [
+    `${total} letter${total !== 1 ? 's' : ''}`,
+    `Starts with ${first}`,
+    `Ends with ${last}`,
+    partial,
+    prompt,
+  ];
+}
 
 /* Tiny burst of colored sparks at (x, y) — called on fast brush strokes */
 function spawnBrushSpark(x, y, color) {
@@ -2550,6 +4124,7 @@ const ACHIEVEMENTS = [
   { id: 'underdog',      icon: '🐺', name: 'Underdog',          desc: 'Win against a player two levels above you.' },
   { id: 'veteran',       icon: '🎖️', name: 'Veteran',          desc: 'Play 25 multiplayer matches.' },
   { id: 'airMaster',     icon: '✋', name: 'Air Master',        desc: 'Win a match using hand-tracking mode.' },
+  { id: 'coloringBook',  icon: '🪣', name: 'Color Master',       desc: 'Reach 80% coverage in Coloring Book mode.' },
 ];
 
 const LEVEL_UNLOCKS = [
@@ -2833,6 +4408,15 @@ const audio = {
 
   /** Vote cast feedback */
   voteCast() { this._tone(700, 80, { type: 'sine', gain: 0.3 }); },
+
+  /** Liquid fill — soft watery splash */
+  fillSplash(color) {
+    if (!this.ensure()) return;
+    // Two layered tones: a low wet plop + a bright shimmer
+    this._tone(180, 120, { type: 'sine', glideTo: 90,  gain: 0.22 });
+    setTimeout(() => this._tone(660, 90,  { type: 'sine', glideTo: 880, gain: 0.14 }), 30);
+    setTimeout(() => this._tone(440, 60,  { type: 'sine', gain: 0.09 }), 90);
+  },
 };
 
 /* ============================================================
@@ -2900,6 +4484,8 @@ const achievements = {
       if (STATE.profile.matchesPlayed >= 25) this.unlock('veteran');
     } else if (eventName === 'matchWonWithHand') {
       this.unlock('airMaster');
+    } else if (eventName === 'coloringBook') {
+      this.unlock('coloringBook');
     }
   },
 };
@@ -3119,6 +4705,7 @@ const drawing = {
   color: '#8ab4ff',
   size: 8,
   isEraser: false,
+  isFill: false,
   strokes: [],
   currentStroke: null,
   isDown: false,
@@ -3134,6 +4721,7 @@ const drawing = {
   onStrokeUndo:  null,
   onStrokeClear: null,
   lastSendTs: 0,
+  fillAnimating: false,   // true while liquid fill animation runs — blocks pointer input
 
   init() {
     this.mainCanvas   = $('canvas-main');
@@ -3174,6 +4762,7 @@ const drawing = {
     this.currentStroke = null;
     this.isDown = false;
     this.isEraser = false;
+    this.isFill = false;
     this.colorsUsed = new Set();
     this.drawingTimeMs = 0;
     this.continuousDrawSeconds = 0;
@@ -3189,13 +4778,43 @@ const drawing = {
 
   redrawAll() {
     this.mainCtx.clearRect(0, 0, this.w, this.h);
-    for (const s of this.strokes) renderStroke(this.mainCtx, s);
+    for (const s of this.strokes) {
+      if (s.type === 'fill') {
+        this._runFloodFill(this.mainCtx, s.nx * this.w, s.ny * this.h, s.color);
+      } else if (s.type === 'coloring-book-outline') {
+        this._drawOutlineStroke(this.mainCtx, s);
+      } else {
+        renderStroke(this.mainCtx, s);
+      }
+    }
+  },
+
+  /* Render a stored coloring-book outline stroke onto a context */
+  _drawOutlineStroke(ctx, s) {
+    const path = getPromptGuide(s.prompt);
+    if (!path) return;
+    ctx.save();
+    ctx.translate(s.offX, s.offY);
+    ctx.scale(s.scale, s.scale);
+    ctx.strokeStyle = 'rgba(30,20,10,0.88)';
+    ctx.lineWidth   = s.lineWidth;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke(new Path2D(path));
+    ctx.restore();
   },
 
   onPointerDown(e) {
     if (!match.isRoundActive()) return;
-    // Ignore pointer events if we're in hand mode — keyboard/mouse take priority for non-hand UI only
+    if (this.fillAnimating) return;
     if (hand && hand.active && e.pointerType !== 'mouse') return;
+    if (this.isFill) {
+      const p = this.eventPoint(e);
+      guide.onFirstStroke();
+      ghostPrompt.hide();
+      this.floodFill(p.x, p.y);
+      return;
+    }
     this.activeCanvas.setPointerCapture(e.pointerId);
     this._beginStroke(this.eventPoint(e));
   },
@@ -3329,7 +4948,191 @@ const drawing = {
 
   setColor(c) { this.color = c; this.isEraser = false; STATE.profile.preferredColor = c; storage.save(); renderToolbar(); },
   setSize(s)  { this.size  = s; STATE.profile.preferredSize  = s; storage.save(); renderToolbar(); },
-  toggleEraser() { this.isEraser = !this.isEraser; renderToolbar(); },
+  toggleEraser() { this.isEraser = !this.isEraser; if (this.isEraser) this.isFill = false; renderToolbar(); },
+  toggleFill()   { this.isFill = !this.isFill; if (this.isFill) this.isEraser = false; renderToolbar(); },
+
+  /* ── Instant flood fill (used by redrawAll/undo replay / export) ── */
+  _runFloodFill(ctx, px, py, color) {
+    const cw = ctx.canvas.width;
+    const ch = ctx.canvas.height;
+    const dpr = cw / (ctx.canvas.offsetWidth || cw);
+    const imageData = ctx.getImageData(0, 0, cw, ch);
+    const d = imageData.data;
+    const si = (~~(py * dpr) * cw + ~~(px * dpr)) * 4;
+    const tR = d[si], tG = d[si+1], tB = d[si+2], tA = d[si+3];
+
+    const hex = color.replace('#', '');
+    const fR = parseInt(hex.slice(0,2),16), fG = parseInt(hex.slice(2,4),16), fB = parseInt(hex.slice(4,6),16);
+    if (tR === fR && tG === fG && tB === fB) return;
+
+    const TOLERANCE = 40;
+    const pixMatch = i => Math.abs(d[i]-tR) + Math.abs(d[i+1]-tG) + Math.abs(d[i+2]-tB) + Math.abs(d[i+3]-tA) < TOLERANCE;
+    const visited = new Uint8Array(cw * ch);
+    const stack = [~~(py * dpr) * cw + ~~(px * dpr)];
+    while (stack.length) {
+      const pos = stack.pop();
+      if (visited[pos]) continue;
+      visited[pos] = 1;
+      const pi = pos * 4;
+      d[pi]=fR; d[pi+1]=fG; d[pi+2]=fB; d[pi+3]=255;
+      const cx2 = pos % cw, cy2 = ~~(pos / cw);
+      if (cx2 > 0    && !visited[pos-1]  && pixMatch((pos-1)*4))  stack.push(pos-1);
+      if (cx2 < cw-1 && !visited[pos+1]  && pixMatch((pos+1)*4))  stack.push(pos+1);
+      if (cy2 > 0    && !visited[pos-cw] && pixMatch((pos-cw)*4)) stack.push(pos-cw);
+      if (cy2 < ch-1 && !visited[pos+cw] && pixMatch((pos+cw)*4)) stack.push(pos+cw);
+    }
+    ctx.putImageData(imageData, 0, 0);
+  },
+
+  /* ── BFS wave collector ─────────────────────────────────────────
+   *  Groups matching pixels into concentric rings from the seed.
+   *  Returns { waves, imageData, tR, tG, tB, tA, fR, fG, fB, cw, ch }
+   *  or null when the seed pixel already matches the fill color.
+   * ─────────────────────────────────────────────────────────────── */
+  _bfsWaves(ctx, px, py, color) {
+    const cw  = ctx.canvas.width;
+    const ch  = ctx.canvas.height;
+    const dpr = cw / (ctx.canvas.offsetWidth || cw);
+    const imageData = ctx.getImageData(0, 0, cw, ch);
+    const d   = imageData.data;
+    const sx  = clamp(~~(px * dpr), 0, cw - 1);
+    const sy  = clamp(~~(py * dpr), 0, ch - 1);
+    const si  = (sy * cw + sx) * 4;
+    const tR  = d[si], tG = d[si+1], tB = d[si+2], tA = d[si+3];
+
+    const hex = color.replace('#', '');
+    const fR  = parseInt(hex.slice(0,2),16);
+    const fG  = parseInt(hex.slice(2,4),16);
+    const fB  = parseInt(hex.slice(4,6),16);
+    if (tR === fR && tG === fG && tB === fB) return null;
+
+    const TOLERANCE = 40;
+    const pixMatch = i => Math.abs(d[i]-tR) + Math.abs(d[i+1]-tG) + Math.abs(d[i+2]-tB) + Math.abs(d[i+3]-tA) < TOLERANCE;
+
+    const visited = new Uint8Array(cw * ch);
+    const seed    = sy * cw + sx;
+    visited[seed] = 1;
+    const waves   = [[seed]];
+
+    let front = [seed];
+    // Limit total collected pixels to avoid hanging on huge fills (>600K device px)
+    const PIXEL_CAP = 600000;
+    let total = 1;
+
+    while (front.length > 0 && total < PIXEL_CAP) {
+      const next = [];
+      for (const pos of front) {
+        const cx2 = pos % cw, cy2 = ~~(pos / cw);
+        const neighbors = [];
+        if (cx2 > 0)    neighbors.push(pos - 1);
+        if (cx2 < cw-1) neighbors.push(pos + 1);
+        if (cy2 > 0)    neighbors.push(pos - cw);
+        if (cy2 < ch-1) neighbors.push(pos + cw);
+        for (const n of neighbors) {
+          if (!visited[n] && pixMatch(n * 4)) {
+            visited[n] = 1;
+            next.push(n);
+            total++;
+          }
+        }
+      }
+      if (next.length > 0) waves.push(next);
+      front = next;
+    }
+
+    return { waves, imageData, tR, tG, tB, tA, fR, fG, fB, cw, ch };
+  },
+
+  /* ── Animated liquid fill — 380 ms BFS wave propagation ────────
+   *  Paints wave rings onto ctx with each rAF frame using a single
+   *  shared ImageData buffer (no GC pressure). Calls onDone() when
+   *  the last wave has been painted and putImageData committed.
+   * ─────────────────────────────────────────────────────────────── */
+  _runFloodFillAnimated(ctx, px, py, color, onDone) {
+    const info = this._bfsWaves(ctx, px, py, color);
+    if (!info) { onDone(); return; }
+
+    const { waves, imageData, fR, fG, fB } = info;
+    const d = imageData.data;
+    const TOTAL = waves.length;
+    const DURATION = Math.min(420, 80 + TOTAL * 0.6); // scales with region size
+    let startTs   = null;
+    let lastWave  = -1;
+
+    const frame = (ts) => {
+      if (!startTs) startTs = ts;
+      const elapsed  = ts - startTs;
+      const progress = Math.min(1, elapsed / DURATION);
+      // Ease-out cubic so the fill *rushes* outward then slows at the edges
+      const eased    = 1 - Math.pow(1 - progress, 2.8);
+      const target   = Math.floor(eased * (TOTAL - 1));
+
+      // Paint every new wave since last frame
+      for (let wi = lastWave + 1; wi <= target && wi < TOTAL; wi++) {
+        for (const pos of waves[wi]) {
+          const pi = pos * 4;
+          d[pi] = fR; d[pi+1] = fG; d[pi+2] = fB; d[pi+3] = 255;
+        }
+      }
+      lastWave = Math.max(lastWave, target);
+      ctx.putImageData(imageData, 0, 0);
+
+      if (progress < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        // Final sweep — guarantee every pixel is painted
+        for (let wi = lastWave + 1; wi < TOTAL; wi++) {
+          for (const pos of waves[wi]) {
+            const pi = pos * 4;
+            d[pi] = fR; d[pi+1] = fG; d[pi+2] = fB; d[pi+3] = 255;
+          }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        onDone();
+      }
+    };
+
+    requestAnimationFrame(frame);
+  },
+
+  /* ── User-triggered flood fill ─────────────────────────────────
+   *  Records the stroke for undo, spawns the click ripple,
+   *  plays the liquid splash SFX, then runs the animated fill.
+   * ─────────────────────────────────────────────────────────────── */
+  floodFill(px, py) {
+    const color = this.color;
+    // Record immediately so undo always works even mid-animation
+    this.strokes.push({ type: 'fill', nx: px / this.w, ny: py / this.h, color });
+    this.colorsUsed.add(color);
+
+    // Visual click ripple at tap/click point
+    const matchEl = document.getElementById('screen-match');
+    if (matchEl) {
+      const ripple = document.createElement('div');
+      ripple.className = 'fill-ripple';
+      ripple.style.cssText = `left:${Math.round(px)}px;top:${Math.round(py)}px;background:${color};opacity:0.72;`;
+      matchEl.appendChild(ripple);
+      ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+    }
+
+    // Liquid splash audio
+    audio.fillSplash(color);
+
+    // Lock input, run animation, unlock on completion
+    this.fillAnimating = true;
+    this._runFloodFillAnimated(this.mainCtx, px, py, color, () => {
+      this.fillAnimating = false;
+      // Let coloring book track coverage after each fill
+      if (typeof coloringBook !== 'undefined' && coloringBook.active) {
+        coloringBook.updateCoverage();
+      }
+    });
+
+    // Broadcast fill to opponent (multiplayer)
+    if (this.onStrokePoint) {
+      this.onStrokePoint('fill', px / this.w, py / this.h, color, 0, 0.5);
+    }
+  },
 
   exportTo(targetCanvas, sizePx = 800) {
     const tctx = targetCanvas.getContext('2d');
@@ -3344,7 +5147,20 @@ const drawing = {
     tctx.translate(offX, offY);
     tctx.scale(scale, scale);
     tctx.lineCap = 'round'; tctx.lineJoin = 'round';
-    for (const s of this.strokes) renderStroke(tctx, s);
+    for (const s of this.strokes) {
+      if (s.type === 'fill') {
+        tctx.restore();
+        const tx = s.nx * this.w * scale + offX;
+        const ty = s.ny * this.h * scale + offY;
+        this._runFloodFill(tctx, tx, ty, s.color);
+        tctx.save();
+        tctx.translate(offX, offY);
+        tctx.scale(scale, scale);
+        tctx.lineCap = 'round'; tctx.lineJoin = 'round';
+      } else {
+        renderStroke(tctx, s);
+      }
+    }
     tctx.restore();
   },
 };
@@ -3546,9 +5362,14 @@ function renderToolbar() {
     d.addEventListener('click', () => drawing.setSize(s));
     sizeEl.appendChild(d);
   }
-  /* Sync eraser button active state */
+  /* Sync eraser and fill button active states */
   const eraserBtn = $('tool-eraser');
   if (eraserBtn) eraserBtn.classList.toggle('active', drawing.isEraser);
+  const fillBtn = $('tool-fill');
+  if (fillBtn) fillBtn.classList.toggle('active', drawing.isFill);
+  /* Cursor aura — match glow to active drawing color */
+  const handCursor = $('hand-cursor');
+  if (handCursor) handCursor.style.setProperty('--cursor-ink', drawing.isEraser ? '#ffffff' : drawing.color);
 }
 
 /* ============================================================
@@ -3756,20 +5577,104 @@ const chat = {
 };
 
 /* ============================================================
+ * Camera PIP — mirrors live hand-tracking feed in bottom-right
+ * ============================================================ */
+const cameraPip = {
+  canvas: null,
+  ctx: null,
+  rafHandle: null,
+
+  init() {
+    this.canvas = $('canvas-pip');
+    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+  },
+
+  show(videoEl) {
+    if (!this.ctx || !videoEl) return;
+    $('camera-pip').style.display = '';
+    const pipLabel = document.querySelector('#camera-pip .camera-pip-label span:last-child');
+    const CONN = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+                  [0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],
+                  [0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
+    const TIPS = [4, 8, 12, 16, 20];
+    const TIP_COLORS = ['rgba(192,168,255,0.9)','rgba(124,185,255,0.95)','rgba(122,240,193,0.9)','rgba(255,200,68,0.9)','rgba(255,122,182,0.9)'];
+
+    const draw = () => {
+      if (!this.rafHandle) return;
+      const c = this.canvas, ctx = this.ctx;
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      // Blurred background video
+      ctx.filter = 'blur(5px)';
+      ctx.drawImage(videoEl, 0, 0, c.width, c.height);
+      ctx.filter = 'none';
+
+      const lm = hand.lastLandmarks;
+      if (pipLabel) pipLabel.textContent = lm ? 'Hand Detected' : 'Searching…';
+
+      if (lm) {
+        const sx = i => lm[i].x * c.width, sy = i => lm[i].y * c.height;
+
+        // Skeleton connections with glow
+        ctx.shadowBlur = 6; ctx.shadowColor = 'rgba(124,185,255,0.6)';
+        ctx.strokeStyle = 'rgba(124,185,255,0.5)'; ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (const [a, b] of CONN) { ctx.moveTo(sx(a), sy(a)); ctx.lineTo(sx(b), sy(b)); }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Fingertip trails (fading dots)
+        const trail = hand.trailHistory || {};
+        for (let ti = 0; ti < TIPS.length; ti++) {
+          const hist = trail[TIPS[ti]] || [];
+          for (let j = 0; j < hist.length - 1; j++) {
+            const alpha = (j / hist.length) * 0.35;
+            ctx.fillStyle = TIP_COLORS[ti].replace(/[\d.]+\)$/, alpha + ')');
+            ctx.beginPath();
+            ctx.arc(hist[j].x * c.width, hist[j].y * c.height, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Joint dots (knuckles = small white; fingertips = colored)
+        for (let i = 0; i < 21; i++) {
+          const tipIdx = TIPS.indexOf(i);
+          const isTip = tipIdx !== -1;
+          ctx.fillStyle = isTip ? TIP_COLORS[tipIdx] : 'rgba(255,255,255,0.45)';
+          ctx.beginPath();
+          ctx.arc(sx(i), sy(i), isTip ? 4 : 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Gesture pulse ring on index fingertip (400ms expanding ring)
+        const pulseAge = performance.now() - (hand.lastGesturePulse || -1e9);
+        if (pulseAge < 400) {
+          const t = pulseAge / 400;
+          ctx.beginPath();
+          ctx.arc(sx(8), sy(8), 8 + t * 18, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(124,185,255,${(1 - t) * 0.75})`;
+          ctx.lineWidth = 2; ctx.stroke();
+        }
+      }
+
+      this.rafHandle = requestAnimationFrame(draw);
+    };
+    this.canvas.width  = 200;
+    this.canvas.height = 220;
+    this.rafHandle = requestAnimationFrame(draw);
+  },
+
+  hide() {
+    $('camera-pip').style.display = 'none';
+    if (this.rafHandle) { cancelAnimationFrame(this.rafHandle); this.rafHandle = null; }
+  },
+};
+
+/* ============================================================
  * Reactions — floating emoji burst
  * ============================================================ */
 const reactions = {
-  init() {
-    $$('.quick-reaction').forEach(el => {
-      el.addEventListener('click', () => {
-        const emoji = el.dataset.emoji;
-        this.spawn(emoji, 'me');
-        if (STATE.net) STATE.net.send(MSG.REACTION, { emoji });
-      });
-    });
-  },
-  show() { $('quick-reactions').style.display = ''; },
-  hide() { $('quick-reactions').style.display = 'none'; },
+  init() {},
   spawn(emoji, side) {
     const el = document.createElement('div');
     el.className = 'float-reaction';
@@ -3823,9 +5728,12 @@ function wireNet(net) {
 
 const MP_TASKS_VISION_VERSION = '0.10.18';
 const HAND_MODEL_URL = 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
-const HYST_FRAMES = 2;
-const PINCH_ENTER = 0.33;
-const PINCH_EXIT  = 0.42;
+const HYST_FRAMES   = 2;
+const HYST_CONTROL  = 5;
+const PINCH_ENTER   = 0.33;
+const PINCH_EXIT    = 0.42;
+const HELD_FIST_MS  = 1500;
+const HELD_PALM_MS  = 1000;
 
 /* One Euro Filter — speed-adaptive low-pass (Casiez/Roussel/Vogel, CHI 2012) */
 class OneEuroFilter {
@@ -3977,12 +5885,30 @@ const hand = {
     this.pendingGesture = null;
     this.pendingFrames = 0;
     this.lastTimestamp = 0;
+    this._pinchAngle = null; this._pinchRotation = 0; this._pinchDidRotate = false;
+    this._heldGesture = null; this._heldStart = 0; this._heldFired = false;
+    this._radialMenuOpen = false; this._radialCenter = null; this._radialSelected = null;
+    this._trailTick = 0; this._unknownStart = null;
 
     this.video.classList.add('visible');
     btn.classList.remove('loading');
     btn.classList.add('active');
     $('hand-info').classList.add('visible');
     this._setStatus('Show your hand', 'searching');
+    clearTimeout(this._guideHideTimer);
+    this._guideHideTimer = setTimeout(() => {
+      const g = $('hand-gesture-guide');
+      if (g) g.classList.add('collapsed');
+    }, 5000);
+    const _btn = $('hand-info-toggle');
+    if (_btn && !_btn._bound) {
+      _btn._bound = true;
+      const _self = this;
+      _btn.addEventListener('click', () => {
+        const g = $('hand-gesture-guide');
+        if (g) { g.classList.toggle('collapsed'); clearTimeout(_self._guideHideTimer); }
+      });
+    }
 
     // Track for airMaster achievement
     if (match.mode === 'multiplayer') match.handModeUsedThisMatch = true;
@@ -4011,6 +5937,8 @@ const hand = {
     else         this.videoFrameHandle = requestAnimationFrame(t => tick(t, null));
 
     this.loading = false;
+    cameraPip.show(this.video);
+    const tb = $('match-toolbar'); if (tb) tb.classList.add('hand-mode-active');
     toast('Hand mode on — point your index finger to draw');
   },
 
@@ -4037,8 +5965,13 @@ const hand = {
     $('tool-hand').classList.remove('active', 'loading');
     $('hand-info').classList.remove('visible');
     $('hand-cursor').classList.remove('visible', 'drawing');
+    const tb = $('match-toolbar'); if (tb) tb.classList.remove('hand-mode-active');
+    this._hideProgressRing();
+    if (this._radialMenuOpen) this._closeRadialMenu(false);
+    const _a = $('gesture-assist'); if (_a) _a.style.display = 'none';
 
     if (this.isDrawing) { drawing.handEnd(); this.isDrawing = false; }
+    cameraPip.hide();
     this.filterX = null; this.filterY = null;
     this.gesture = 'none';
     this.pinchActive = false;
@@ -4049,6 +5982,38 @@ const hand = {
     if (!el) return;
     el.textContent = text;
     el.className = 'hand-info-state ' + (cls || '');
+  },
+
+  _onGestureChange(newGesture) {
+    this.lastGesturePulse = performance.now();
+    const TOOL_EMOJIS = { 'two-finger':'🎨', 'three-finger':'⬆️', 'pinky':'⬇️', 'thumb':'✏️', 'rock-on':'🪣' };
+    switch (newGesture) {
+      case 'two-finger': {
+        const colors = [...BRUSH_COLORS, ...(STATE.profile.unlockedColors || [])];
+        const idx = colors.indexOf(drawing.color);
+        drawing.setColor(colors[(idx + 1) % colors.length]);
+        break;
+      }
+      case 'three-finger': {
+        const i = BRUSH_SIZES.indexOf(drawing.size);
+        if (i < BRUSH_SIZES.length - 1) drawing.setSize(BRUSH_SIZES[i + 1]);
+        break;
+      }
+      case 'pinky': {
+        const i = BRUSH_SIZES.indexOf(drawing.size);
+        if (i > 0) drawing.setSize(BRUSH_SIZES[i - 1]);
+        break;
+      }
+      case 'thumb':
+        drawing.toggleEraser();
+        break;
+      case 'rock-on':
+        drawing.toggleFill();
+        renderToolbar();
+        break;
+    }
+    const em = TOOL_EMOJIS[newGesture];
+    if (em && typeof reactions !== 'undefined') reactions.spawn(em, 'me');
   },
 
   /** 21-landmark gesture detection (subset for in-match use) */
@@ -4063,20 +6028,25 @@ const hand = {
         const tip = lm[4], mcp = lm[2];
         extended.push(
           Math.hypot(tip.x - lm[0].x, tip.y - lm[0].y) >
-          Math.hypot(mcp.x - lm[0].x, mcp.y - lm[0].y) * 1.05
+          Math.hypot(mcp.x - lm[0].x, mcp.y - lm[0].y) * 1.2
         );
       } else {
         extended.push(lm[tipIds[i]].y < lm[pipIds[i]].y - 0.015);
       }
     }
-    const [, index, middle, ring, pinky] = extended;
+    const [thumb, index, middle, ring, pinky] = extended;
     const pinchRatio = Math.hypot(lm[4].x - lm[8].x, lm[4].y - lm[8].y) / handSize;
     const pinching = prevPinch ? (pinchRatio < PINCH_EXIT) : (pinchRatio < PINCH_ENTER);
 
-    if (pinching && !middle && !ring && !pinky)   return 'pinch';
-    if (index && !middle && !ring && !pinky)      return 'draw';
-    if (index && middle && ring && pinky)         return 'palm';
-    if (!index && !middle && !ring && !pinky)     return 'fist';
+    if (pinching && !middle && !ring && !pinky)           return 'pinch';
+    if (thumb && !index && !middle && !ring && pinky)     return 'rock-on';
+    if (thumb && !index && !middle && !ring && !pinky)    return 'thumb';
+    if (!thumb && !index && !middle && !ring && pinky)    return 'pinky';
+    if (index && middle && ring && !pinky)                return 'three-finger';
+    if (index && middle && !ring && !pinky)               return 'two-finger';
+    if (index && !middle && !ring && !pinky)              return 'draw';
+    if (index && middle && ring && pinky)                 return 'palm';
+    if (!index && !middle && !ring && !pinky)             return 'fist';
     return 'unknown';
   },
 
@@ -4091,14 +6061,29 @@ const hand = {
       if (this.filterY) this.filterY.reset();
       this.pendingGesture = null; this.pendingFrames = 0;
       this.gesture = 'none'; this.pinchActive = false;
+      this.lastLandmarks = null; this.trailHistory = {};
+      this._heldGesture = null; this._heldFired = false;
+      this._hideProgressRing();
+      if (this._radialMenuOpen) this._closeRadialMenu(false);
       this._setStatus('Show your hand', 'searching');
       return;
     }
 
     const lm = landmarks[0];
+    this.lastLandmarks = lm;
+    if (!this.trailHistory) this.trailHistory = {};
+    for (const _t of [4, 8, 12, 16, 20]) {
+      if (!this.trailHistory[_t]) this.trailHistory[_t] = [];
+      this.trailHistory[_t].push({ x: lm[_t].x, y: lm[_t].y });
+      if (this.trailHistory[_t].length > 8) this.trailHistory[_t].shift();
+    }
     const rawGesture = this._detectGesture(lm, this.pinchActive);
+    const prevGesture = this.gesture;
 
-    // Hysteresis: candidate must hold for HYST_FRAMES; palm/unknown commit immediately
+    // Hysteresis: candidate must hold for HYST_FRAMES (or HYST_CONTROL for tool-switch gestures);
+    //             palm/unknown commit immediately
+    const _hyst = ['two-finger','three-finger','pinky','thumb','rock-on'].includes(rawGesture)
+      ? HYST_CONTROL : HYST_FRAMES;
     let nextGesture = this.gesture;
     if (rawGesture === this.gesture) {
       this.pendingGesture = null; this.pendingFrames = 0;
@@ -4111,7 +6096,7 @@ const hand = {
       } else {
         this.pendingGesture = rawGesture; this.pendingFrames = 1;
       }
-      if (this.pendingFrames >= HYST_FRAMES) {
+      if (this.pendingFrames >= _hyst) {
         nextGesture = rawGesture;
         this.pendingGesture = null; this.pendingFrames = 0;
       }
@@ -4119,17 +6104,105 @@ const hand = {
     this.gesture = nextGesture;
     this.pinchActive = (nextGesture === 'pinch');
 
+    // Pinch-rotate: track wrist angle while pinching; fire undo on clean release
+    if (nextGesture === 'pinch') {
+      const angle = Math.atan2(lm[8].y - lm[4].y, lm[8].x - lm[4].x);
+      if (this._pinchAngle === null) {
+        this._pinchAngle = angle;
+      } else {
+        let d = angle - this._pinchAngle;
+        if (d > Math.PI) d -= 2 * Math.PI;
+        if (d < -Math.PI) d += 2 * Math.PI;
+        this._pinchRotation = (this._pinchRotation || 0) + d;
+        this._pinchAngle = angle;
+        if (Math.abs(this._pinchRotation) > Math.PI / 6) {
+          const dir = this._pinchRotation > 0 ? 1 : -1;
+          this._pinchRotation = 0;
+          this._pinchDidRotate = true;
+          const cols = [...BRUSH_COLORS, ...(STATE.profile.unlockedColors || [])];
+          drawing.setColor(cols[(cols.indexOf(drawing.color) + dir + cols.length) % cols.length]);
+        }
+      }
+    }
+    if (prevGesture === 'pinch' && nextGesture !== 'pinch') {
+      if (!this._pinchDidRotate) drawing.undo();
+      this._pinchAngle = null; this._pinchRotation = 0; this._pinchDidRotate = false;
+    }
+
+    // Fire toolbar shortcuts once on gesture transition (skip pinch — handled above)
+    if (nextGesture !== prevGesture && nextGesture !== 'pinch') this._onGestureChange(nextGesture);
+
     // Mirror x because the visible video is flipped (selfie style)
     const rawX = (1 - lm[8].x) * w;
     const rawY = lm[8].y * h;
     const sx = this.filterX.filter(rawX, tsMs);
     const sy = this.filterY.filter(rawY, tsMs);
 
+    // Radial menu open: track dwell selection; ignore normal held-gesture logic
+    if (this._radialMenuOpen) {
+      this._updateRadialMenu(lm, tsMs);
+      // Pinch = cancel; losing hand = cancel (handled in landmarks.length===0 block above)
+      if (nextGesture === 'pinch' && prevGesture !== 'pinch') this._closeRadialMenu(false);
+    } else {
+      // Held gesture detection (fist → clear, palm → radial menu)
+      if (nextGesture === 'fist' || nextGesture === 'palm') {
+        if (this._heldGesture !== nextGesture) {
+          this._heldGesture = nextGesture;
+          this._heldStart = tsMs;
+          this._heldFired = false;
+        }
+        const heldMs = tsMs - this._heldStart;
+        const thresh = nextGesture === 'fist' ? HELD_FIST_MS : HELD_PALM_MS;
+        this._updateProgressRing(nextGesture, heldMs / thresh, sx, sy);
+        if (heldMs >= thresh && !this._heldFired) {
+          this._heldFired = true;
+          this._hideProgressRing();
+          if (nextGesture === 'fist') { drawing.clear(); if (typeof reactions !== 'undefined') reactions.spawn('🗑️', 'me'); }
+          else this._openRadialMenu(sx, sy);
+        }
+      } else {
+        if (this._heldGesture) {
+          this._heldGesture = null; this._heldFired = false;
+          this._hideProgressRing();
+        }
+      }
+    }
+
+    // Unknown gesture assistant (show hint after 2s)
+    if (nextGesture === 'unknown') {
+      if (!this._unknownStart) this._unknownStart = tsMs;
+      else if (tsMs - this._unknownStart > 2000) {
+        const a = $('gesture-assist'); if (a) a.style.display = '';
+      }
+    } else {
+      this._unknownStart = null;
+      const a = $('gesture-assist'); if (a) a.style.display = 'none';
+    }
+
     // Update hand cursor visualization
     const cursor = $('hand-cursor');
     cursor.style.left = sx + 'px';
     cursor.style.top  = sy + 'px';
     cursor.classList.add('visible');
+    cursor.classList.toggle('control-gesture', ['two-finger','three-finger','pinky','thumb','pinch','rock-on'].includes(nextGesture));
+
+    // Radial menu update + status override while open
+    if (this._radialMenuOpen) {
+      this._setStatus(this._radialSelected ? `Hold → ${this._radialSelected}` : 'Move hand to sector', 'control');
+    }
+
+    // Particle trail every 3rd frame
+    if (!this._trailTick) this._trailTick = 0;
+    if (++this._trailTick % 3 === 0) {
+      const tc = nextGesture === 'draw' ? (drawing.color + 'aa') : 'rgba(124,185,255,0.38)';
+      spawnHandTrail(sx, sy, tc);
+    }
+
+    // Gesture HUD row highlight
+    document.querySelectorAll('#hand-gesture-guide .hand-gesture-row').forEach(r => {
+      const g = r.dataset.gesture || '';
+      r.classList.toggle('active', g === nextGesture || (nextGesture === 'fist' && g === 'fist'));
+    });
 
     // Route gesture → drawing engine
     if (nextGesture === 'draw') {
@@ -4147,11 +6220,103 @@ const hand = {
         drawing.handEnd();
         this.isDrawing = false;
       }
-      if (nextGesture === 'palm')          this._setStatus('Brush lifted — point to draw', 'lifted');
-      else if (nextGesture === 'fist')     this._setStatus('Fist — open hand to lift', 'lifted');
-      else if (nextGesture === 'pinch')    this._setStatus('Pinch detected', 'lifted');
-      else                                 this._setStatus('Tracking', '');
+      if (nextGesture === 'palm')              this._setStatus('🖐 Brush lifted', 'lifted');
+      else if (nextGesture === 'fist')         this._setStatus('✊ Hold to clear…', 'lifted');
+      else if (nextGesture === 'pinch')        this._setStatus('Pinch — rotate to cycle', 'control');
+      else if (nextGesture === 'rock-on')      this._setStatus('🤘 Fill toggled', 'control');
+      else if (nextGesture === 'thumb')        this._setStatus('👍 Eraser toggled', 'control');
+      else if (nextGesture === 'two-finger')   this._setStatus('✌ Next color', 'control');
+      else if (nextGesture === 'three-finger') this._setStatus('3-finger — Size up', 'control');
+      else if (nextGesture === 'pinky')        this._setStatus('🤙 Size down', 'control');
+      else                                     this._setStatus('Tracking…', '');
     }
+  },
+
+  _openRadialMenu(x, y) {
+    this._radialMenuOpen = true;
+    this._radialCenter = { x, y };
+    this._radialSelected = null;
+    this._dwellStart = null;
+    this._dwellFired = false;
+    const m = $('radial-menu');
+    if (m) {
+      m.style.left = x + 'px'; m.style.top = y + 'px';
+      m.style.display = '';
+      requestAnimationFrame(() => m.classList.add('visible'));
+    }
+  },
+
+  _updateRadialMenu(lm, tsMs) {
+    if (!this._radialMenuOpen || !lm) return;
+    // Use palm center (lm[9]) so finger pose doesn't affect sector selection
+    const ix = (1 - lm[9].x) * window.innerWidth;
+    const iy = lm[9].y * window.innerHeight;
+    const dx = ix - this._radialCenter.x;
+    const dy = iy - this._radialCenter.y;
+    const dist = Math.hypot(dx, dy);
+    let sel = null;
+    if (dist > 40) {
+      const deg = ((Math.atan2(dy, dx) * 180 / Math.PI) + 360) % 360;
+      if (deg >= 315 || deg < 45)       sel = 'undo';
+      else if (deg >= 45 && deg < 135)  sel = 'clear';
+      else if (deg >= 135 && deg < 225) sel = 'exit';
+      else                              sel = 'fill';
+    }
+    // Dwell timing: sector must be held for 700ms to fire
+    const DWELL_MS = 2000;
+    if (sel !== this._radialSelected) {
+      this._radialSelected = sel;
+      this._dwellStart = sel ? tsMs : null;
+      this._dwellFired = false;
+      this._hideProgressRing();
+    }
+    document.querySelectorAll('.radial-sector').forEach(el =>
+      el.classList.toggle('active', el.dataset.action === sel));
+    // Show dwell progress on the active sector
+    if (sel && this._dwellStart && !this._dwellFired) {
+      const heldMs = tsMs - this._dwellStart;
+      const OFFSETS = { undo:[0,-82], clear:[82,0], exit:[0,82], fill:[-82,0] };
+      const [ox, oy] = OFFSETS[sel] || [0, 0];
+      this._updateProgressRing('menu', heldMs / DWELL_MS,
+        this._radialCenter.x + ox, this._radialCenter.y + oy);
+      if (heldMs >= DWELL_MS) {
+        this._dwellFired = true;
+        this._hideProgressRing();
+        this._closeRadialMenu(true);
+      }
+    } else if (!sel) {
+      this._hideProgressRing();
+    }
+  },
+
+  _closeRadialMenu(fire) {
+    this._radialMenuOpen = false;
+    const m = $('radial-menu');
+    if (m) { m.classList.remove('visible'); setTimeout(() => { if (m) m.style.display = 'none'; }, 200); }
+    if (fire && this._radialSelected) {
+      const a = this._radialSelected;
+      if (a === 'undo')  drawing.undo();
+      if (a === 'clear') drawing.clear();
+      if (a === 'exit')  { const q = $('tool-quit'); if (q) q.click(); }
+      if (a === 'fill')  { drawing.toggleFill(); renderToolbar(); }
+      if (typeof reactions !== 'undefined')
+        reactions.spawn({ undo:'↩️', clear:'🗑️', exit:'🚪', fill:'🪣' }[a] || '✨', 'me');
+    }
+    this._radialSelected = null;
+  },
+
+  _updateProgressRing(gesture, frac, x, y) {
+    const el = $('gesture-progress-ring'), arc = $('prog-ring-arc'), lbl = $('prog-ring-label');
+    if (!el || !arc) return;
+    const circumference = 175.9;
+    arc.style.strokeDashoffset = circumference * (1 - Math.min(1, frac));
+    arc.style.stroke = gesture === 'fist' ? 'rgba(255,92,92,0.85)' : gesture === 'menu' ? 'rgba(109,232,188,0.9)' : 'rgba(124,185,255,0.85)';
+    el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.display = '';
+    if (lbl) lbl.textContent = gesture === 'fist' ? 'CLEAR' : gesture === 'menu' ? '' : 'MENU';
+  },
+
+  _hideProgressRing() {
+    const el = $('gesture-progress-ring'); if (el) el.style.display = 'none';
   },
 };
 
@@ -4356,6 +6521,157 @@ const aiJudge = {
 };
 
 /* ============================================================
+ * Coloring Book mode — solo "color within the outlines" experience
+ * ============================================================ */
+const coloringBook = {
+  active: false,
+  prompt: '',
+  startTs: null,
+  SAMPLE_STEP: 8,       // sample every 8th pixel (~1/64 density) for speed
+  CANVAS_BG: [248, 245, 239], // CANVAS_BG = '#f8f5ef'
+  BG_TOLERANCE: 50,
+
+  /* Start a coloring-book solo session */
+  start() {
+    this.active  = true;
+    this.startTs = performance.now();
+    this.prompt  = (typeof match !== 'undefined' && match.prompt) || '';
+
+    // Render the prompt outline permanently onto the canvas
+    this._paintOutline();
+
+    // Show coverage HUD
+    this._showHud();
+    this.updateCoverage();
+  },
+
+  end() {
+    this.active = false;
+    this._hideHud();
+  },
+
+  /* ── Render SVG outline onto main canvas ─────────────────── */
+  _paintOutline() {
+    const ctx  = drawing.mainCtx;
+    const w    = drawing.w;
+    const h    = drawing.h;
+    const dpr  = drawing.dpr || window.devicePixelRatio || 1;
+
+    const guide = getPromptGuide(this.prompt);
+    if (!guide) return;
+
+    // Measure the path's natural bounding box so we can centre+fit it
+    const tmp   = new Path2D(guide);
+    ctx.save();
+
+    // Build a scale that fits the path within 80% of canvas with equal margins
+    // Inset from visible UI chrome so the outline never clips behind the toolbar,
+    // top HUD bar, or bottom coverage/prompt elements.
+    const CHROME_LEFT   = 90;   // left toolbar + gap
+    const CHROME_RIGHT  = 20;
+    const CHROME_TOP    = 72;   // top HUD bar
+    const CHROME_BOTTOM = 88;   // coverage HUD + prompt label
+    const usableW = w - CHROME_LEFT - CHROME_RIGHT;
+    const usableH = h - CHROME_TOP  - CHROME_BOTTOM;
+    const scale   = Math.min(usableW, usableH) * 0.82 / 500;
+    const offX    = CHROME_LEFT + (usableW - 500 * scale) / 2;
+    const offY    = CHROME_TOP  + (usableH - 500 * scale) / 2;
+
+    ctx.translate(offX, offY);
+    ctx.scale(scale, scale);
+    ctx.strokeStyle = 'rgba(30,20,10,0.88)';
+    ctx.lineWidth   = 6 / scale;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.stroke(tmp);
+    ctx.restore();
+
+    // Store the transform for redrawAll replay
+    drawing.strokes.push({
+      type:    'coloring-book-outline',
+      prompt:  this.prompt,
+      offX, offY,
+      scale,
+      lineWidth: 6 / scale,
+    });
+  },
+
+  /* ── Coverage measurement ────────────────────────────────── */
+  updateCoverage() {
+    const ctx     = drawing.mainCtx;
+    const cw      = ctx.canvas.width;
+    const ch      = ctx.canvas.height;
+    const data    = ctx.getImageData(0, 0, cw, ch).data;
+    const [bgR, bgG, bgB] = this.CANVAS_BG;
+    const tol     = this.BG_TOLERANCE;
+    const step    = this.SAMPLE_STEP;
+
+    let total = 0, filled = 0;
+    for (let y = 0; y < ch; y += step) {
+      for (let x = 0; x < cw; x += step) {
+        const i = (y * cw + x) * 4;
+        const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+        if (a < 10) continue;   // transparent — skip
+        // Classify as "outline ink" (very dark) — don't count either way
+        if (r < 60 && g < 60 && b < 60) continue;
+        total++;
+        const isBg = Math.abs(r - bgR) + Math.abs(g - bgG) + Math.abs(b - bgB) < tol;
+        if (!isBg) filled++;
+      }
+    }
+
+    const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+    this._updateHud(pct);
+    return pct;
+  },
+
+  /* ── HUD helpers ─────────────────────────────────────────── */
+  _showHud() {
+    const el = document.getElementById('coverage-hud');
+    if (el) el.classList.add('show');
+  },
+  _hideHud() {
+    const el = document.getElementById('coverage-hud');
+    if (el) el.classList.remove('show');
+    // Reset ring
+    const fill = document.getElementById('coverage-ring-fill');
+    if (fill) fill.style.strokeDashoffset = '94.25';
+  },
+
+  _updateHud(pct) {
+    const hudPct  = document.getElementById('coverage-ring-pct');
+    const hudGrade = document.getElementById('coverage-hud-grade');
+    const ringFill = document.getElementById('coverage-ring-fill');
+    if (!hudPct || !hudGrade || !ringFill) return;
+
+    hudPct.textContent = pct + '%';
+
+    // Circumference = 2πr = 2π×15 ≈ 94.25; dashoffset = circ × (1 – t)
+    const offset = +(94.25 * (1 - pct / 100)).toFixed(2);
+    ringFill.style.strokeDashoffset = offset;
+
+    // Colour tiers
+    ringFill.classList.remove('warn', 'great');
+    if (pct >= 80)       ringFill.classList.add('great');
+    else if (pct >= 40)  ringFill.classList.add('warn');
+
+    // Grade text
+    let grade = 'Start filling!';
+    if (pct >= 95)      grade = 'Masterpiece! ✦';
+    else if (pct >= 80) grade = 'Almost done!';
+    else if (pct >= 60) grade = 'Looking great!';
+    else if (pct >= 40) grade = 'Keep going!';
+    else if (pct >= 20) grade = 'Nice start!';
+    hudGrade.textContent = grade;
+  },
+
+  /* ── Final result score (0-100) ─────────────────────────── */
+  finalCoverage() {
+    return this.active ? this.updateCoverage() : 0;
+  },
+};
+
+/* ============================================================
  * Match state machine
  * Supports 'practice' (Phase 1) and 'multiplayer' (Phase 2) modes.
  * ============================================================ */
@@ -4405,9 +6721,94 @@ const match = {
     $('match-total-rounds').textContent = this.totalRounds;
     $('match-prompt').textContent = this.prompt;
     $('match-prompt-ref-emoji').textContent = getPromptEmoji(this.prompt);
-    const hudP = $('match-hud-prompt'); if (hudP) hudP.textContent = this.prompt;
+    const hudP = $('match-hud-prompt'); if (hudP) hudP.textContent = '';
     showScreen('match');
     setTimeout(() => this.runCountdown(), 350);
+  },
+
+  /* ----------- COLORING BOOK MODE ─────────────────────── */
+  startColoringBook() {
+    this.mode = 'coloring-book';
+    this.role = null;
+    this.round = 1;
+    this.totalRounds = 1;
+    this.scores = [0, 0];
+    // Pick a prompt that has an SVG guide; fall back to any prompt
+    const guided = ALL_PROMPTS.filter(p => getPromptGuide(p));
+    this.prompt = guided.length
+      ? guided[Math.floor(Math.random() * guided.length)]
+      : ALL_PROMPTS[Math.floor(Math.random() * ALL_PROMPTS.length)];
+    this.opponent = null;
+
+    drawing.reset();
+    drawing.color = STATE.profile.preferredColor;
+    drawing.size  = STATE.profile.preferredSize;
+    // Auto-select fill tool so the player is ready to click and fill immediately
+    drawing.isFill   = true;
+    drawing.isEraser = false;
+    drawing.onStrokePoint = null;
+    drawing.onStrokeUndo  = null;
+    drawing.onStrokeClear = null;
+    renderToolbar();
+
+    this.applyMatchHud('coloring-book');
+    $('match-round-num').textContent    = this.round;
+    $('match-total-rounds').textContent = this.totalRounds;
+    $('match-prompt').textContent       = this.prompt;
+    $('match-prompt-ref-emoji').textContent = getPromptEmoji(this.prompt);
+    const hudP = $('match-hud-prompt'); if (hudP) hudP.textContent = '';
+
+    showScreen('match');
+    setTimeout(() => {
+      this.runCountdown();
+    }, 350);
+  },
+
+  openColoringBookReveal() {
+    const coverage = coloringBook.finalCoverage();
+    coloringBook.end();
+
+    // Reuse practice reveal layout — single drawing, full width
+    $('reveal-prompt').textContent = this.prompt;
+    drawing.exportTo($('reveal-canvas-you'), 800);
+    $('reveal-art-p2').style.display    = 'none';
+    $('reveal-art-p1').style.gridColumn = '1 / -1';
+    $('reveal-p1-name').textContent     = 'You';
+    $('reveal-p1-badge').style.display  = 'none';
+    $('reveal-timer').style.display     = 'none';
+    $('reveal-continue').style.display  = '';
+    $('reveal-save-btn').style.display  = '';
+
+    // Inject coverage score into reveal status
+    let grade = 'Keep practicing — fill more regions next time!';
+    if (coverage >= 95)      grade = 'Masterpiece — fully colored!';
+    else if (coverage >= 80) grade = 'Excellent — almost every region filled!';
+    else if (coverage >= 60) grade = 'Great job — most regions covered!';
+    else if (coverage >= 40) grade = 'Good start — try filling more regions!';
+    $('reveal-status').textContent = `Coverage: ${coverage}% — ${grade}`;
+
+    showScreen('reveal');
+  },
+
+  completeColoringBook() {
+    const coverage = drawing.strokes.length ? coloringBook.updateCoverage() : 0;
+    STATE.profile.practiceRoundsPlayed++;
+    const earned = Math.round(10 + coverage * 0.2); // 10–30 XP based on coverage
+    awardXp(earned);
+    checkDailyChallenge();
+
+    if (coverage >= 80) {
+      achievements.check('coloringBook');
+    }
+
+    $('result-eyebrow').textContent  = 'Coloring Book Complete';
+    $('result-headline').textContent = coverage >= 80 ? 'Beautifully colored!' : 'Keep filling!';
+    $('result-headline').className   = 'result-headline practice';
+    $('result-sub').textContent      = `You covered ${coverage}% of the canvas.`;
+    $('result-xp').textContent       = `+${earned}`;
+    $('result-level').textContent    = levelFromXp(STATE.profile.xp);
+    $('result-save-btn').style.display = '';
+    showScreen('result');
   },
 
   /* ----------- MULTIPLAYER MODE (Phase 2) ----------------- */
@@ -4597,7 +6998,7 @@ const match = {
     $('match-total-rounds').textContent = this.totalRounds;
     $('match-prompt').textContent = this.prompt;
     $('match-prompt-ref-emoji').textContent = getPromptEmoji(this.prompt);
-    const hudPr = $('match-hud-prompt'); if (hudPr) hudPr.textContent = this.prompt;
+    const hudPr = $('match-hud-prompt'); if (hudPr) hudPr.textContent = '';
     $('score-p1').textContent = this.scores[0];
     $('score-p2').textContent = this.scores[1];
     $('opp-ghost-name').textContent = (this.opponent && this.opponent.name) || 'OPPONENT';
@@ -4616,20 +7017,26 @@ const match = {
 
   /** Apply HUD show/hide based on mode */
   applyMatchHud(mode) {
+    const pill = $('match-mode-pill');
     if (mode === 'practice') {
-      $('match-mode-pill').textContent = 'PRACTICE';
-      $('match-mode-pill').classList.remove('mp');
-      $('match-score').style.display = 'none';
+      pill.textContent = 'PRACTICE';
+      pill.classList.remove('mp', 'coloring-book');
+      $('match-score').classList.remove('score-visible');
       $('opp-ghost').classList.remove('show');
       chat.hide();
-      reactions.hide();
+    } else if (mode === 'coloring-book') {
+      pill.textContent = 'COLORING BOOK';
+      pill.classList.remove('mp');
+      pill.classList.add('coloring-book');
+      $('match-score').classList.remove('score-visible');
+      $('opp-ghost').classList.remove('show');
+      chat.hide();
     } else {
-      $('match-mode-pill').textContent = 'DUEL';
-      $('match-mode-pill').classList.add('mp');
-      $('match-score').style.display = '';
-      $('opp-ghost').classList.add('show');
+      pill.textContent = 'DUEL';
+      pill.classList.remove('coloring-book');
+      pill.classList.add('mp');
+      $('match-score').classList.add('score-visible');
       chat.show();
-      reactions.show();
     }
   },
 
@@ -4640,6 +7047,8 @@ const match = {
     // Populate prompt context so players know what to draw before the timer starts
     const ctxEl = $('countdown-context-prompt');
     if (ctxEl) ctxEl.textContent = this.prompt || '';
+    const eyebrowEl = $('countdown-context-eyebrow');
+    if (eyebrowEl) eyebrowEl.textContent = (this.mode === 'coloring-book') ? 'Color this' : 'Draw this';
     overlay.classList.add('show');
     const sequence = ['3', '2', '1', 'DRAW!'];
     let i = 0;
@@ -4649,6 +7058,9 @@ const match = {
       numEl.style.animation = 'none';
       void numEl.offsetWidth;
       numEl.style.animation = '';
+      // Re-trigger radial burst per digit
+      const overlayEl = $('countdown-overlay');
+      if (overlayEl) { overlayEl.classList.remove('burst'); void overlayEl.offsetWidth; overlayEl.classList.add('burst'); }
       // SFX: ticks beep, DRAW! is brighter
       if (sequence[i] === 'DRAW!') audio.countdownGo();
       else                          audio.countdownTick();
@@ -4668,8 +7080,26 @@ const match = {
   beginDrawPhase() {
     this.active = true;
     this.timerEnd = now() + GAME.ROUND_SECONDS * 1000;
-    guide.show(this.prompt);
-    ghostPrompt.show(this.prompt);
+
+    // Coloring Book: paint outline BEFORE guide/ghostPrompt so fill stops at ink edges
+    if (this.mode === 'coloring-book') {
+      coloringBook.start();
+    }
+
+    if (this.mode !== 'coloring-book') {
+      guide.show(this.prompt);
+      ghostPrompt.show(this.prompt);
+    }
+
+    // Progressive hints: reveal after 12s/22s/32s/42s/52s (no hint during countdown)
+    (this.hintTimers || []).forEach(t => clearTimeout(t));
+    const _hints = buildPromptHints(this.prompt);
+    const _hintEl = $('match-hud-prompt');
+    if (_hintEl) {
+      _hintEl.textContent = '';
+      this.hintTimers = [12000, 22000, 32000, 42000, 52000].map((d, i) =>
+        setTimeout(() => { if (_hintEl) _hintEl.textContent = _hints[i] || ''; }, d));
+    }
 
     // Reset and reveal the timer progress bar
     const bar = $('timer-progress-bar');
@@ -4697,8 +7127,15 @@ const match = {
     $('match-timer').textContent = remainSec;
     $('match-timer').classList.toggle('urgent', remainSec <= 10);
 
-    // Timer progress bar — shrinks from full to zero
+    // Timer ring — depleting arc via CSS custom properties
     const fraction = remainMs / (GAME.ROUND_SECONDS * 1000);
+    const timerWrap = $('match-timer') && $('match-timer').parentElement;
+    if (timerWrap) {
+      timerWrap.style.setProperty('--timer-frac', Math.max(0, fraction).toFixed(4));
+      const ringColor = remainSec <= 10 ? 'rgba(255,92,92,0.72)' : remainSec <= 20 ? 'rgba(255,200,68,0.65)' : 'rgba(124,185,255,0.55)';
+      timerWrap.style.setProperty('--ring-color', ringColor);
+    }
+    // Timer progress bar — shrinks from full to zero
     const bar = $('timer-progress-bar');
     if (bar) {
       bar.style.transform = `scaleX(${Math.max(0, fraction).toFixed(4)})`;
@@ -4722,6 +7159,9 @@ const match = {
     guide.hide();
     ghostPrompt.hide();
     if (this.timerInterval) clearTimeout(this.timerInterval);
+    (this.hintTimers || []).forEach(t => clearTimeout(t));
+    this.hintTimers = [];
+    const _hintEl = $('match-hud-prompt'); if (_hintEl) _hintEl.textContent = '';
     if (drawing.isDown) drawing.onPointerUp();
     $('match-timer').classList.remove('urgent');
 
@@ -4730,6 +7170,9 @@ const match = {
     if (bar) { bar.classList.remove('active', 'warning', 'critical'); bar.style.transform = 'scaleX(0)'; }
     const frame = document.querySelector('#screen-match .drawing-frame');
     if (frame) frame.classList.remove('timer-warning', 'timer-critical', 'round-start');
+    // Reset timer ring
+    const timerWrapEnd = $('match-timer') && $('match-timer').parentElement;
+    if (timerWrapEnd) { timerWrapEnd.style.setProperty('--timer-frac', '0'); }
 
     // Time's-up red flash on the canvas
     const matchEl = $('screen-match');
@@ -4740,7 +7183,9 @@ const match = {
       flash.addEventListener('animationend', () => flash.remove(), { once: true });
     }
 
-    if (this.mode === 'practice') {
+    if (this.mode === 'coloring-book') {
+      this.openColoringBookReveal();
+    } else if (this.mode === 'practice') {
       this.openPracticeReveal();
     } else {
       this.openMultiplayerReveal();
@@ -4787,11 +7232,13 @@ const match = {
   /* ----------- MULTIPLAYER REVEAL & VOTE ------------------ */
   openMultiplayerReveal() {
     // Capture stroke snapshots NOW for AI judge and replay (before any reset/clear)
-    this._myStrokesForAI    = drawing.strokes.map(s => ({ color: s.color, points: s.points }));
-    this._theirStrokesForAI = oppGhost.strokes.map(s => ({ color: s.color, points: s.points }));
+    this._myStrokesForAI    = drawing.strokes.map(s => ({ color: s.color, points: s.points || [] }));
+    this._theirStrokesForAI = oppGhost.strokes.map(s => ({ color: s.color, points: s.points || [] }));
     // Replay strokes: scale opponent ghost (220px space) up to reveal canvas (800px)
     const gs = 800 / (oppGhost.w || 220);
-    this._myReplayStrokes = drawing.strokes.map(s => ({ color: s.color, size: s.size, points: s.points.slice(), eraser: s.eraser }));
+    this._myReplayStrokes = drawing.strokes.map(s => s.type === 'fill'
+      ? { type: 'fill', nx: s.nx, ny: s.ny, color: s.color }
+      : { color: s.color, size: s.size, points: s.points.slice(), eraser: s.eraser });
     this._myReplayW = drawing.w; this._myReplayH = drawing.h;
     this._theirReplayStrokes = oppGhost.strokes.map(s => ({
       color: s.color, size: s.size * gs, eraser: s.eraser,
@@ -5150,10 +7597,12 @@ const match = {
     drawing.onStrokePoint = null;
     drawing.onStrokeUndo = null;
     drawing.onStrokeClear = null;
+    drawing.fillAnimating = false;
     drawing.reset();
     oppGhost.reset();
     if (STATE.net) { STATE.net.close(); STATE.net = null; }
     chat.reset();
+    coloringBook.end();
     this.mode = null;
     this.role = null;
     this.opponent = null;
@@ -5210,7 +7659,12 @@ function replayOnCanvas(strokes, destCanvas, srcW, srcH) {
   const dCtx = destCanvas.getContext('2d');
   for (let i = 0; i < strokes.length; i++) {
     setTimeout(() => {
-      renderStroke(tmpCtx, strokes[i], { last: true });
+      const s = strokes[i];
+      if (s.type === 'fill') {
+        drawing._runFloodFill(tmpCtx, s.nx * srcW, s.ny * srcH, s.color);
+      } else {
+        renderStroke(tmpCtx, s, { last: true });
+      }
       dCtx.fillStyle = CANVAS_BG; dCtx.fillRect(0, 0, destCanvas.width, destCanvas.height);
       dCtx.drawImage(tmp, 0, 0, destCanvas.width, destCanvas.height);
     }, i * 45); // ~22 strokes per second
@@ -5330,6 +7784,7 @@ function bindUi() {
     const action = t.dataset.action;
     switch (action) {
       case 'practice':            match.startPractice(); break;
+      case 'coloring-book':       match.startColoringBook(); break;
       case 'multiplayer-host':    match.startHost(); break;
       case 'multiplayer-join':    match.showJoin(); break;
       case 'quickplay':           quickplay.start(); break;
@@ -5382,6 +7837,7 @@ function bindUi() {
 
   // Match toolbar buttons
   $('tool-eraser').addEventListener('click', () => drawing.toggleEraser());
+  $('tool-fill').addEventListener('click', () => drawing.toggleFill());
   $('tool-undo').addEventListener('click', () => drawing.undo());
   let _clearTapTs = 0;
   $('tool-clear').addEventListener('click', () => {
@@ -5464,7 +7920,8 @@ function bindUi() {
 
   // Reveal continue (practice only)
   $('reveal-continue').addEventListener('click', () => {
-    if (match.mode === 'practice') match.completePractice();
+    if (match.mode === 'coloring-book') match.completeColoringBook();
+    else if (match.mode === 'practice') match.completePractice();
     else showScreen('menu');
   });
   $('reveal-save-btn').addEventListener('click', () => saveDrawingImage());
@@ -5477,7 +7934,8 @@ function bindUi() {
 
   // Result actions
   $('result-again').addEventListener('click', () => {
-    if (match.mode === 'practice') match.startPractice();
+    if (match.mode === 'coloring-book') match.startColoringBook();
+    else if (match.mode === 'practice') match.startPractice();
     else if (match.mode === 'multiplayer') match.requestRematch();
   });
 
@@ -5501,6 +7959,7 @@ function bindUi() {
         else { _clearTapTs = now; toast('Tap again to clear canvas', { duration: 1400 }); }
       }
       if (e.key === 'e' || e.key === 'E') { e.preventDefault(); drawing.toggleEraser(); }
+      if (e.key === 'f' || e.key === 'F') { e.preventDefault(); drawing.toggleFill(); }
     }
     if (e.key === 'Escape') {
       closeAllModals();
@@ -5567,6 +8026,7 @@ function boot() {
   chat.init();
   reactions.init();
   hand.init();
+  cameraPip.init();
   guide.init();
   ghostPrompt.init();
   bindUi();
