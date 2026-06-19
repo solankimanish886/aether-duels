@@ -157,6 +157,10 @@
   box-shadow: var(--glass-shadow);
   background: #000;
 }
+.camera-pip--right {
+  left: auto;
+  right: 18px;
+}
 .camera-pip video {
   width: 100%;
   height: 100%;

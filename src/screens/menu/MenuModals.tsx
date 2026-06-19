@@ -75,20 +75,25 @@ export function MenuModals() {
       <Modal open={modal === 'howto'} title="How to Play" onClose={close}>
         <div className="howto">
           <p>
-            <b>⚔️ Duels.</b> You and a rival get the same prompt and 60 seconds to draw it. Then you
-            vote on the better drawing. Best of three wins the match.
-          </p>
-          <p>
-            <b>✏️ Practice.</b> Draw solo against the clock to warm up and earn XP — no pressure, no
-            opponent.
+            <b>⚔️ Forge a Duel.</b> You and a rival get the same prompt and 60 seconds to draw it,
+            then vote on the better drawing. Best of three wins. Pinch to draw; hold up 2 / 3 / 4
+            fingers for colour, brush size and tools.
           </p>
           <p>
             <b>🜂 Elemental Showdown.</b> A gesture battle of the elements — summon earth, wind,
             water, fire, or lightning with your hand and outwit your opponent.
           </p>
           <p>
-            <b>🖐️ Hand tracking.</b> Pinch to draw, open your hand to hover a tool, make a fist to
-            confirm. Everything runs on-device — your camera never leaves the browser.
+            <b>🎨 Creative Sandbox.</b> A calm space to draw freehand and drop in shapes, then colour
+            them in — by hand or mouse. No timer, no rival.
+          </p>
+          <p>
+            <b>🌍 Element Creator.</b> Shape a living 3D world with your hands — raise land, dig
+            water, plant forests, erupt volcanoes and summon storms.
+          </p>
+          <p>
+            <b>🖐️ Hand tracking.</b> Each control is a hand pose, and every mode has a built-in
+            gesture guide. Everything runs on-device — your camera never leaves the browser.
           </p>
         </div>
       </Modal>

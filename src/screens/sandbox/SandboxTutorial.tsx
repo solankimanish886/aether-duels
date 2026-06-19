@@ -6,6 +6,7 @@ import { SandboxCanvas } from '@/game/sandbox/SandboxCanvas';
 import { SandboxScene } from '@/game/sandbox/SandboxScene';
 import { useHandTracking } from '@/game/hand/useHandTracking';
 import { CameraPip } from '@/game/hand/CameraPip';
+import { CameraView } from '@/game/hand/CameraView';
 import { HandCursor } from '@/game/hand/HandCursor';
 import type { Gesture } from '@/game/hand/gestures';
 import { GestureGuide } from '@/components/GestureGuide';
@@ -19,6 +20,7 @@ const STEPS = 6; // 0..5
 /** First-time onboarding for the Creative Sandbox — mirrors DuelTutorial. */
 export function SandboxTutorial() {
   const go = useUI((s) => s.go);
+  const prevScreen = useUI((s) => s.prevScreen);
   const profile = useProfile();
   const reducedMotion = useProfile((s) => s.prefs.reducedMotion);
 
@@ -29,7 +31,6 @@ export function SandboxTutorial() {
   const [dontShow, setDontShow] = useState(true);
 
   const practiceScene = useRef<SandboxScene | null>(null);
-  const camPreviewRef = useRef<HTMLVideoElement | null>(null);
 
   const hand = useHandTracking({
     getEngine: () => practiceScene.current,
@@ -56,19 +57,6 @@ export function SandboxTutorial() {
     if (step !== 4) practiceScene.current = null;
   }, [step]);
 
-  // Callback ref: attach the stream when the <video> actually mounts (AnimatePresence
-  // mode="wait" delays the mount, so an effect would run with a null ref).
-  const attachPreview = useCallback(
-    (v: HTMLVideoElement | null) => {
-      camPreviewRef.current = v;
-      if (v) {
-        v.srcObject = hand.stream;
-        if (hand.stream) v.play().catch(() => {});
-      }
-    },
-    [hand.stream],
-  );
-
   const enableCamera = async () => {
     audio.click();
     setCamChoice('camera');
@@ -88,6 +76,11 @@ export function SandboxTutorial() {
   };
   const back = () => {
     audio.click();
+    if (step === 0) {
+      hand.stop();
+      go(prevScreen && prevScreen !== 'sandbox-tutorial' ? prevScreen : 'menu');
+      return;
+    }
     setStep((s) => Math.max(0, s - 1));
   };
 
@@ -158,7 +151,7 @@ export function SandboxTutorial() {
                 </p>
                 {camChoice === 'camera' && (
                   <div className={`dt-campreview ${detected ? 'is-ok' : ''}`}>
-                    <video ref={attachPreview} autoPlay playsInline muted />
+                    <CameraView stream={hand.stream} />
                     {detected && <span className="dt-campreview-tag">Hand detected ✓</span>}
                   </div>
                 )}
@@ -240,7 +233,7 @@ export function SandboxTutorial() {
       </div>
 
       <div className="dt-nav">
-        <Button variant="ghost" onClick={back} disabled={step === 0}>
+        <Button variant="ghost" onClick={back}>
           ← Back
         </Button>
         {step !== 1 && (

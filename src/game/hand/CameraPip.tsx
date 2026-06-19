@@ -1,21 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { CameraView } from './CameraView';
 import './hand-ui.css';
 
 /** Small mirrored camera preview so players can see their hand while drawing. */
-export function CameraPip({ stream }: { stream: MediaStream | null }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    v.srcObject = stream;
-    if (stream) v.play().catch(() => {});
-  }, [stream]);
-
+export function CameraPip({ stream, corner = 'left' }: { stream: MediaStream | null; corner?: 'left' | 'right' }) {
   if (!stream) return null;
   return (
-    <div className="camera-pip">
+    <div className={`camera-pip ${corner === 'right' ? 'camera-pip--right' : ''}`}>
       <span className="camera-pip-label">You</span>
-      <video ref={ref} autoPlay playsInline muted />
+      <CameraView stream={stream} />
     </div>
   );
 }

@@ -55,7 +55,7 @@ export function Menu() {
       desc: 'Shape a living world with your hands',
       accent: 'mint',
       emoji: '🌍',
-      action: () => go('element-creator'),
+      action: () => go(useProfile.getState().elementCreatorTutorialDone ? 'element-creator' : 'element-creator-tutorial'),
     },
     {
       key: 'sandbox',

@@ -17,6 +17,7 @@ import { Lobby } from '@/screens/Lobby';
 import { Duel } from '@/screens/multiplayer/Duel';
 import { DuelTutorial } from '@/screens/multiplayer/DuelTutorial';
 import { SandboxTutorial } from '@/screens/sandbox/SandboxTutorial';
+import { ElementCreatorTutorial } from '@/screens/elemental/ElementCreatorTutorial';
 // (Removed dead 'reveal'/'result' Placeholder routes — Duel/Match/Elemental
 //  manage those phases internally.)
 
@@ -64,6 +65,7 @@ export default function App() {
               <ElementCreator />
             </Suspense>
           )}
+          {screen === 'element-creator-tutorial' && <ElementCreatorTutorial />}
         </ScreenTransition>
       </AnimatePresence>
       <ToastHost />

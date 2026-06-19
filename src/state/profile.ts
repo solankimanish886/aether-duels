@@ -34,6 +34,8 @@ export interface Profile {
   duelTutorialDone: boolean;
   /** First-time gate for the Sandbox gesture onboarding (one-shot). */
   sandboxTutorialDone: boolean;
+  /** First-time gate for the Element Creator gesture onboarding (one-shot). */
+  elementCreatorTutorialDone: boolean;
 }
 
 const DEFAULT_PROFILE: Profile = {
@@ -56,6 +58,7 @@ const DEFAULT_PROFILE: Profile = {
   elementalTutorialDone: false,
   duelTutorialDone: false,
   sandboxTutorialDone: false,
+  elementCreatorTutorialDone: false,
 };
 
 /** XP needed to *reach* a given level. Level 1 starts at 0 XP. */
@@ -84,6 +87,7 @@ interface ProfileState extends Profile {
   completeElementalTutorial: () => void;
   completeDuelTutorial: () => void;
   completeSandboxTutorial: () => void;
+  completeElementCreatorTutorial: () => void;
   setPref: <K extends keyof Prefs>(key: K, value: Prefs[K]) => void;
   unlock: (id: string) => boolean;
   recordStats: (patch: Partial<Stats>) => void;
@@ -96,7 +100,7 @@ export const useProfile = create<ProfileState>((set, get) => {
   audio.setEnabled(persisted.prefs.audio);
 
   const persist = () => {
-    const { name, xp, onboarded, stats, prefs, achievements, elementalTutorialDone, duelTutorialDone, sandboxTutorialDone } =
+    const { name, xp, onboarded, stats, prefs, achievements, elementalTutorialDone, duelTutorialDone, sandboxTutorialDone, elementCreatorTutorialDone } =
       get();
     saveJSON('profile', {
       name,
@@ -108,6 +112,7 @@ export const useProfile = create<ProfileState>((set, get) => {
       elementalTutorialDone,
       duelTutorialDone,
       sandboxTutorialDone,
+      elementCreatorTutorialDone,
     });
   };
 
@@ -138,6 +143,10 @@ export const useProfile = create<ProfileState>((set, get) => {
     },
     completeSandboxTutorial: () => {
       set({ sandboxTutorialDone: true });
+      persist();
+    },
+    completeElementCreatorTutorial: () => {
+      set({ elementCreatorTutorialDone: true });
       persist();
     },
     setPref: (key, value) => {

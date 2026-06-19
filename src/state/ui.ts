@@ -14,14 +14,16 @@ export type Screen =
   | 'elemental-tutorial'
   | 'elemental-practice'
   | 'element-creator'
+  | 'element-creator-tutorial'
   | 'duel';
 
 export type ModalId = 'achievements' | 'stats' | 'howto' | 'profile' | 'leaderboard' | null;
 
 interface UIState {
   screen: Screen;
+  /** The screen navigated away from — lets tutorials exit back to their origin. */
+  prevScreen: Screen | null;
   modal: ModalId;
-  /** True while a screen transition animation is in flight. */
   go: (screen: Screen) => void;
   openModal: (modal: Exclude<ModalId, null>) => void;
   closeModal: () => void;
@@ -29,8 +31,9 @@ interface UIState {
 
 export const useUI = create<UIState>((set) => ({
   screen: 'splash',
+  prevScreen: null,
   modal: null,
-  go: (screen) => set({ screen, modal: null }),
+  go: (screen) => set((s) => ({ prevScreen: s.screen, screen, modal: null })),
   openModal: (modal) => set({ modal }),
   closeModal: () => set({ modal: null }),
 }));

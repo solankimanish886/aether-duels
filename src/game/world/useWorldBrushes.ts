@@ -31,6 +31,9 @@ export function useWorldBrushes({ input, getRect, calibration }: Params) {
   const [delegate, setDelegate] = useState<'GPU' | 'CPU' | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [cursor, setCursor] = useState<CursorState>({ x: 0, y: 0, visible: false, drawing: false, dwell: 0 });
+  /** 0..1 progress toward locking a new gesture (for HUD feedback). */
+  const [progress, setProgress] = useState(0);
 
   const refresh = useCallback(() => {
     const inp = input.current;
@@ -53,6 +56,7 @@ export function useWorldBrushes({ input, getRect, calibration }: Params) {
       onStatus: (kind, text) => setStatus({ kind, text }),
       onCursor: (c: CursorState) => {
         visibleRef.current = c.visible;
+        setCursor(c);
         if (c.visible) {
           const r = getRect();
           input.current.px = r ? c.x - r.left : c.x;
@@ -65,6 +69,7 @@ export function useWorldBrushes({ input, getRect, calibration }: Params) {
         input.current.handKind = GESTURE_TO_BRUSH[g] ?? 'none';
         refresh();
       },
+      onGestureProgress: (_pending, frames, needed) => setProgress(needed ? frames / needed : 0),
       onHands: (hands) => {
         const hit = detectStorm(hands);
         if (hit) {
@@ -101,10 +106,13 @@ export function useWorldBrushes({ input, getRect, calibration }: Params) {
     visibleRef.current = false;
     input.current.handActive = false;
     input.current.storm = false;
+    input.current.handKind = 'none';
+    setCursor({ x: 0, y: 0, visible: false, drawing: false, dwell: 0 });
+    setBrush('none');
     setStatus(null);
   }, [input]);
 
   useEffect(() => () => trackerRef.current?.disable(), []);
 
-  return { enabled, status, gesture, brush, delegate, stream, error, start, stop };
+  return { enabled, status, gesture, brush, delegate, stream, error, cursor, progress, start, stop };
 }

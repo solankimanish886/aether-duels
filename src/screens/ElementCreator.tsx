@@ -1,25 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useUI } from '@/state/ui';
 import { useProfile } from '@/state/profile';
 import { CameraPip } from '@/game/hand/CameraPip';
+import { HandCursor } from '@/game/hand/HandCursor';
+import { Button } from '@/components/Button';
+import { GestureGuide } from '@/components/GestureGuide';
 import { WorldCanvas } from '@/game/world/WorldCanvas';
 import { useWorldBrushes } from '@/game/world/useWorldBrushes';
 import { useWorldEngine } from '@/game/world/useWorldEngine';
 import { makeBrushInput } from '@/game/world/brushInput';
-import { BRUSHES, HUD_BRUSHES, type BrushKind } from '@/game/world/brushes';
+import { BRUSHES, BRUSH_TINT, HUD_BRUSHES, type BrushKind } from '@/game/world/brushes';
+import { EC_GESTURES, EC_GUIDE_NOTE } from '@/game/world/ecGestures';
 import { DEFAULT_QUALITY } from '@/game/world/constants';
 import { audio } from '@/lib/audio';
 import './ElementCreator.css';
 
-const LEGEND: { pose: string; brush: Exclude<BrushKind, 'none'> }[] = [
-  { pose: '🖐', brush: 'raise' },
-  { pose: '✊', brush: 'dig' },
-  { pose: '☝', brush: 'forest' },
-  { pose: '👍', brush: 'volcano' },
-  { pose: '✌', brush: 'rain' },
-  { pose: '🙌🙌', brush: 'storm' },
-];
+const hex = (n: number) => `#${n.toString(16).padStart(6, '0')}`;
 
 /** Element Creator — shape a living world with your hands (solo sandbox). */
 export function ElementCreator() {
@@ -31,8 +28,9 @@ export function ElementCreator() {
   const stageRef = useRef<HTMLDivElement>(null);
 
   const [armed, setArmed] = useState<Exclude<BrushKind, 'none' | 'storm'>>('raise');
-  const [fallback, setFallback] = useState<string | null>(null);
   const [worldError, setWorldError] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
+  const [starting, setStarting] = useState(true);
 
   const hb = useWorldBrushes({
     input: inputRef,
@@ -45,18 +43,22 @@ export function ElementCreator() {
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    hb.start().catch(() => {});
+    hb.start()
+      .catch(() => {})
+      .finally(() => setStarting(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Camera watchdog: if the hand tracker hasn't reported a delegate in time,
-  // surface the mouse-fallback hint (the world itself still runs).
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (!hb.delegate) setFallback('Camera unavailable — pick a tool below and drag to shape the world.');
-    }, 9000);
-    return () => clearTimeout(t);
-  }, [hb.delegate]);
+  const toggleHand = async () => {
+    audio.click();
+    if (hb.enabled) {
+      hb.stop();
+      return;
+    }
+    setStarting(true);
+    await hb.start().catch(() => {});
+    setStarting(false);
+  };
 
   // ── mouse / touch fallback (writes the shared brush input) ────
   const localXY = (e: React.PointerEvent) => {
@@ -81,8 +83,10 @@ export function ElementCreator() {
     inputRef.current.mouseActive = false;
   };
 
+  const handOn = hb.enabled;
   const activeBrush = hb.brush !== 'none' ? hb.brush : null;
-  const camReady = !!hb.delegate;
+  const cursorColor = activeBrush ? hex(BRUSH_TINT[activeBrush]) : '#7cb9ff';
+  const liveGesture = hb.brush === 'storm' ? 'shaka' : hb.gesture;
 
   return (
     <div className="ecreate">
@@ -104,73 +108,118 @@ export function ElementCreator() {
         )}
       </div>
 
-      <button className="ecreate-back" onClick={() => go('menu')}>
-        ← Menu
-      </button>
+      {/* TOP BAR */}
+      <div className="ec-top">
+        <Button variant="ghost" size="sm" onClick={() => go('menu')}>
+          ← Menu
+        </Button>
+        <div className="ec-title display">
+          Element <span className="ec-title-accent">Creator</span>
+        </div>
+        <div className="ec-top-right">
+          <button
+            className={`ec-iconbtn ${handOn ? 'is-active' : ''}`}
+            onClick={toggleHand}
+            title="Hand tracking"
+            aria-label="Toggle hand tracking"
+          >
+            🖐️
+          </button>
+          <button
+            className="ec-iconbtn"
+            onClick={() => { audio.click(); setShowGuide(true); }}
+            title="Gesture guide"
+            aria-label="Gesture guide"
+          >
+            ❔
+          </button>
+          <button
+            className="ec-iconbtn"
+            onClick={() => { audio.click(); engine.reset(); }}
+            title="New world"
+            aria-label="New world"
+          >
+            🔄
+          </button>
+        </div>
+      </div>
 
-      <motion.div
-        className="ecreate-title display"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        Element <span className="ecreate-title-accent">Creator</span>
-      </motion.div>
+      {/* mouse tool rail — only when hand tracking is off */}
+      {!handOn && !starting && (
+        <motion.div className="ec-rail glass-strong" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }}>
+          {HUD_BRUSHES.map((b) => (
+            <button
+              key={b}
+              className={`ec-tool ${armed === b ? 'is-active' : ''}`}
+              title={BRUSHES[b].label}
+              aria-label={BRUSHES[b].label}
+              onClick={() => { audio.click(); setArmed(b); }}
+            >
+              {BRUSHES[b].emoji}
+            </button>
+          ))}
+        </motion.div>
+      )}
 
-      <div className="ecreate-status glass">
-        <span className={`ecreate-dot ${fallback ? 'warn' : camReady ? 'ok' : 'idle'}`} />
-        {fallback ? (
-          <span>{fallback}</span>
-        ) : activeBrush ? (
-          <span>
-            {BRUSHES[activeBrush].emoji} {BRUSHES[activeBrush].label}
+      {/* active-brush feedback pill (bottom-center) */}
+      <div className="ec-active glass">
+        <span className={`ec-active-dot ${hb.error ? 'warn' : starting ? 'idle' : handOn ? (activeBrush ? 'ok' : 'idle') : 'off'}`} />
+        <span className="ec-active-text">
+          {hb.error ? (
+            'Camera off — pick a tool and drag to shape the world'
+          ) : starting ? (
+            'Starting camera…'
+          ) : !handOn ? (
+            'Pick a tool, then drag on the world'
+          ) : activeBrush ? (
+            <>
+              {BRUSHES[activeBrush].emoji} {BRUSHES[activeBrush].label}
+            </>
+          ) : (
+            'Make a gesture to shape the world'
+          )}
+        </span>
+        {handOn && hb.progress > 0.02 && hb.progress < 1 && (
+          <span className="ec-active-bar">
+            <span style={{ width: `${Math.round(hb.progress * 100)}%` }} />
           </span>
-        ) : camReady ? (
-          <span>Make a gesture to shape the world</span>
-        ) : (
-          <span>Starting camera…</span>
         )}
       </div>
 
-      {/* gesture legend */}
-      <div className="ecreate-legend glass">
-        {LEGEND.map((l) => (
-          <div key={l.brush} className={`ecreate-legend-row ${activeBrush === l.brush ? 'active' : ''}`}>
-            <span className="ecreate-legend-pose">{l.pose}</span>
-            <span className="ecreate-legend-name">
-              {BRUSHES[l.brush].emoji} {BRUSHES[l.brush].label}
-            </span>
-          </div>
-        ))}
-      </div>
+      {/* hand-tracking overlays */}
+      {handOn && (
+        <>
+          <CameraPip stream={hb.stream} corner="right" />
+          <HandCursor cursor={hb.cursor} color={cursorColor} />
+        </>
+      )}
 
-      {/* mouse-fallback tool picker + reset */}
-      <div className="ecreate-tools glass">
-        {HUD_BRUSHES.map((b) => (
-          <button
-            key={b}
-            className={`ecreate-tool ${armed === b ? 'sel' : ''}`}
-            title={BRUSHES[b].label}
-            onClick={() => {
-              audio.click();
-              setArmed(b);
-            }}
+      {/* collapsible gesture guide */}
+      <AnimatePresence>
+        {showGuide && (
+          <motion.div
+            className="ec-help"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowGuide(false)}
           >
-            {BRUSHES[b].emoji}
-          </button>
-        ))}
-        <button
-          className="ecreate-tool ecreate-reset"
-          title="New world"
-          onClick={() => {
-            audio.click();
-            engine.reset();
-          }}
-        >
-          🔄
-        </button>
-      </div>
-
-      <CameraPip stream={hb.stream} />
+            <motion.div
+              className="ec-help-card glass-strong"
+              initial={{ scale: 0.94, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.96, opacity: 0 }}
+              onClick={(ev) => ev.stopPropagation()}
+            >
+              <h2 className="display ec-help-title">Gesture guide</h2>
+              <GestureGuide items={EC_GESTURES} live={liveGesture} note={EC_GUIDE_NOTE} />
+              <Button variant="primary" onClick={() => { audio.click(); setShowGuide(false); }}>
+                Got it
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

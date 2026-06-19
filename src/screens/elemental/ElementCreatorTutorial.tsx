@@ -1,28 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useUI } from '@/state/ui';
 import { useProfile } from '@/state/profile';
-import { DrawingCanvas } from '@/game/drawing/DrawingCanvas';
-import { DrawingEngine } from '@/game/drawing/DrawingEngine';
 import { useHandTracking } from '@/game/hand/useHandTracking';
-import { CameraPip } from '@/game/hand/CameraPip';
 import { CameraView } from '@/game/hand/CameraView';
-import { HandCursor } from '@/game/hand/HandCursor';
 import type { Gesture } from '@/game/hand/gestures';
-import { Button } from '@/components/Button';
 import { GestureGuide } from '@/components/GestureGuide';
+import { Button } from '@/components/Button';
 import { audio } from '@/lib/audio';
-import './DuelTutorial.css';
+import { EC_GESTURES, EC_GUIDE_NOTE } from '@/game/world/ecGestures';
+import '@/screens/multiplayer/DuelTutorial.css';
 
-const STEPS = 6; // 0..5
+const STEPS = 5; // 0..4
 
-/**
- * Dedicated first-time onboarding for Forge a Duel: a 6-step carousel that
- * explains the mode, camera/privacy, hand position, the pinch-to-draw gestures,
- * an interactive practice canvas, and the win rules — then launches the lobby.
- * Shown once (gated by profile.duelTutorialDone); re-openable from a Help button.
- */
-export function DuelTutorial() {
+/** First-time onboarding for Element Creator — a lean gesture-teaching carousel. */
+export function ElementCreatorTutorial() {
   const go = useUI((s) => s.go);
   const prevScreen = useUI((s) => s.prevScreen);
   const profile = useProfile();
@@ -31,48 +23,35 @@ export function DuelTutorial() {
   const [step, setStep] = useState(0);
   const [camChoice, setCamChoice] = useState<'idle' | 'camera' | 'mouse'>('idle');
   const [gesture, setGesture] = useState<Gesture>('none');
-  const [practiceOk, setPracticeOk] = useState(false);
   const [dontShow, setDontShow] = useState(true);
 
-  const practiceEngine = useRef<DrawingEngine | null>(null);
-
+  // Camera + gestures only (no drawing engine needed here).
   const hand = useHandTracking({
-    getEngine: () => practiceEngine.current,
-    getSurfaceRect: () => document.querySelector('.dt-practice .draw-surface')?.getBoundingClientRect() ?? null,
+    getEngine: () => null,
+    getSurfaceRect: () => null,
     calibration: profile.handCalibration,
     onGesture: setGesture,
   });
 
   const detected = hand.cursor.visible;
-
-  // Confidence: none (no cam) / weak (cam, no hand) / strong (hand seen).
   const confidence = camChoice !== 'camera' ? 0 : detected ? 3 : 1;
   const camStarting = camChoice === 'camera' && !hand.enabled && !hand.error;
 
   const finish = useCallback(
     (markDone: boolean) => {
-      if (markDone) profile.completeDuelTutorial();
+      if (markDone) profile.completeElementCreatorTutorial();
       hand.stop();
-      go('lobby');
+      go('element-creator');
     },
     [go, hand, profile],
   );
 
-  // Tidy the tracker if the screen unmounts mid-flow.
   useEffect(() => () => hand.stop(), [hand]);
-
-  // The practice canvas only exists on step 4; drop the engine ref when we leave
-  // so a stray pinch never draws into a destroyed engine.
-  useEffect(() => {
-    if (step !== 4) practiceEngine.current = null;
-  }, [step]);
 
   const enableCamera = async () => {
     audio.click();
     setCamChoice('camera');
     const ok = await hand.start();
-    // Advance to the hand-position step once the camera is up. On failure, stay
-    // here — the inline warning + "Use mouse instead" let the player continue.
     if (ok) setStep((s) => s + 1);
   };
   const useMouse = () => {
@@ -81,7 +60,6 @@ export function DuelTutorial() {
     setCamChoice('mouse');
     setStep((s) => s + 1);
   };
-
   const next = () => {
     audio.click();
     if (step < STEPS - 1) setStep((s) => s + 1);
@@ -90,18 +68,17 @@ export function DuelTutorial() {
   const back = () => {
     audio.click();
     if (step === 0) {
-      // First screen → leave the tutorial, returning to where it was opened from.
       hand.stop();
-      go(prevScreen && prevScreen !== 'duel-tutorial' ? prevScreen : 'menu');
+      go(prevScreen && prevScreen !== 'element-creator-tutorial' ? prevScreen : 'menu');
       return;
     }
     setStep((s) => Math.max(0, s - 1));
   };
 
-  const anim = (extra?: object) =>
+  const anim = () =>
     reducedMotion
       ? { initial: false as const }
-      : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -8 }, ...extra };
+      : { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -8 } };
 
   return (
     <div className="dt">
@@ -120,15 +97,11 @@ export function DuelTutorial() {
           <motion.div key={step} className="dt-step" {...anim()} transition={{ duration: reducedMotion ? 0 : 0.3 }}>
             {step === 0 && (
               <>
-                <div className="dt-art dt-art-vs">
-                  <span className="dt-mini">🎨</span>
-                  <span className="dt-vs">VS</span>
-                  <span className="dt-mini dt-mini--pink">🎨</span>
-                </div>
-                <h1 className="display dt-title">Forge a Duel</h1>
+                <div className="dt-art">🌍</div>
+                <h1 className="display dt-title">Element Creator</h1>
                 <p className="dt-body">
-                  A <b>1v1 art battle</b>. You and a rival draw the <b>same prompt</b> in 60 seconds, then
-                  vote on the best drawing. <b>Best of 3 wins</b> the match. 🏆
+                  You're a tiny god. <b>Shape a living 3D world</b> with your hands — raise mountains, carve
+                  oceans, grow forests, and call down storms. No timer, no rival.
                 </p>
               </>
             )}
@@ -136,10 +109,10 @@ export function DuelTutorial() {
             {step === 1 && (
               <>
                 <div className="dt-art">{camChoice === 'camera' ? '📷' : '🖐️'}</div>
-                <h1 className="display dt-title">Draw with your hand</h1>
+                <h1 className="display dt-title">Sculpt with your hands</h1>
                 <p className="dt-body">
-                  Use your webcam to draw in the air. Your camera runs <b>only on your device</b> to track
-                  your hand — it is <b>never recorded or uploaded</b>.
+                  Use your webcam to shape the world in the air. The camera runs <b>only on your device</b> — it
+                  is <b>never recorded or uploaded</b>.
                 </p>
                 <div className="dt-choices">
                   <Button variant="primary" onClick={enableCamera} disabled={camStarting}>
@@ -156,7 +129,7 @@ export function DuelTutorial() {
                   </Button>
                 </div>
                 {camChoice === 'camera' && hand.error && (
-                  <p className="dt-warn">Camera unavailable — you can still play with your mouse.</p>
+                  <p className="dt-warn">Camera unavailable — you can still shape the world with your mouse.</p>
                 )}
               </>
             )}
@@ -165,8 +138,8 @@ export function DuelTutorial() {
               <>
                 <h1 className="display dt-title">Hold your hand up</h1>
                 <p className="dt-body">
-                  Keep your <b>palm to the camera</b>, about an <b>arm's length</b> away, with your whole hand
-                  in frame.
+                  Keep your <b>palm to the camera</b>, about an <b>arm's length</b> away, with your whole hand in
+                  frame.
                 </p>
                 {camChoice === 'camera' && (
                   <div className={`dt-campreview ${detected ? 'is-ok' : ''}`}>
@@ -193,62 +166,30 @@ export function DuelTutorial() {
 
             {step === 3 && (
               <>
-                <h1 className="display dt-title">Your hand is the controller</h1>
+                <h1 className="display dt-title">Each pose shapes the world</h1>
                 <p className="dt-body dt-body--sm">
-                  Every control is a hand pose.{' '}
                   {camChoice === 'camera' ? 'Try one — its card lights up when recognised.' : 'Here is the full set:'}
                 </p>
-                <GestureGuide live={camChoice === 'camera' ? gesture : undefined} />
+                <GestureGuide
+                  live={camChoice === 'camera' ? gesture : undefined}
+                  items={EC_GESTURES}
+                  note={EC_GUIDE_NOTE}
+                />
               </>
             )}
 
             {step === 4 && (
               <>
-                <h1 className="display dt-title">Try it — {camChoice === 'camera' ? 'pinch and draw' : 'draw a line'}</h1>
-                <div className="dt-practice">
-                  <DrawingCanvas
-                    onReady={(engine) => {
-                      practiceEngine.current = engine;
-                      engine.inputEnabled = true;
-                    }}
-                    sparkles
-                    callbacks={{
-                      onChange: ({ canUndo }) => {
-                        if (canUndo && !practiceOk) {
-                          setPracticeOk(true);
-                          audio.roundWon();
-                        }
-                      },
-                    }}
-                  />
-                  <AnimatePresence>
-                    {!practiceOk ? (
-                      <motion.div className="dt-practice-hint" {...anim()}>
-                        {camChoice === 'camera' ? '🤏 Pinch and move to draw' : '✏️ Draw a line with your mouse'}
-                      </motion.div>
-                    ) : (
-                      <motion.div className="dt-practice-ok" {...anim()}>
-                        Nice! ✓
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </>
-            )}
-
-            {step === 5 && (
-              <>
-                <div className="dt-art">🏆</div>
+                <div className="dt-art">✨</div>
                 <h1 className="display dt-title">You're ready</h1>
                 <p className="dt-body">
-                  <b>Pinch to draw</b> the prompt; hold up <b>2 / 3 / 4 fingers</b> for colour, size and tools.
-                  Then <b>🙌 hold an open hand</b> to finish (or let the timer run out). You both vote —
-                  <b> first to win 2 rounds</b> takes it.
+                  Hold a pose over the world to use that tool; the bar at the bottom shows which one is active.
+                  Tap <b>❔ Gestures</b> any time, <b>🖐</b> to switch to mouse, or <b>🔄</b> for a fresh world.
                 </p>
                 <ul className="dt-tips">
-                  <li>👍 thumb = undo · 🤙 thumb+pinky = redo · ✊ hold a fist = clear.</li>
-                  <li>Keep your hand fully in frame, in good light, an arm's length away.</li>
-                  <li>Tap <b>❓ Gestures</b> during a duel to see this guide again.</li>
+                  <li>🖐 Raise land · ✊ Dig water · ☝ Plant forest.</li>
+                  <li>👍 Erupt a volcano · ✌ Make rain · 🙌 both hands wide = Storm.</li>
+                  <li>Good light and your whole hand in frame help recognition.</li>
                 </ul>
                 <label className="dt-checkbox">
                   <input type="checkbox" checked={dontShow} onChange={(e) => setDontShow(e.target.checked)} />
@@ -264,21 +205,12 @@ export function DuelTutorial() {
         <Button variant="ghost" onClick={back}>
           ← Back
         </Button>
-        {/* Step 1 routes via its own camera/mouse buttons. */}
         {step !== 1 && (
           <Button variant="primary" onClick={next}>
-            {step === STEPS - 1 ? 'Start Duel →' : 'Next →'}
+            {step === STEPS - 1 ? 'Start creating →' : 'Next →'}
           </Button>
         )}
       </div>
-
-      {/* practice step: corner camera + pen cursor (step 2 has its own centered preview) */}
-      {camChoice === 'camera' && hand.enabled && step === 4 && (
-        <>
-          <CameraPip stream={hand.stream} />
-          <HandCursor cursor={hand.cursor} color="#7cb9ff" />
-        </>
-      )}
     </div>
   );
 }
