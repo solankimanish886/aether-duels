@@ -1,0 +1,12 @@
+.world-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.world-host canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}

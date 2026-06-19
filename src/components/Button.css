@@ -1,0 +1,71 @@
+.ad-btn {
+  appearance: none;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: border-color var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+
+.ad-btn--sm {
+  font-size: 13px;
+  padding: 9px 16px;
+}
+.ad-btn--md {
+  font-size: 14px;
+  padding: 12px 22px;
+}
+.ad-btn--lg {
+  font-size: 16px;
+  padding: 16px 30px;
+}
+
+.ad-btn--primary {
+  background: linear-gradient(135deg, rgba(124, 185, 255, 0.28), rgba(124, 185, 255, 0.12));
+  border-color: rgba(124, 185, 255, 0.5);
+}
+.ad-btn--primary:hover {
+  box-shadow: var(--glow-blue);
+}
+
+.ad-btn--accent {
+  background: linear-gradient(135deg, rgba(255, 110, 181, 0.28), rgba(255, 110, 181, 0.12));
+  border-color: rgba(255, 110, 181, 0.5);
+}
+.ad-btn--accent:hover {
+  box-shadow: var(--glow-pink);
+}
+
+.ad-btn--danger {
+  background: rgba(255, 92, 92, 0.12);
+  border-color: rgba(255, 92, 92, 0.45);
+  color: #ffd5d5;
+}
+
+.ad-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-dim);
+}
+.ad-btn--ghost:hover {
+  color: var(--text);
+  background: var(--glass-bg);
+}
+
+.ad-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

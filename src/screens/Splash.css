@@ -1,0 +1,45 @@
+.splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.splash-logo {
+  font-size: clamp(64px, 12vw, 132px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: center;
+  z-index: 2;
+}
+
+.splash-logo-accent {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.splash-tagline {
+  margin-top: 14px;
+  color: var(--text-dim);
+  font-size: clamp(13px, 2.4vw, 16px);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.splash-orb {
+  position: absolute;
+  width: min(70vw, 620px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 185, 255, 0.35), rgba(255, 110, 181, 0.12) 55%, transparent 72%);
+  filter: blur(40px);
+  animation: floatPulse 6s var(--ease-soft) infinite;
+}

@@ -1,0 +1,83 @@
+.gguide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.gguide-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.gguide-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 14px 8px;
+  border-radius: var(--r-md);
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  text-align: center;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+}
+.gguide-card.is-live {
+  border-color: var(--accent-3);
+  box-shadow: 0 0 20px rgba(93, 232, 184, 0.45);
+  transform: translateY(-3px);
+}
+
+.gguide-emoji {
+  font-size: 34px;
+  line-height: 1;
+  animation: dtFloat 2.4s var(--ease-out, ease) infinite;
+}
+.gguide-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+.gguide-how {
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--text-mute);
+}
+
+.gguide-note {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+  margin: 0;
+}
+
+/* Float keyframes (mirrors DuelTutorial's dtFloat so this component is self-contained). */
+@keyframes dtFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gguide-emoji {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .gguide-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 320px;
+  }
+  .gguide-emoji {
+    font-size: 30px;
+  }
+}

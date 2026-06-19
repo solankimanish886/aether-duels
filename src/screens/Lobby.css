@@ -1,0 +1,176 @@
+.lobby {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 5vw, 56px);
+}
+
+.lobby-back {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.lobby-back:hover {
+  color: var(--text);
+}
+
+.lobby-title {
+  font-size: clamp(28px, 5vw, 40px);
+  line-height: 1.1;
+}
+.lobby-sub {
+  color: var(--text-dim);
+  margin: 8px 0 24px;
+}
+
+.lobby-choose,
+.lobby-vs {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lobby-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(320px, 100%);
+}
+
+.lobby-panel {
+  text-align: center;
+  padding: 36px;
+  border-radius: var(--r-xl);
+  width: min(440px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.lobby-code {
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 16px 24px;
+  border-radius: var(--r-md);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
+  color: var(--accent);
+  margin-bottom: 14px;
+  word-break: break-all;
+}
+.lobby-code-actions {
+  margin-bottom: 18px;
+}
+.lobby-waiting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.lobby-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-3);
+  animation: floatPulse 1.2s var(--ease-soft) infinite;
+}
+.lobby-input {
+  width: 100%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  color: var(--text);
+  font-size: 20px;
+  text-align: center;
+  letter-spacing: 0.12em;
+  padding: 16px;
+  border-radius: var(--r-md);
+  outline: none;
+  margin-bottom: 18px;
+  text-transform: none;
+}
+.lobby-input:focus {
+  border-color: var(--accent);
+}
+
+.lobby-vs-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 6vw, 60px);
+  margin: 18px 0 30px;
+}
+.lobby-vs-divider {
+  font-style: italic;
+  font-size: 32px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.lobby-fighter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.lobby-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--bg-0);
+}
+.lobby-avatar--you {
+  background: linear-gradient(135deg, var(--accent), #4f8fe0);
+  box-shadow: var(--glow-blue);
+}
+.lobby-avatar--opp {
+  background: linear-gradient(135deg, var(--accent-2), #d64f93);
+  box-shadow: var(--glow-pink);
+}
+.lobby-fighter-name {
+  font-weight: 700;
+}
+.lobby-fighter-lvl {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.lobby-ready {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-mute);
+}
+.lobby-ready.is-ready {
+  color: var(--accent-3);
+  border-color: rgba(93, 232, 184, 0.45);
+  background: rgba(93, 232, 184, 0.12);
+}
+
+/* "How to play" link → opens the Duel tutorial */
+.lobby-help {
+  margin-top: 18px;
+  background: none;
+  border: none;
+  color: var(--text-mute);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.lobby-help:hover {
+  color: var(--text);
+}

@@ -1,0 +1,28 @@
+.sandbox-surface {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas-paper);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(40, 30, 20, 0.06), 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.sb-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.sb-main {
+  z-index: 1;
+}
+.sb-active {
+  z-index: 2;
+  pointer-events: none;
+}
+.sb-overlay {
+  z-index: 3;
+  touch-action: none;
+  cursor: crosshair;
+}

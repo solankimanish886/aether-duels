@@ -1,0 +1,20 @@
+.holdring {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: var(--z-toolbar);
+  display: grid;
+  place-items: center;
+}
+.holdring svg {
+  display: block;
+}
+.holdring-label {
+  position: absolute;
+  top: calc(100% + 4px);
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.65);
+}

@@ -1,0 +1,4 @@
+.ad-card {
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+}

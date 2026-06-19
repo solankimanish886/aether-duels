@@ -1,0 +1,278 @@
+/* ── Elemental shared UI: gallery, cards, matchup wheel, intro/practice/tutorial ── */
+
+/* Gesture gallery grid */
+.ggallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: var(--sp-3);
+  width: 100%;
+}
+
+.gcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--sp-4) var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  color: var(--text);
+  text-align: center;
+  cursor: default;
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast), transform var(--dur-fast);
+}
+button.gcard {
+  cursor: pointer;
+}
+button.gcard:hover {
+  transform: translateY(-3px);
+  border-color: var(--glass-border-strong);
+}
+button.gcard:focus-visible {
+  outline: 2px solid var(--elem-color, var(--accent));
+  outline-offset: 2px;
+}
+button.gcard:active {
+  transform: scale(0.97);
+}
+.gcard.is-active {
+  border-color: var(--elem-color);
+  box-shadow: 0 0 0 1px var(--elem-color), 0 0 26px color-mix(in srgb, var(--elem-color) 45%, transparent);
+}
+.gcard.is-done {
+  border-color: var(--accent-3);
+}
+.gcard-hand {
+  font-size: 34px;
+  line-height: 1;
+}
+.gcard-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.gcard-emoji {
+  font-size: 16px;
+}
+.gcard-check {
+  color: var(--accent-3);
+  font-weight: 800;
+}
+.gcard-how {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.25;
+}
+.gcard-beats {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--elem-color);
+  margin-top: 2px;
+}
+
+/* Matchup wheel */
+.mwheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  max-width: 320px;
+  margin: 0 auto;
+}
+.mwheel-legend {
+  font-size: 11px;
+  color: var(--text-mute);
+  text-align: center;
+}
+
+/* ── Shared screen scaffold for intro / practice / tutorial ── */
+.escreen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(16px, 4vw, 40px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.escreen::-webkit-scrollbar {
+  display: none;
+}
+.escreen-back {
+  position: absolute;
+  top: var(--sp-4);
+  left: var(--sp-4);
+  z-index: var(--z-hud);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-dim);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: 100px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color var(--dur-fast), border-color var(--dur-fast), background var(--dur-fast);
+}
+.escreen-back:hover {
+  color: var(--text);
+  border-color: var(--glass-border-strong);
+  background: var(--glass-bg-strong);
+}
+.escreen-skip {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  z-index: var(--z-hud);
+  background: transparent;
+  border: none;
+  color: var(--text-mute);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color var(--dur-fast);
+}
+.escreen-skip:hover {
+  color: var(--text);
+}
+.escreen-title {
+  font-size: clamp(34px, 6vw, 54px);
+  margin: 8px 0 2px;
+  text-align: center;
+}
+.escreen-sub {
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: var(--sp-5);
+  max-width: 540px;
+}
+
+/* Intro hub layout */
+.eintro-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  width: 100%;
+  max-width: 760px;
+}
+.eintro-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: var(--sp-3);
+}
+.eintro-rules {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-3);
+}
+.eintro-rule {
+  padding: var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+.eintro-rule-icon {
+  font-size: 22px;
+}
+.eintro-rule b {
+  display: block;
+  margin: 6px 0 2px;
+  font-size: 14px;
+}
+.eintro-rule span {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.eintro-tips {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eintro-tips li {
+  font-size: 13px;
+  color: var(--text-dim);
+  padding-left: 22px;
+  position: relative;
+}
+.eintro-tips li::before {
+  content: '💡';
+  position: absolute;
+  left: 0;
+}
+.eintro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  justify-content: center;
+  padding: var(--sp-4) 0 var(--sp-7);
+}
+@keyframes eintro-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(93, 232, 184, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(93, 232, 184, 0); }
+}
+.eintro-pulse {
+  animation: eintro-pulse 1.8s var(--ease-soft) infinite;
+  border-radius: var(--r-md);
+}
+
+/* Practice / tutorial center stage */
+.epractice-stage,
+.etutorial-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  max-width: 620px;
+}
+.epractice-readout {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  font-size: 20px;
+  font-weight: 700;
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: 100px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  min-height: 46px;
+}
+.epractice-prompt {
+  font-size: 15px;
+  color: var(--text-dim);
+}
+.etutorial-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.etutorial-progress {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.etutorial-pip {
+  width: 26px;
+  height: 5px;
+  border-radius: 100px;
+  background: var(--glass-border);
+}
+.etutorial-pip.is-done {
+  background: var(--accent-3);
+}
+.etutorial-pip.is-current {
+  background: var(--accent);
+}
+.etutorial-success {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-3);
+}

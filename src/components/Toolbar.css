@@ -1,0 +1,136 @@
+.toolbar {
+  position: absolute;
+  left: clamp(10px, 2vw, 22px);
+  /* Vertically center via auto margins (transform is owned by Framer Motion). */
+  top: 0;
+  bottom: 0;
+  height: fit-content;
+  max-height: calc(100% - 20px);
+  margin-block: auto;
+  overflow-y: auto;
+  z-index: var(--z-toolbar);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 12px;
+  border-radius: var(--r-lg);
+  /* Dark scrim so the toolbar reads against the light paper canvas
+     (overrides the white-tint .glass-strong background). */
+  background: rgba(10, 13, 24, 0.62);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.toolbar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.toolbar-colors {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.toolbar-divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: 2px 0;
+}
+
+.tb-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-spring), box-shadow var(--dur-fast);
+  padding: 0;
+}
+.tb-swatch:hover {
+  transform: scale(1.12);
+}
+.tb-swatch.is-active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), 0 0 12px rgba(255, 255, 255, 0.35);
+  transform: scale(1.12);
+}
+
+.tb-size {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+.tb-size span {
+  display: block;
+  background: var(--text);
+  border-radius: 50%;
+}
+.tb-size.is-active {
+  border-color: var(--accent);
+  background: rgba(124, 185, 255, 0.16);
+}
+
+.tb-tool {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  cursor: pointer;
+  font-size: 16px;
+  display: grid;
+  place-items: center;
+  transition: border-color var(--dur-fast), background var(--dur-fast), opacity var(--dur-fast);
+}
+.tb-tool:hover:not(:disabled) {
+  background: var(--glass-bg-strong);
+}
+.tb-tool.is-active {
+  border-color: var(--accent);
+  background: rgba(124, 185, 255, 0.18);
+}
+.tb-tool:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.tb-danger.is-active,
+.tb-danger:hover:not(:disabled) {
+  border-color: rgba(255, 92, 92, 0.5);
+  background: rgba(255, 92, 92, 0.14);
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    top: auto;
+    bottom: 14px;
+    left: 0;
+    right: 0;
+    width: fit-content;
+    max-width: calc(100% - 20px);
+    height: auto;
+    margin-block: 0;
+    margin-inline: auto;
+    flex-direction: row;
+    align-items: center;
+  }
+  .toolbar-group {
+    flex-direction: row;
+  }
+  .toolbar-colors {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .toolbar-divider {
+    width: 1px;
+    height: auto;
+    align-self: stretch;
+    margin: 0 2px;
+  }
+}

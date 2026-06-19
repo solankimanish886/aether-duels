@@ -1,0 +1,80 @@
+/*
+ * Aether Duels — Design Tokens ("Ink & Chrome")
+ * Ported and consolidated from the legacy v2 theme (legacy/index.html :root).
+ * Single source of truth for color, type, spacing, radius, z-index, motion.
+ */
+:root {
+  /* ── Backgrounds ── */
+  --bg-0: #020208;
+  --bg-1: #070b18;
+  --bg-2: #0d1220;
+
+  /* ── Accents ── */
+  --accent: #7cb9ff;
+  --accent-2: #ff6eb5;
+  --accent-3: #5de8b8;
+  --gold: #ffc844;
+  --warn: #ff5c5c;
+  /* Player identity colors */
+  --p1: #7cb9ff;
+  --p2: #ff6eb5;
+
+  /* ── Text ── */
+  --text: rgba(255, 255, 255, 0.96);
+  --text-dim: rgba(255, 255, 255, 0.6);
+  --text-mute: rgba(255, 255, 255, 0.35);
+
+  /* ── Glass ── */
+  --glass-bg: rgba(255, 255, 255, 0.058);
+  --glass-bg-strong: rgba(255, 255, 255, 0.095);
+  --glass-border: rgba(255, 255, 255, 0.11);
+  --glass-border-strong: rgba(255, 255, 255, 0.19);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  /* ── Glows ── */
+  --glow-blue: 0 0 20px rgba(124, 185, 255, 0.4), 0 0 50px rgba(124, 185, 255, 0.16);
+  --glow-pink: 0 0 20px rgba(255, 110, 181, 0.4), 0 0 50px rgba(255, 110, 181, 0.16);
+  --glow-gold: 0 0 20px rgba(255, 200, 68, 0.42), 0 0 50px rgba(255, 200, 68, 0.16);
+
+  /* ── Canvas ── */
+  --canvas-paper: #f7f4ed;
+
+  /* ── Radii ── */
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+
+  /* ── Spacing scale ── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 22px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ── Z-index ── */
+  --z-base: 1;
+  --z-canvas: 5;
+  --z-hud: 10;
+  --z-toolbar: 12;
+  --z-overlay: 30;
+  --z-modal: 50;
+  --z-toast: 60;
+  --z-burst: 80;
+
+  /* ── Type ── */
+  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-body: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── Motion ── */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.18s;
+  --dur-base: 0.25s;
+  --dur-slow: 0.4s;
+}

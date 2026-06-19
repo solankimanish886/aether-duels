@@ -1,0 +1,56 @@
+.draw-surface {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas-paper);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(40, 30, 20, 0.06), 0 30px 80px rgba(0, 0, 0, 0.4);
+}
+
+.draw-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.draw-main {
+  z-index: 1;
+}
+.draw-active {
+  z-index: 2;
+  touch-action: none;
+  cursor: crosshair;
+}
+.draw-cursor {
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* ── Brush sparkle micro-interaction ── */
+.brush-spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  z-index: 4;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: brushSpark 0.5s var(--ease-out) forwards;
+}
+@keyframes brushSpark {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--sdx)), calc(-50% + var(--sdy))) scale(0.2);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brush-spark {
+    display: none;
+  }
+}

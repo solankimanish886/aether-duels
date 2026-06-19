@@ -1,0 +1,189 @@
+/* ── Hand cursor ── */
+.hand-cursor {
+  position: fixed;
+  z-index: var(--z-toast);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  display: grid;
+  place-items: center;
+}
+.hand-cursor-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--cursor-color, var(--accent));
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 14px var(--cursor-color, var(--accent));
+  transition: width 0.12s, height 0.12s;
+}
+.hand-cursor.is-drawing .hand-cursor-dot {
+  width: 22px;
+  height: 22px;
+  box-shadow: 0 0 22px var(--cursor-color, var(--accent));
+}
+.hand-cursor-ring {
+  position: absolute;
+  inset: 50%;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+}
+
+/* dwell highlight on toolbar targets */
+.hand-dwell {
+  outline: 2px solid var(--accent-3) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 18px rgba(93, 232, 184, 0.5) !important;
+}
+
+/* ── Coach badge ── */
+.hand-coach {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 100px;
+  max-width: 360px;
+}
+.hand-coach-state {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.hand-coach-state--drawing {
+  color: var(--accent-3);
+}
+.hand-coach-state--control {
+  color: var(--accent);
+}
+.hand-coach-state--searching,
+.hand-coach-state--lifted,
+.hand-coach-state--loading {
+  color: var(--text-dim);
+}
+.hand-coach-hint {
+  font-size: 12px;
+  color: var(--text-mute);
+  border-left: 1px solid var(--glass-border);
+  padding-left: 12px;
+}
+.hand-coach-badge {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent-3);
+  background: rgba(93, 232, 184, 0.14);
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+/* ── Gesture status badge (Elemental) ── */
+.gesture-status {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  z-index: var(--z-hud);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 100px;
+  max-width: 360px;
+}
+.gesture-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--text-dim);
+}
+.gesture-status-dot.is-ok {
+  background: var(--accent-3);
+  box-shadow: 0 0 10px var(--accent-3);
+}
+.gesture-status-dot.is-warn {
+  background: var(--warn, #ffb03a);
+  box-shadow: 0 0 10px rgba(255, 176, 58, 0.7);
+}
+.gesture-status-label {
+  font-weight: 700;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.gesture-status-badge {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent-3);
+  background: rgba(93, 232, 184, 0.14);
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+.gesture-status-bar {
+  width: 48px;
+  height: 5px;
+  border-radius: 100px;
+  background: var(--glass-border);
+  overflow: hidden;
+}
+.gesture-status-bar-fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3));
+  transition: width 0.08s linear;
+}
+
+@media (max-width: 640px) {
+  .gesture-status {
+    left: 18px;
+    right: 18px;
+    bottom: 110px;
+    justify-content: center;
+  }
+}
+
+/* ── Camera PIP ── */
+.camera-pip {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  width: 160px;
+  height: 120px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  z-index: var(--z-hud);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  background: #000;
+}
+.camera-pip video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* selfie mirror */
+}
+.camera-pip-label {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+
+@media (max-width: 640px) {
+  .camera-pip {
+    width: 110px;
+    height: 84px;
+  }
+  .hand-coach {
+    left: 18px;
+    right: 18px;
+    bottom: 110px;
+  }
+}

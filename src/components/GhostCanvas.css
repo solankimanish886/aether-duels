@@ -1,0 +1,93 @@
+/* Opponent status panel — dark elevated card that frames the live drawing. */
+.ghost-panel {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: var(--z-hud);
+  width: 220px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: rgba(13, 18, 32, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.ghost-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+}
+.ghost-chip {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #fff;
+  background: var(--accent-2);
+  padding: 2px 7px;
+  border-radius: 100px;
+}
+.ghost-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ghost-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: auto;
+  flex: none;
+}
+.ghost-dot.is-on {
+  background: var(--accent-3);
+  box-shadow: 0 0 7px var(--accent-3);
+}
+.ghost-dot.is-off {
+  background: var(--warn);
+}
+.ghost-status {
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.ghost-canvas {
+  position: relative;
+  line-height: 0;
+}
+.ghost-canvas canvas {
+  display: block;
+  width: 220px;
+  height: 150px;
+}
+.ghost-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 0 16px;
+  text-align: center;
+  font-size: 11px;
+  color: #8a8475;
+  background: var(--canvas-paper, #f7f4ed);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .ghost-panel {
+    width: 150px;
+  }
+  .ghost-canvas canvas {
+    width: 150px;
+    height: 100px;
+  }
+  .ghost-name {
+    max-width: 50px;
+  }
+}

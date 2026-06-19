@@ -1,0 +1,94 @@
+/* Full-screen overlay; only the buttons capture the pointer (so elementFromPoint
+   in the hand tracker's dwell logic still hits them). */
+.gmenu {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toolbar);
+  pointer-events: none;
+}
+
+.gmenu-hub {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  background: rgba(10, 13, 24, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.gmenu-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  /* A touch larger than the rail equivalents — easier to dwell-target by hand. */
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.gmenu-item.tb-swatch {
+  width: 34px;
+  height: 34px;
+}
+.gmenu-item.tb-size,
+.gmenu-item.tb-tool {
+  width: 44px;
+  height: 44px;
+  background: rgba(10, 13, 24, 0.72);
+}
+.gmenu-item.tb-tool {
+  font-size: 20px;
+}
+
+/* Hub size-preview (dot in current ink colour + label). */
+.gmenu-hub--size {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.gmenu-hub-dot {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  flex: none;
+}
+
+/* Stroke-size buttons: amplified dot stacked over an S/M/L/XL label.
+   Declared after `.gmenu-item.tb-size` so it wins on equal specificity. */
+.gmenu-item.gmenu-size {
+  width: 62px;
+  height: 62px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: var(--r-md);
+}
+.gmenu-size .gmenu-size-dot {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.gmenu-size .gmenu-size-label {
+  background: none;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+.gmenu-size.is-active {
+  border-color: var(--accent);
+  background: rgba(124, 185, 255, 0.18);
+  box-shadow: 0 0 0 2px rgba(124, 185, 255, 0.4), 0 0 18px rgba(124, 185, 255, 0.45);
+}
+.gmenu-size.is-active .gmenu-size-label {
+  color: var(--text);
+}

@@ -1,0 +1,320 @@
+.dt {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 3vh, 30px);
+  padding: clamp(20px, 5vw, 56px);
+  text-align: center;
+}
+
+.dt-skip {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--text-mute);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+.dt-skip:hover {
+  color: var(--text);
+}
+
+/* progress dots */
+.dt-progress {
+  display: flex;
+  gap: 8px;
+}
+.dt-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--glass-border);
+  transition: background 0.3s, transform 0.3s;
+}
+.dt-dot.is-done {
+  background: var(--accent-3);
+}
+.dt-dot.is-current {
+  background: var(--accent);
+  transform: scale(1.35);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* stage */
+.dt-stage {
+  width: min(640px, 92vw);
+  min-height: clamp(300px, 46vh, 440px);
+  display: grid;
+  place-items: center;
+}
+.dt-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+}
+
+.dt-title {
+  font-size: clamp(26px, 5vw, 40px);
+  font-style: italic;
+}
+.dt-body {
+  max-width: 480px;
+  font-size: clamp(15px, 2.4vw, 17px);
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+.dt-body--sm {
+  font-size: 14px;
+}
+.dt-warn {
+  color: #ffd27c;
+  font-size: 14px;
+}
+
+/* step 0 art */
+.dt-art {
+  font-size: clamp(56px, 12vw, 96px);
+  line-height: 1;
+}
+.dt-art-vs {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 5vw, 40px);
+}
+.dt-mini {
+  width: clamp(70px, 14vw, 110px);
+  height: clamp(70px, 14vw, 110px);
+  border-radius: var(--r-md);
+  display: grid;
+  place-items: center;
+  font-size: clamp(34px, 7vw, 52px);
+  background: var(--canvas-paper, #f5f1e6);
+  border: 2px solid rgba(124, 185, 255, 0.5);
+  box-shadow: 0 0 24px rgba(124, 185, 255, 0.25);
+}
+.dt-mini--pink {
+  border-color: rgba(255, 110, 181, 0.5);
+  box-shadow: 0 0 24px rgba(255, 110, 181, 0.25);
+}
+.dt-vs {
+  font-style: italic;
+  font-weight: 800;
+  font-size: clamp(22px, 5vw, 34px);
+  color: var(--text-mute);
+}
+
+/* step 1 choices */
+.dt-choices {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* step 2 detection meter */
+.dt-detect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 26px;
+  border-radius: var(--r-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+.dt-confbar {
+  display: flex;
+  gap: 6px;
+}
+.dt-confseg {
+  width: 34px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--glass-border);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.dt-confseg.is-on {
+  /* searching = amber (neutral), not the red error tone */
+  background: #ffb03a;
+}
+.dt-detect.is-ok .dt-confseg.is-on {
+  background: var(--accent-3);
+  box-shadow: 0 0 8px var(--accent-3);
+}
+
+/* centered live camera preview on the hand-position step */
+.dt-campreview {
+  position: relative;
+  width: min(360px, 78vw);
+  aspect-ratio: 4 / 3;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  border: 2px solid var(--glass-border);
+  background: #000;
+  box-shadow: var(--glass-shadow);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.dt-campreview.is-ok {
+  border-color: var(--accent-3);
+  box-shadow: 0 0 26px rgba(93, 232, 184, 0.45);
+}
+.dt-campreview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* selfie mirror */
+}
+.dt-campreview-tag {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: #06210f;
+  background: var(--accent-3);
+  padding: 3px 12px;
+  border-radius: 100px;
+}
+.dt-detect-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* step 3 gestures */
+.dt-gestures {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.dt-gcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 130px;
+  padding: 18px 12px;
+  border-radius: var(--r-md);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+.dt-gcard.is-live {
+  border-color: var(--accent-3);
+  box-shadow: 0 0 20px rgba(93, 232, 184, 0.45);
+}
+.dt-gemoji {
+  font-size: 40px;
+  animation: dtFloat 2.4s var(--ease-out, ease) infinite;
+}
+.dt-glabel {
+  font-weight: 700;
+  font-size: 15px;
+}
+.dt-gsub {
+  font-size: 12px;
+  color: var(--text-mute);
+}
+@keyframes dtFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* step 4 practice canvas */
+.dt-practice {
+  position: relative;
+  width: min(560px, 86vw);
+  height: clamp(240px, 38vh, 320px);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 2px solid var(--glass-border);
+  background: var(--canvas-paper, #f5f1e6);
+}
+.dt-practice .draw-surface {
+  position: absolute;
+  inset: 0;
+}
+.dt-practice-hint,
+.dt-practice-ok {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.dt-practice-hint {
+  background: rgba(6, 8, 15, 0.55);
+  color: #fff;
+}
+.dt-practice-ok {
+  background: var(--accent-3);
+  color: #06210f;
+}
+
+/* step 5 tips + checkbox */
+.dt-tips {
+  text-align: left;
+  max-width: 420px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.dt-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-top: 4px;
+}
+.dt-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+/* nav */
+.dt-nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dt-gemoji {
+    animation: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .dt-gcard {
+    width: 104px;
+    padding: 14px 8px;
+  }
+  .dt-gemoji {
+    font-size: 32px;
+  }
+}

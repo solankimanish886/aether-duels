@@ -1,0 +1,158 @@
+.ecreate {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #0b1020;
+  color: #fff;
+  user-select: none;
+}
+
+.ecreate-stage {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.ecreate-error {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+  color: #ffd7d7;
+}
+
+.ecreate-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 5;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(12, 18, 34, 0.55);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.ecreate-back:hover {
+  background: rgba(28, 38, 64, 0.7);
+}
+
+.ecreate-title {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  font-size: clamp(20px, 3vw, 30px);
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+.ecreate-title-accent {
+  color: #8ad0ff;
+}
+
+.glass {
+  background: rgba(12, 18, 34, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+}
+
+.ecreate-status {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  max-width: 80vw;
+}
+.ecreate-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
+.ecreate-dot.ok {
+  background: #5fe39a;
+  box-shadow: 0 0 8px #5fe39a;
+}
+.ecreate-dot.warn {
+  background: #ffcf5a;
+}
+.ecreate-dot.idle {
+  background: #7a86a8;
+}
+
+.ecreate-legend {
+  position: absolute;
+  top: 64px;
+  right: 14px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+}
+.ecreate-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.62;
+  transition: opacity 0.15s;
+}
+.ecreate-legend-row.active {
+  opacity: 1;
+}
+.ecreate-legend-pose {
+  width: 34px;
+  font-size: 16px;
+}
+.ecreate-legend-name {
+  white-space: nowrap;
+}
+
+.ecreate-tools {
+  position: absolute;
+  bottom: 18px;
+  left: 14px;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+}
+.ecreate-tool {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 20px;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    background 0.15s,
+    border-color 0.15s;
+}
+.ecreate-tool:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+}
+.ecreate-tool.sel {
+  border-color: #8ad0ff;
+  background: rgba(138, 208, 255, 0.18);
+}
+.ecreate-reset {
+  margin-left: 6px;
+}
